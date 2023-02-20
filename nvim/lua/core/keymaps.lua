@@ -51,6 +51,16 @@ return {
 		b = "Toggle block comment",
 	},
 
+	["<leader>x"] = {
+		name = "+Trouble",
+		x = { "<cmd>TroubleToggle<cr>", "Toggle Trouble Panel" },
+		w = { "<cmd>TroubleToggle workspace_diagnostics<cr>", "Toggle workspace diagnostics" },
+		d = { "<cmd>TroubleToggle document_diagnostics<cr>", "Toggle document diagnostics" },
+		q = { "<cmd>TroubleToggle loclist<cr>", "Toggle location list" },
+		l = { "<cmd>TroubleToggle quickfix<cr>", "Toggle quickfix" },
+		r = { "<cmd>TroubleToggle lsp_references<cr>", "Toggle references" },
+	},
+
 	["<leader>p"] = { '"_dp', "Void paste", mode = "x" },
 	["<leader>k"] = { "<cmd>lnext<cr>zz", "Lnext" },
 	["<leader>j"] = { "<cmd>lprev<cr>zz", "Lprev" },

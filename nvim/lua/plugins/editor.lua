@@ -102,4 +102,12 @@ return {
 		"windwp/nvim-autopairs",
 		config = true,
 	},
+
+	-- trouble
+	{
+		"folke/trouble.nvim",
+		event = { "BufReadPost", "BufNewFile" },
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		config = true,
+	},
 }

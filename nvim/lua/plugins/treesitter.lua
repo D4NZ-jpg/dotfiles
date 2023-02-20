@@ -29,6 +29,7 @@ return {
 			"yaml",
 			"cpp",
 			"rust",
+			"svelte",
 		},
 		incremental_selection = {
 			enable = true,
