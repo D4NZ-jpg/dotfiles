@@ -30,6 +30,7 @@ return {
 			"cpp",
 			"rust",
 			"svelte",
+			"css",
 		},
 		incremental_selection = {
 			enable = true,

@@ -40,5 +40,6 @@ vim.cmd([[
     augroup FormatAutocms
         autocmd!
         autocmd BufWritePre * Format
+        autocmd BufWritePre *.svelte,*.js,*.ts,*.jsx,*.tsx EslintFixAll
     augroup END
     ]])

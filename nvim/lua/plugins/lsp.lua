@@ -48,7 +48,7 @@ return {
 		},
 		event = { "BufReadPost", "BufNewFile" },
 		opts = {
-			ensure_installed = { "stylelua", "prettier" },
+			ensure_installed = { "stylelua" },
 			automatic_setup = true,
 		},
 

@@ -29,7 +29,7 @@ return {
 		l = { "<cmd>Telescope live_grep<cr>", "Live Grep" },
 	},
 
-	["<leader>t"] = {
+	["<C-t>"] = {
 		name = "+Tabs",
 		a = { "<cmd>$tabnew<cr><cmd>Alpha<cr>", "New Tab" },
 		c = { "<cmd>tabclose<cr>", "Close Tab" },
