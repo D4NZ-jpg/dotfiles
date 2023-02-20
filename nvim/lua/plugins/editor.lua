@@ -106,7 +106,7 @@ return {
 	-- trouble
 	{
 		"folke/trouble.nvim",
-		event = { "BufReadPost", "BufNewFile" },
+		event = "VeryLazy",
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 		config = true,
 	},
