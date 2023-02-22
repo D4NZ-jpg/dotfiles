@@ -89,25 +89,35 @@ return {
 	-- fast comments
 	{
 		"numToStr/Comment.nvim",
+		event = { "BufNewFile", "BufReadPost" },
 		opts = {
 			toggler = {
 				line = "<leader>cl",
 				block = "<leader>cb",
 			},
 		},
+		keys = { "<leader>cl", "<leader>cb" },
 	},
 
 	-- autopairs
 	{
 		"windwp/nvim-autopairs",
 		config = true,
+		event = { "BufReadPost", "BufNewFile" },
 	},
 
 	-- trouble
 	{
 		"folke/trouble.nvim",
-		event = "VeryLazy",
+		event = { "BufReadPost", "BufNewFile" },
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 		config = true,
+	},
+
+	-- fold indents
+	{
+		"anuvyklack/pretty-fold.nvim",
+		config = true,
+		event = "VeryLazy",
 	},
 }

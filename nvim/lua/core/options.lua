@@ -32,6 +32,9 @@ vim.opt.updatetime = 50
 
 vim.opt.cursorline = true
 
+vim.opt.foldmethod = "indent"
+vim.opt.foldlevel = 3
+
 -- Autocommands
 -------------------------------------------------------------------------------
 -- Format on write

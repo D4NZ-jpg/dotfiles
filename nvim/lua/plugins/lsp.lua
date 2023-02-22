@@ -39,7 +39,7 @@ return {
 		end,
 	},
 
-	-- formatters
+	-- null-ls
 	{
 		"jay-babu/mason-null-ls.nvim",
 		dependencies = {
@@ -48,7 +48,7 @@ return {
 		},
 		event = { "BufReadPost", "BufNewFile" },
 		opts = {
-			ensure_installed = { "stylelua" },
+			ensure_installed = { "stylelua", "eslint" },
 			automatic_setup = true,
 		},
 
