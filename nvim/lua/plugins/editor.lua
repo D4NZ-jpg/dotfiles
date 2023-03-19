@@ -90,16 +90,11 @@ return {
 	{
 		"numToStr/Comment.nvim",
 		event = { "BufNewFile", "BufReadPost" },
-		opts = {
-			toggler = {
-				line = "<leader>cl",
-				block = "<leader>cb",
-			},
-		},
-		keys = { "<leader>cl", "<leader>cb" },
+		config = true,
+		keys = { { "gc", mode = "x" }, { "gb", mode = "x" } },
 	},
 
-	-- autopairs
+	--autopairs
 	{
 		"windwp/nvim-autopairs",
 		config = true,

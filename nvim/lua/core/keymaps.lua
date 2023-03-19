@@ -45,12 +45,6 @@ return {
 		},
 	},
 
-	["<leader>c"] = {
-		name = "+Comment",
-		l = "Toggle line comment",
-		b = "Toggle block comment",
-	},
-
 	["<leader>x"] = {
 		name = "+Trouble",
 		x = { "<cmd>TroubleToggle<cr>", "Toggle Trouble Panel" },
