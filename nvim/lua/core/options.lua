@@ -32,9 +32,6 @@ vim.opt.updatetime = 50
 
 vim.opt.cursorline = true
 
-vim.opt.foldmethod = "indent"
-vim.opt.foldlevel = 3
-
 -- Autocommands
 -------------------------------------------------------------------------------
 -- Format on write
@@ -46,3 +43,11 @@ vim.cmd([[
         autocmd BufWritePre *.svelte,*.js,*.ts,*.jsx,*.tsx EslintFixAll
     augroup END
     ]])
+
+-- Add image filetypes to neovim
+vim.cmd([[
+  augroup RecognizeImageFiles
+    autocmd!
+    autocmd BufReadPre *.jpg,*.jpeg,*.png,*.webp,*.gif,*.bmp,*.svg,*.tiff setfiletype image
+  augroup END
+]])

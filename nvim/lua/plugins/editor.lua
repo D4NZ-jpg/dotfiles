@@ -4,7 +4,6 @@ return {
 	{
 		"nvim-telescope/telescope-file-browser.nvim",
 		dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim", "nvim-tree/nvim-web-devicons" },
-		config = true,
 	},
 
 	-- telescope
@@ -112,7 +111,33 @@ return {
 	-- fold indents
 	{
 		"anuvyklack/pretty-fold.nvim",
-		config = true,
+		event = { "BufReadPost", "BufNewFile" },
+	},
+
+	-- mkdir
+	{
+		"ghauser/mkdir.nvim",
 		event = "VeryLazy",
+	},
+
+	-- images
+	{
+		-- Remember to download ascii image converter and add it to the path
+		-- https://github.com/TheZoraiz/ascii-image-converter/releases
+		"samodostal/image.nvim",
+		dependencies = { "nvim-lua/plenary.nvim", "m00qek/baleia.nvim" },
+		ft = image,
+		opts = {
+			render = {
+				foreground_color = true,
+				background_color = true,
+				show_label = true,
+				use_dithering = true,
+				min_padding = 5,
+			},
+			events = {
+				update_on_nvim_resize = true,
+			},
+		},
 	},
 }
