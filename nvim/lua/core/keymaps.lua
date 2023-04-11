@@ -59,4 +59,5 @@ return {
 	["<leader>k"] = { "<cmd>lnext<cr>zz", "Lnext" },
 	["<leader>j"] = { "<cmd>lprev<cr>zz", "Lprev" },
 	["<leader>r"] = { ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>", "Replace current word" },
+	["<leader>t"] = { "<cmd>lua require('betterTerm').open()<cr>", "Toggle terminal" },
 }
