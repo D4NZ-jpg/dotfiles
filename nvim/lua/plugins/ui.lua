@@ -184,8 +184,8 @@ return {
                 val = {
                     button("e", "  > New File", ":ene <BAR> startinsert <CR>"),
                     button("r", "  > Recent Files", ":Telescope oldfiles<CR>"),
-                    button("f", "  > Find File", ":Telescope find_files<CR>"),
-                    button("b", "󰥨  > Browse Folders", ":Telescope file_browser<CR>"),
+                    button("f", "  > Find File", ":Telescope find_files hidden=true<CR>"),
+                    button("b", "󰥨  > Browse Folders", ":Telescope file_browser hidden=true<CR>"),
                     button("q", "  > Quit", ":qa<CR>"),
                 },
             }

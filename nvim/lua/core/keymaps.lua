@@ -25,10 +25,10 @@ vim.cmd([[command! Diff :DiffviewOpen]])
 return {
     ["<leader>f"] = {
         name = "+File/Find",
-        f = { "<cmd>Telescope find_files<cr>", "Find File" },
+        f = { "<cmd>Telescope find_files hidden=true<cr>", "Find File" },
         r = { "<cmd>Telescope oldfiles<cr>", "Open Recent File" },
         n = { "<cmd>enew<cr>", "New File" },
-        t = { "<cmd>Telescope file_browser<cr>", "Browse Files" },
+        t = { "<cmd>Telescope file_browser hidden=true<cr>", "Browse Files" },
         h = { "<cmd>Telescope help_tags<cr>", "Help" },
         l = { "<cmd>Telescope live_grep<cr>", "Live Grep" },
     },
