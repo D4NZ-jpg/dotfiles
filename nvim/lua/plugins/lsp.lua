@@ -82,6 +82,17 @@ return {
                 desc =
                 "Build project"
             },
+            {
+                "<leader>cq",
+                "<cmd>CMakeClose<cr>",
+                desc = "Close Cmake window"
+            },
+            {
+                "<leader>cc",
+                "<cmd>CMakeClean<cr>",
+                desc = "Remove build system and build files"
+            }
+
         },
         config = function()
             vim.g.cmake_link_compile_commands = 1
