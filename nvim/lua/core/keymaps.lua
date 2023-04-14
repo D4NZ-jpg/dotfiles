@@ -56,7 +56,6 @@ return {
         l = { "<cmd>TroubleToggle quickfix<cr>", "Toggle quickfix" },
         r = { "<cmd>TroubleToggle lsp_references<cr>", "Toggle references" },
     },
-    ["<leader>p"] = { '"_dp', "Void paste", mode = "x" },
     ["<leader>k"] = { "<cmd>lnext<cr>zz", "Lnext" },
     ["<leader>j"] = { "<cmd>lprev<cr>zz", "Lprev" },
     ["<leader>r"] = { ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>", "Replace current word" },

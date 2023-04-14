@@ -23,6 +23,7 @@
   "mason.nvim": { "branch": "main", "commit": "3fb2be48864b7850a26c54c04cedb54e95dcdf3f" },
   "mini.indentscope": { "branch": "main", "commit": "43f6761c9a3e397b7c12b3c72f678bcf61efcfcf" },
   "mkdir.nvim": { "branch": "main", "commit": "c55d1dee4f099528a1853b28bb28caa802eba217" },
+  "nabla.nvim": { "branch": "master", "commit": "fb5ee8cd1ada2fc65465fc92ccfad554df3fe8de" },
   "nui.nvim": { "branch": "main", "commit": "6e8f9a0f280fada3f8ce694a42f8376a31e9776e" },
   "null-ls.nvim": { "branch": "main", "commit": "f8ffcd7cb8fb3325c711d459152ef132b5b65aed" },
   "nvim-autopairs": { "branch": "master", "commit": "7470af886ffb3df32800e5ef9c072a6cd825770d" },
