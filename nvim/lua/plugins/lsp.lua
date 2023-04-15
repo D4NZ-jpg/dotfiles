@@ -3,7 +3,7 @@ return {
     {
         "VonHeikemen/lsp-zero.nvim",
         branch = "v1.x",
-        event = { "BufReadPost", "BufNewFile" },
+        event = "InsertEnter",
         dependencies = {
             -- LSP Support
             { "neovim/nvim-lspconfig" },
@@ -48,7 +48,7 @@ return {
             "williamboman/mason.nvim",
             "jose-elias-alvarez/null-ls.nvim",
         },
-        event = { "BufReadPost", "BufNewFile" },
+        event = "InsertEnter",
         opts = {
             ensure_installed = { "stylelua", "eslint" },
             automatic_setup = true,
@@ -57,12 +57,12 @@ return {
             require("mason-null-ls").setup(opts)
 
             handlers = {
-                    function(source_name, methods)
-                        require("mason-null-ls.automatic_setup")(source_name, methods)
-                    end,
-                },
+                function(source_name, methods)
+                    require("mason-null-ls.automatic_setup")(source_name, methods)
+                end,
+            }
 
-                require("null-ls").setup()
+            require("null-ls").setup()
         end,
     },
 

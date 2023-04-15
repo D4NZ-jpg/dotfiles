@@ -1,15 +1,9 @@
 return {
-
-    -- file browser
-    {
-        "nvim-telescope/telescope-file-browser.nvim",
-        dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim", "nvim-tree/nvim-web-devicons" },
-    },
-
-    -- telescope
+    -- telescope & file browser
     {
         "nvim-telescope/telescope.nvim",
-        dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-web-devicons" },
+        dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-web-devicons",
+            "nvim-telescope/telescope-file-browser.nvim" },
         cmd = "Telescope",
         opts = {
             defaults = {
@@ -25,9 +19,6 @@ return {
             require("telescope").setup(opts)
             require("telescope").load_extension("file_browser")
         end,
-        keys = {
-            { "<leader>:", "<cmd>Telescope command_history<cr>", desc = "Command History" },
-        },
     },
 
     -- which-key
@@ -46,83 +37,82 @@ return {
     -- undotree
     {
         "mbbill/undotree",
-        event = { "BufReadPost", "BufNewFile" },
         keys = { { "<leader>l", "<cmd>UndotreeToggle<cr>", desc = "Toggle undotree" } },
     },
 
     -- git
     {
         "tpope/vim-fugitive",
-        event = "VeryLazy",
+        cmd = { "Git", "G" },
+        keys = {
+            { "<leader>ga", "<cmd>execute 'G add ' .. input('File: ')<cr>",          desc = "Stage files" },
+            { "<leader>gc", "<cmd>execute 'G commit -m ' .. input('Message: ')<cr>", desc = "Commit changes" }
+        }
     },
 
     -- git diff
     {
         "sindrets/diffview.nvim",
         dependencies = { "nvim-lua/plenary.nvim" },
-        event = "VeryLazy",
+        keys = {
+            { "<leader>gd", "<cmd>DiffviewOpen<cr>", desc = "Show git differences" }
+        },
+        cmd = "DiffviewOpen"
     },
 
     -- tabs
     {
         "nanozuki/tabby.nvim",
-        event = "VeryLazy",
+        event = "TabNew",
         config = function()
             require("tabby.tabline").use_preset("active_wins_at_tail")
         end,
     },
 
-    -- easy buffer moving
+    -- fast moving around file
     {
         "ggandor/leap.nvim",
-        event = { "BufReadPost", "BufNewFile" },
         dependencies = { "tpope/vim-repeat" },
         config = function()
             require("leap").add_default_mappings()
         end,
-        keys = { "s" },
+        keys = { "s", "S" },
     },
 
     -- fast comments
     {
         "numToStr/Comment.nvim",
-        event = { "BufNewFile", "BufReadPost" },
         config = true,
-        keys = { { "gc", mode = "x" }, { "gb", mode = "x" } },
+        keys = { "gc", "gb" },
     },
 
     --autopairs
     {
         "windwp/nvim-autopairs",
         config = true,
-        event = { "BufReadPost", "BufNewFile" },
+        event = "InsertEnter",
     },
 
     -- trouble
     {
         "folke/trouble.nvim",
-        event = { "BufReadPost", "BufNewFile" },
-        dependencies = { "nvim-tree/nvim-web-devicons" },
+        event = { "BufRead", "BufNewFile" },
+        dependencies = { "nvim-tree/nvim-web-devicons", { "folke/todo-comments.nvim", config = true } },
         config = true,
     },
 
     -- mkdir
     {
         "jghauser/mkdir.nvim",
-        event = "VeryLazy",
+        event = "BufNewFile",
     },
 
     -- Better Term
     {
         "CRAG666/betterTerm.nvim",
         config = true,
+        keys = {
+            { "<leader>t", "<cmd>lua require('betterTerm').open()<cr>", desc = "Toggle terminal" }
+        }
     },
-
-    -- todo comments
-    {
-        "folke/todo-comments.nvim",
-        config = true,
-        event = { "BufReadPost", "BufNewFile" },
-    },
-
 }

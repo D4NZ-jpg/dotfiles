@@ -26,9 +26,9 @@ return {
     -- statusline
     {
         "nvim-lualine/lualine.nvim",
-        event = "VeryLazy",
+        event = "VimEnter",
         dependencies = { "SmiteshP/nvim-navic" },
-        opts = function(plugin)
+        opts = function()
             local icons = require("core.config").icons
 
             local function fg(name)
