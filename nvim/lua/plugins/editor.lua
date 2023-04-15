@@ -115,4 +115,11 @@ return {
             { "<leader>t", "<cmd>lua require('betterTerm').open()<cr>", desc = "Toggle terminal" }
         }
     },
+
+    -- Show colors
+    {
+        "brenoprata10/nvim-highlight-colors",
+        config = true,
+        ft = { "html", "css", "scss", "sass" }
+    }
 }
