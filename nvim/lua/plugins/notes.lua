@@ -30,5 +30,27 @@ return {
                 desc = "Show math equation in floating window"
             }
         },
+    },
+
+    -- markdown
+    {
+        "jakewvincent/mkdnflow.nvim",
+        config = true,
+        ft = "markdown"
+    },
+
+    -- md preview
+    {
+        "D4NZ-jpg/markdown-preview.nvim",
+        build = "cd app && yarn install",
+        keys = {
+            { "<leader>m", "<cmd>MarkdownPreview<cr>", desc = "Open markdown preview" }
+        },
+        config = function()
+            vim.g.mkdp_auto_close = 0
+            vim.g.mkdp_refresh_slow = 1
+        end
     }
+
+
 }
