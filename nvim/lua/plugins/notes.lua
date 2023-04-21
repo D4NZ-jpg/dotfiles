@@ -35,22 +35,24 @@ return {
     -- markdown
     {
         "jakewvincent/mkdnflow.nvim",
-        config = true,
-        ft = "markdown"
+        ft = "markdown",
+        opts = {
+            perspective = {
+                priority = 'root',
+                fallback = 'first',
+                root_tell = "index.md"
+            }
+        }
     },
 
     -- md preview
     {
-        "D4NZ-jpg/markdown-preview.nvim",
+        "iamcco/markdown-preview.nvim",
         build = "cd app && yarn install",
-        keys = {
-            { "<leader>m", "<cmd>MarkdownPreview<cr>", desc = "Open markdown preview" }
-        },
+        ft = "markdown",
         config = function()
             vim.g.mkdp_auto_close = 0
             vim.g.mkdp_refresh_slow = 1
         end
     }
-
-
 }
