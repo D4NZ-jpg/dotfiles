@@ -10,6 +10,7 @@
   "cmp-nvim-lua": { "branch": "main", "commit": "f12408bdb54c39c23e67cab726264c10db33ada8" },
   "cmp-path": { "branch": "main", "commit": "91ff86cd9c29299a64f968ebb45846c485725f23" },
   "cmp_luasnip": { "branch": "master", "commit": "18095520391186d634a0045dacaa346291096566" },
+  "colorful-winsep.nvim": { "branch": "main", "commit": "c2475c5f9b62f34f38a929949f20a33f1613621a" },
   "diffview.nvim": { "branch": "main", "commit": "63720aa5a70ce4aa386be407d0e612cd9e63861a" },
   "friendly-snippets": { "branch": "main", "commit": "781af8c404ce351e999b5102b9724ee847f3ad18" },
   "image.nvim": { "branch": "main", "commit": "eef32a352d490374d19edfaef4bc0ad4f7a11074" },

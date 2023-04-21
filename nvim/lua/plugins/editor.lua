@@ -121,5 +121,12 @@ return {
         "brenoprata10/nvim-highlight-colors",
         config = true,
         ft = { "html", "css", "scss", "sass" }
+    },
+
+    -- color current window border
+    {
+        "nvim-zh/colorful-winsep.nvim",
+        event = "WinNew",
+        config = true
     }
 }
