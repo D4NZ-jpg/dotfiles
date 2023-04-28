@@ -60,6 +60,15 @@ return {
         cmd = "DiffviewOpen"
     },
 
+    -- lazygit
+    {
+        "kdheepak/lazygit.nvim",
+        cmd = "LazyGit",
+        keys = {
+            { "<leader>gg", "<cmd>LazyGit<cr>", desc = "Open LazyGit" }
+        }
+    },
+
     -- tabs
     {
         "nanozuki/tabby.nvim",
