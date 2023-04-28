@@ -6,6 +6,7 @@
   "baleia.nvim": { "branch": "main", "commit": "c048a1d33d5bd4025254e94af2193c73fa8ec8f7" },
   "betterTerm.nvim": { "branch": "main", "commit": "ae3eeec170844c274a2263f8dddf18151fa7cb78" },
   "blackjack.nvim": { "branch": "main", "commit": "4145567d7c38cd3c693f3a07b6d713ce4c5a42aa" },
+  "cellular-automaton.nvim": { "branch": "main", "commit": "679943b8e1e5ef79aaeeaf4b00782c52eb4e928f" },
   "cmp-buffer": { "branch": "main", "commit": "3022dbc9166796b644a841a02de8dd1cc1d311fa" },
   "cmp-nvim-lsp": { "branch": "main", "commit": "0e6b2ed705ddcff9738ec4ea838141654f12eeef" },
   "cmp-nvim-lua": { "branch": "main", "commit": "f12408bdb54c39c23e67cab726264c10db33ada8" },
@@ -20,3 +21,4 @@
   "leap.nvim": { "branch": "main", "commit": "98a72ad93c629c49bd7127d342960cc1b159b620" },
   "lsp-zero.nvim": { "branch": "v1.x", "commit": "48d5f891b57291550a7e32792abae4d0774942e3" },
   "lualine.nvim": { "branch": "master", "commit": "84ffb80e452d95e2c46fa29a98ea11a240f7843e" },
+  "nvim-tetris": { "branch": "master", "commit": "d17c99fb527ada98ffb0212ffc87ccda6fd4f7d9" },
