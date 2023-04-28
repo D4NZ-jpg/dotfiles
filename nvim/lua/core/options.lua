@@ -1,13 +1,13 @@
-vim.opt.number = true -- Show line numbers
+vim.opt.number = true         -- Show line numbers
 vim.opt.relativenumber = true -- Show numbers relative to current line
 
-vim.opt.cc = "80" -- Show column at 80 chars
+vim.opt.cc = "80"             -- Show column at 80 chars
 
-vim.opt.autoindent = true -- New line inherits indentation of previous one
-vim.opt.expandtab = true -- Tabs to spaces
-vim.opt.tabstop = 4 -- 1 Tab = 4 Spaces
-vim.opt.shiftwidth = 4 -- Use 4 spaces when shiftint
-vim.opt.shiftround = true -- When shifting round to nearest
+vim.opt.autoindent = true     -- New line inherits indentation of previous one
+vim.opt.expandtab = true      -- Tabs to spaces
+vim.opt.tabstop = 4           -- 1 Tab = 4 Spaces
+vim.opt.shiftwidth = 4        -- Use 4 spaces when shiftint
+vim.opt.shiftround = true     -- When shifting round to nearest
 vim.opt.smartindent = true
 
 vim.opt.tgc = true
@@ -36,16 +36,15 @@ vim.opt.foldlevel = 3
 vim.opt.foldmethod = "expr"
 vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
 vim.opt.foldenable = false
-vim.api.nvim_create_autocmd({"BufEnter"}, { pattern = {"*"},  command = "normal zx"})
+vim.api.nvim_create_autocmd({ "BufEnter" }, { pattern = { "*" }, command = "normal zx" })
 -- Autocommands
 -------------------------------------------------------------------------------
 -- Format on write
-vim.cmd([[ 
+vim.cmd([[
     command! Format execute 'lua vim.lsp.buf.format {async = false}'
     augroup FormatAutocms
         autocmd!
         autocmd BufWritePre * Format
-        autocmd BufWritePre *.svelte,*.js,*.ts,*.jsx,*.tsx EslintFixAll
     augroup END
     ]])
 
