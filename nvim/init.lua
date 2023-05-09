@@ -12,6 +12,10 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+local opts = {
+    concurrency = 5
+}
+
 require("core.options")
 require("core.keymaps")
-require("lazy").setup("plugins")
+require("lazy").setup("plugins", opts)
