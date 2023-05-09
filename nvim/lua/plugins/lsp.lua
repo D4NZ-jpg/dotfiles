@@ -3,12 +3,18 @@ return {
     { "folke/neodev.nvim", config = true },
     {
         "VonHeikemen/lsp-zero.nvim",
-        branch = "v1.x",
+        branch = "v2.x",
         event = "InsertEnter",
         dependencies = {
             -- LSP Support
             { "neovim/nvim-lspconfig" },
-            { "williamboman/mason.nvim",          config = true },
+            {
+                "williamboman/mason.nvim",
+                config = true,
+                build = function()
+                    pcall(vim.cmd, "MasonUpdate")
+                end,
+            },
             { "williamboman/mason-lspconfig.nvim" },
 
             -- Autocompletion
@@ -24,21 +30,25 @@ return {
             { "rafamadriz/friendly-snippets" },
         },
         config = function()
-            local lsp = require("lsp-zero").preset({
-                name = "recommended",
-                set_lsp_keymaps = { preserve_mappings = false },
-            })
+            local lsp = require("lsp-zero").preset({})
+            local cmp = require("cmp")
+            lsp.on_attach(function(_, bufnr)
+                lsp.default_keymaps({ buffer = bufnr })
+            end)
 
-            lsp.ensure_installed({
-                "eslint",
-                "lua_ls",
-                "rust_analyzer",
-            })
-
-            lsp.nvim_workspace()
-            lsp.setup()
-
+            require("lspconfig").lua_ls.setup(lsp.nvim_lua_ls())
             require("luasnip.loaders.from_snipmate").lazy_load()
+
+            cmp.setup({
+                sources = {
+                    { name = "nvim_lsp" },
+                    { name = "luasnip" }
+                },
+                mapping = {
+                    ['<tab>'] = cmp.mapping.confirm({ select = true }),
+                }
+            })
+            lsp.setup()
         end,
     },
 
@@ -56,7 +66,6 @@ return {
         },
         config = function(_, opts)
             require("mason-null-ls").setup(opts)
-
             handlers = {
                 function(source_name, methods)
                     require("mason-null-ls.automatic_setup")(source_name, methods)
