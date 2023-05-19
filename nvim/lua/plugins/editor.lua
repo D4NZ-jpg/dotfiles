@@ -128,5 +128,15 @@ return {
         "nvim-zh/colorful-winsep.nvim",
         event = "WinNew",
         config = true
+    },
+
+    -- buffer file editor
+    {
+        "stevearc/oil.nvim",
+        config = true,
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+        keys = {
+            { "-", "<cmd>lua require('oil').open()<cr>", desc = "Open parent directory" }
+        }
     }
 }
