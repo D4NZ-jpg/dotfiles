@@ -19,6 +19,8 @@ vim.keymap.set("n", "<C-j>", "<cmd>cprev<cr>zz")
 vim.keymap.set("i", "<C-k>", "<cmd>lua require('luasnip').jump(1)<cr>")
 vim.keymap.set("i", "<C-j>", "<cmd>lua require('luasnip').jump(-1)<cr>")
 
+vim.keymap.set("t", "<C-q>", "<C-\\><C-n>")
+
 -- Add git diff as command
 vim.cmd([[command! Diff :DiffviewOpen]])
 
