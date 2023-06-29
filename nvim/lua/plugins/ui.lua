@@ -3,7 +3,6 @@ return {
     {
         "nyoom-engineering/oxocarbon.nvim",
         config = function()
-            vim.opt.background = "dark"
             vim.cmd([[colorscheme oxocarbon]])
 
             --tabs
@@ -12,6 +11,14 @@ return {
             vim.api.nvim_set_hl(0, "TabLineHead", { fg = colors.base00, bg = colors.base09 })
             vim.api.nvim_set_hl(0, "TabLineIna", { fg = colors.base00, bg = colors.base03 })
             vim.api.nvim_set_hl(0, "TabLineFill", { fg = colors.base03, bg = colors.base00 })
+        end
+    },
+
+    -- transparent background
+    {
+        "xiyaowong/transparent.nvim",
+        config = function()
+            vim.g.transparent_enabled = true
         end
     },
 
