@@ -13,7 +13,12 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local opts = {
-    concurrency = 5
+    concurrency = 5,
+    dev = {
+        path = "~/dev/work",
+        patterns = { "D4NZ-jpg" },
+        fallback = true
+    }
 }
 
 require("core.options")
