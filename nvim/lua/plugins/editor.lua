@@ -138,5 +138,18 @@ return {
         keys = {
             { "-", "<cmd>lua require('oil').open()<cr>", desc = "Open parent directory" }
         }
+    },
+
+    -- code outline
+    {
+        'stevearc/aerial.nvim',
+        dependencies = {
+            "nvim-treesitter/nvim-treesitter",
+            "nvim-tree/nvim-web-devicons"
+        },
+        config = true,
+        keys = {
+            { "<leader>a", "<cmd>AerialToggle!<CR>", desc = "Toggle Aerial (Outline)" }
+        }
     }
 }
