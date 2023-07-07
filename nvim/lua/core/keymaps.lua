@@ -24,6 +24,30 @@ vim.keymap.set("t", "<C-q>", "<C-\\><C-n>")
 -- Add git diff as command
 vim.cmd([[command! Diff :DiffviewOpen]])
 
+-- Add shortened commands for Competitest. This is important because these abbreviated commands might not initially seem intuitive.
+-- "cp" -> CompetiTestRun
+-- "cp problem" -> CompetiTestReceive problem
+-- "cp contest" -> CompetiTestReceive contest
+vim.cmd([[
+"Call the appropriate CompetiTest command
+function! s:CompetiTestFunction(arg) abort
+    if a:arg == ""
+        CompetiTestRun
+    else
+        execute 'CompetiTestReceive ' . a:arg
+    endif
+endfunction
+
+"Tab completion of the command with 'contest' or 'problem'
+function! s:CompetiTestComplete(...) abort
+    let l:options = ['problem', 'contest']
+    return join(l:options, "\n")
+endfunction
+
+"The actual command
+ command! -bar -nargs=? -complete=custom,s:CompetiTestComplete CP call s:CompetiTestFunction(<q-args>)
+]])
+
 return {
     ["<leader>f"] = {
         name = "+File/Find",
