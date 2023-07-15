@@ -151,6 +151,7 @@ awful.screen.connect_for_each_screen(function(s)
                 widget = wibox.container.margin
             },
             s.tasklist,
+
         },
         { -- Center widget
             playerctl,
@@ -160,8 +161,35 @@ awful.screen.connect_for_each_screen(function(s)
         },
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
-            extra.cpu,
-            clock,
+            {
+                widget = wibox.container.margin,
+                right = dpi(25),
+                {
+                    layout = wibox.layout.fixed.horizontal,
+                    {
+                        widget = wibox.container.margin,
+                        right = dpi(5),
+                        {
+                            text = "",
+                            font = beautiful.font .. dpi(17),
+                            widget = wibox.widget.textbox,
+                        }
+                    },
+                    {
+                        widget = wibox.container.place,
+                        extra.cpu,
+                    }
+                }
+            },
+            {
+                layout = wibox.layout.fixed.horizontal,
+                {
+                    text = "󰥔",
+                    font = beautiful.font .. dpi(16),
+                    widget = wibox.widget.textbox
+                },
+                clock,
+            },
             s.layout_box,
             sys_widget,
             {

@@ -18,7 +18,7 @@ M.cpu = awful.widget.watch(
         local diff_total = total - total_prev
         local diff_usage = (1000 * (diff_total - diff_idle) / diff_total + 5) / 10
 
-        widget:set_markup_silently(" " .. tostring(math.floor(diff_usage)) .. "%")
+        widget:set_markup_silently(tostring(math.floor(diff_usage)) .. "%")
 
         total_prev = total
         idle_prev = idle
