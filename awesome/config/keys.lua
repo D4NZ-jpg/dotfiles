@@ -32,6 +32,10 @@ GlobalKeys = gears.table.join(
     -- Rofi -> Network manager
     awful.key({ Modkey, shift }, "w", function() awful.spawn("rofi-net") end,
         { description = "open network settings", group = "settings" }),
+    -- Rofi -> Screenshots
+    awful.key({ Modkey }, "p", function() awful.spawn("rofi-screenshot") end,
+        { description = "open screenshot menu", group = "settings" }),
+
 
 
     -- File manager
