@@ -307,4 +307,11 @@ return {
             require("alpha").setup(config)
         end,
     },
+
+    -- better ui
+    {
+        "stevearc/dressing.nvim",
+        config = true,
+        event = "VeryLazy",
+    }
 }
