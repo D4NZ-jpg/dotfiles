@@ -16,9 +16,24 @@ GlobalKeys = gears.table.join(
     -- Browser
     awful.key({ Modkey }, "b", function() awful.spawn.with_shell(Preferences.web) end,
         { description = "open web browser", group = "launcher" }),
-    -- Rofi
+
+    -- Rofi -> Apps
     awful.key({ Modkey }, "Return", function() awful.spawn("rofi -show drun") end,
-        { description = "open rofi", group = "launcher" }),
+        { description = "open an app", group = "launcher" }),
+    -- Rofi -> Emojis
+    awful.key({ Modkey, shift }, "e", function() awful.spawn("rofi -show emoji") end,
+        { description = "select an emoji", group = "launcher" }),
+    -- Rofi -> Calculator
+    awful.key({ Modkey }, "c", function() awful.spawn("rofi -show calc -no-show-match -no-sort") end,
+        { description = "open calculator", group = "launcher" }),
+    -- Rofi -> Bluetooth manager
+    awful.key({ Modkey, shift }, "b", function() awful.spawn("rofi-bluetooth") end,
+        { description = "open bluetooth settings", group = "settings" }),
+    -- Rofi -> Network manager
+    awful.key({ Modkey, shift }, "w", function() awful.spawn("rofi-net") end,
+        { description = "open network settings", group = "settings" }),
+
+
     -- File manager
     awful.key({ Modkey }, "e", function() awful.spawn(Preferences.files) end,
         { description = "open file manager", group = "launcher" }),
