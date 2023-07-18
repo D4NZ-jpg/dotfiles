@@ -42,7 +42,7 @@ return {
                 }
             },
             compile_command = {
-                cpp = { exec = "g++", args = { "$(FNAME)", "-o", "./bin/$(FNOEXT)" } }
+                cpp = { exec = "g++", args = { "-g", "$(FNAME)", "-o", "./bin/$(FNOEXT)" } }
             }
         },
         cmd = { "CompetiTestReceive", "CompetiTestRun" },
