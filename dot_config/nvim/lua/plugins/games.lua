@@ -34,7 +34,8 @@ return {
             "// Problem: $(NAME)\n// Contest: $(GROUP)\n// URL: $(URL)\n// Memory Limit: $(MEMLIM) MB\n// Time Limit: $(TIMELIM) ms\n// Start: $(TIME)",
             time_format = "%d-%m-%Y %H:%M:%S",
             testcases_directory = "testcases",
-            testcases_use_single_file = true,
+            testcases_input_file_format = "$(FNOEXT).in$(TCNUM)",
+            testcases_output_file_format = "$(FNOEXT).out$(TCNUM)",
             save_current_file = true,
             run_command = {
                 cpp = {
@@ -42,7 +43,7 @@ return {
                 }
             },
             compile_command = {
-                cpp = { exec = "g++", args = { "-g", "$(FNAME)", "-o", "./bin/$(FNOEXT)" } }
+                cpp = { exec = "g++", args = { "-g", "-DDEBUG", "$(FNAME)", "-o", "./bin/$(FNOEXT)" } }
             }
         },
         cmd = { "CompetiTestReceive", "CompetiTestRun" },
