@@ -25,18 +25,20 @@ return {
 
     -- Competitive programming
     {
-        "D4NZ-jpg/competitest.nvim",
+        "xeluxee/competitest.nvim",
         dependencies = { "MunifTanjim/nui.nvim" },
-        branch = "patches",
         opts = {
             template_file = "~/dev/cp/Settings/template.cpp",
-            head_comment =
-            "// Problem: $(NAME)\n// Contest: $(GROUP)\n// URL: $(URL)\n// Memory Limit: $(MEMLIM) MB\n// Time Limit: $(TIMELIM) ms\n// Start: $(TIME)",
-            time_format = "%d-%m-%Y %H:%M:%S",
             testcases_directory = "testcases",
             testcases_input_file_format = "$(FNOEXT).in$(TCNUM)",
             testcases_output_file_format = "$(FNOEXT).out$(TCNUM)",
             save_current_file = true,
+            evaluate_template_modifiers = true,
+            received_files_extension = "cpp",
+            received_problems_prompt_path = false,
+            received_contests_prompt_directory = false,
+            received_contests_prompt_extension = false,
+            date_format = "%d-%m-%Y %H:%M:%S",
             run_command = {
                 cpp = {
                     exec = "./bin/$(FNOEXT)"
