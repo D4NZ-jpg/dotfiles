@@ -48,6 +48,6 @@ return {
                 cpp = { exec = "g++", args = { "-g", "-DDEBUG", "$(FNAME)", "-o", "./bin/$(FNOEXT)" } }
             }
         },
-        cmd = { "CompetiTestReceive", "CompetiTestRun" },
+        cmd = "CompetiTest",
     }
 }

@@ -25,16 +25,16 @@ vim.keymap.set("t", "<C-q>", "<C-\\><C-n>")
 vim.cmd([[command! Diff :DiffviewOpen]])
 
 -- Add shortened commands for Competitest. This is important because these abbreviated commands might not initially seem intuitive.
--- "cp" -> CompetiTestRun
--- "cp problem" -> CompetiTestReceive problem
--- "cp contest" -> CompetiTestReceive contest
+-- "CP" -> CompetiTest run
+-- "CP problem" -> CompetiTest receive problem
+-- "CP contest" -> CompetiTest receive contest
 vim.cmd([[
 "Call the appropriate CompetiTest command
 function! s:CompetiTestFunction(arg) abort
     if a:arg == ""
-        CompetiTestRun
+        execute "CompetiTest run"
     else
-        execute 'CompetiTestReceive ' . a:arg
+        execute 'CompetiTest receive ' . a:arg
     endif
 endfunction
 
