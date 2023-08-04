@@ -32,8 +32,19 @@ vim.cmd([[
 "Call the appropriate CompetiTest command
 function! s:CompetiTestFunction(arg) abort
     if a:arg == ""
+        " Create bin folder if not existing
+        if !isdirectory("./bin")
+            call mkdir("./bin")
+        endif
+
         execute "CompetiTest run"
     else
+
+        " Create .gitignore to hide input and binary files in telescope 🔭
+        if !filereadable(".gitignore")
+            call writefile(["testcases\nbin"], ".gitignore")
+        endif
+
         execute 'CompetiTest receive ' . a:arg
     endif
 endfunction
