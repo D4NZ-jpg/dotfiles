@@ -36,12 +36,17 @@ return {
             -- Snippets
             { "L3MON4D3/LuaSnip" },
             { "rafamadriz/friendly-snippets" },
+
+            -- Extras
+            { "p00f/clangd_extensions.nvim" }
         },
         config = function()
             local lsp = require("lsp-zero").preset({})
             local cmp = require("cmp")
             lsp.on_attach(function(_, bufnr)
                 lsp.default_keymaps({ buffer = bufnr })
+                require("clangd_extensions.inlay_hints").setup_autocmd()
+                require("clangd_extensions.inlay_hints").set_inlay_hints()
             end)
 
             require("lspconfig").lua_ls.setup(lsp.nvim_lua_ls())
@@ -54,9 +59,17 @@ return {
                 },
                 mapping = {
                     ['<tab>'] = cmp.mapping.confirm({ select = true }),
+                },
+                sorting = {
+                    comparators = {
+                        require("clangd_extensions.cmp_scores"),
+                    }
                 }
             })
             lsp.setup()
+
+            -- Since this is lazy loading, it doesn't attach automatically if a file is alredy open
+            vim.cmd([[LspStart]])
         end,
     },
 
@@ -229,8 +242,8 @@ return {
                     only_first_definition = false,
                     all_references = true,
                 }
-            }
-
+            },
+            "VonHeikemen/lsp-zero.nvim",
         },
 
         keys = {
