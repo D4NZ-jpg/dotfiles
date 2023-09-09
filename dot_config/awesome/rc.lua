@@ -53,13 +53,11 @@ require("theme")
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 awful.layout.layouts = {
-    awful.layout.suit.tile,
     awful.layout.suit.tile.left,
-    awful.layout.suit.tile.bottom,
     awful.layout.suit.tile.top,
     awful.layout.suit.spiral,
     awful.layout.suit.max,
-    awful.layout.suit.floating,
+    awful.layout.suit.tile,
 }
 
 -- Menubar configuration

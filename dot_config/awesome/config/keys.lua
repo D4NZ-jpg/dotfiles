@@ -189,7 +189,7 @@ ClientKeys = gears.table.join(
         { description = "move to screen", group = "client" }),
 
     -- Keep on top
-    awful.key({ Modkey, }, "t", function(c) c.ontop = not c.ontop end,
+    awful.key({ Modkey, shift }, "t", function(c) c.ontop = not c.ontop end,
         { description = "toggle keep on top", group = "client" }),
 
     -- (un)Maximize
