@@ -7,7 +7,8 @@ return {
                 plugins = { "nvim-dap-ui" },
                 types = true
             }
-        }
+        },
+        ft = "lua"
     },
     {
         "VonHeikemen/lsp-zero.nvim",

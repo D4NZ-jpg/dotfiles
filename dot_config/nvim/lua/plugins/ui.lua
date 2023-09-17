@@ -25,7 +25,7 @@ return {
     -- tabs
     {
         "nanozuki/tabby.nvim",
-        --event = "TabNew",
+        event = "TabNew",
         config = function()
             local function tab_name(tab)
                 return string.gsub(tab, "%[..%]", "")
