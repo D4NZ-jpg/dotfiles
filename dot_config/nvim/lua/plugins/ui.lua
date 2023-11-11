@@ -120,6 +120,7 @@ return {
     -- indent guides
     {
         "lukas-reineke/indent-blankline.nvim",
+        main = "ibl",
         event = { "BufReadPost", "BufNewFile" },
         config = true,
     },
@@ -274,9 +275,9 @@ return {
                 val = {
                     button("e", "  > New File", ":ene <BAR> startinsert <CR>"),
                     button("r", "  > Recent Files", ":Telescope oldfiles<CR>"),
-                    button("f", "  > Find File", ":Telescope find_files hidden=true<CR>"),
+                    button("f", "󰱼  > Find File", ":Telescope find_files hidden=true<CR>"),
                     button("b", "󰥨  > Browse Folders", ":Telescope file_browser hidden=true<CR>"),
-                    button("q", "  > Quit", ":qa<CR>"),
+                    button("q", "  > Quit", ":qa<CR>"),
                 },
             }
 
