@@ -1,0 +1,93 @@
+@import "../../.cache/wal/colors-waybar.css";
+
+* {
+    font-family: "Fira Sans Semibold", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
+    border: none;
+    border-radius: 0px;
+}
+
+window#waybar {
+    background-color: rgba(0,0,0,0.8);
+    border-bottom: 0px solid #ffffff;
+    background: transparent;
+    transition-property: background-color;
+    transition-duration: 0.5s
+}
+
+/* Workspaces */
+#workspaces {
+    background: #FFFFFF;
+    margin: 5px;
+    padding: 4px 1px;
+    border-radius: 12px;
+    font-weight: normal;
+    font-style: normal;
+    opacity: 0.8;
+}
+
+#workspaces button{
+    padding: 0px 10px;
+    margin: 0px 3px;
+    border-radius: 12px;
+    color: @color9;
+    background-color: @color11;
+    transition: all 0.3s ease-in-out;
+    opacity: 0.4;
+    font-size: 13px;
+}
+
+#workspaces button.active{
+    color:  @color10;
+    background-color: @color11;
+    border-radius: 10px;
+    min-width: 30px;
+    background-size: 400% 400%;
+    transition: all 0.3s ease-in-out;
+    opacity: 1.0;
+}
+
+#workspaces button:hover{
+    color:  @color10;
+    background-color: @color1;
+    border-radius: 10px;
+    min-width: 30px;
+    background-size: 400% 400%;
+}
+
+/* taskbar */
+#taskbar {
+    background: @color11;
+    margin: 3px 10px 3px 10px;
+    padding: 2px 3px 1px 3px;
+    border-radius: 14px;
+    font-weight: normal;
+    font-style: normal;
+    opacity: 0.8;
+    border: 3px solid #FFFFFF;
+}
+
+#taskbar button {
+    margin: 0;
+    padding: 0px 5px 0px 5px;
+    border-radius: 14px;
+}
+
+/* Modules */
+#pulseaudio, #bluetooth, #battery, #network, #clock{
+    background: #FFFFFF;
+    margin: 5px;
+    padding: 4px 5px;
+    border-radius: 12px;
+    opacity: 0.8
+
+}
+
+#hardware, #custom-exit{
+    color: #FFFFFF;
+    margin: 5px;
+    font-weight: bold;
+}
+
+#custom-exit{
+    margin-right: 7px;
+}

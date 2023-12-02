@@ -1,0 +1,38 @@
+{
+    "layer": "top", 
+    "spacing": 0,
+    "margin-top": 0,
+    "margin-left": 0,
+    "margin-right": 0,
+
+    "include": ["~/.config/waybar/modules.json"],
+
+    "modules-left": [
+        "wlr/taskbar",
+    ],
+
+    "modules-center": [
+        "hyprland/workspaces"
+    ],
+
+    "modules-right": [
+        "pulseaudio",
+        "bluetooth",
+        "battery",
+        "network",
+        "group/hardware",
+        "custom/exit",
+        "clock"
+    ],
+
+    // Set groups
+    "group/hardware": {
+        "orientation": "horizontal",
+        "modules": [
+            "disk",
+            "cpu",
+            "memory"
+        ]
+    }
+}
+

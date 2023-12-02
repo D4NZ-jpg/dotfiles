@@ -7,3 +7,6 @@ source "$HOME/.cache/wal/colors.sh"
 
 # set wallpaper
 swww img $wallpaper --transition-step 20 --transition-fps 20
+
+# copy current file to ~/currentWallpaper
+cp $wallpaper ~/.cache/currentWallpaper.jpg
