@@ -16,28 +16,42 @@ if ! pacman -Qi yay &> /dev/null; then
 fi
 
 pkgs=(
-    "kitty"        # Terminal
-    "lf"           # File explorer (TUI)
-    "firefox"      # Browser
+    "kitty"                    # Terminal
+    "lf"                       # File explorer (TUI)
+    "firefox"                  # Browser
+    "wofi"                     # App launcher
 
-    "hyprland"     # WM
-    "way-displays" # Set displays
+    "zsh"                      # Shell
+    "starship"                 # Shell prompt
+    "hyprland"                 # WM
+    "way-displays"             # Set displays
     
-    "swww"         # Wallpaper setup
-    "python-pywal" # Colorschemes
+    "swww"                     # Wallpaper setup
+    "python-pywal"             # Colorschemes
+    "waybar"                   # Infobar
 
-    "waybar"       # Infobar
-    "wl-clipboard" # Clipboard manager
+    "wl-clipboard"             # Clipboard manager
+    "wlogout"                  # Logout menu
+    "swaylock-effects-git"     # Lock screen
+    "pavucontrol"              # Sound control
+    "htop"                     # Task manager
+    "neofetch"                 # Flexing
+
+    # Bluetooth
+    "blueman"
+    "bluez"
+    "bluez-utils"
 
     # Extra utils
     "ripgrep"
     "xdg-utils"
+    "exa"
 
 
     # Some fonts used on my configs
     "ttf-firacode-nerd"
+    "noto-fonts-emoji"
 )
-
 # Install all pkgs
 output=""
 for pkg in "${pkgs[@]}"; do
@@ -51,3 +65,14 @@ if [ "$output" != "" ]; then
     echo "$output"
     yay -S $output
 fi
+
+# Set zsh as default shell
+if [ "$SHELL" != "/usr/bin/zsh" ]; then
+    sudo chsh -s /usr/bin/zsh $USER
+    
+    # Intall plugin manager (Zap)
+    zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
+    echo "Default shell has been changed, log in again to apply changes"
+fi
+
+systemctl enable bluetooth.service

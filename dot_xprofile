@@ -1,5 +1,0 @@
-# display
-xrandr --output HDMI-0 --primary --right-of DP-0 &
-
-picom & 
-awesome
