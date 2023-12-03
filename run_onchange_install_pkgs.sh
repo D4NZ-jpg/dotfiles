@@ -35,6 +35,7 @@ pkgs=(
     "swaylock-effects-git"     # Lock screen
     "pavucontrol"              # Sound control
     "htop"                     # Task manager
+    "dunst"                    # Notifications
     "neofetch"                 # Flexing
 
     # Bluetooth
