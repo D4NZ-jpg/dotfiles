@@ -19,7 +19,7 @@ pkgs=(
     "kitty"                    # Terminal
     "lf"                       # File explorer (TUI)
     "firefox"                  # Browser
-    "wofi"                     # App launcher
+    "rofi"                     # App launcher
 
     "zsh"                      # Shell
     "starship"                 # Shell prompt
@@ -38,6 +38,9 @@ pkgs=(
     "dunst"                    # Notifications
     "neofetch"                 # Flexing
 
+    # Icons
+    "oranchelo-icon-theme"
+
     # Bluetooth
     "blueman"
     "bluez"
@@ -48,11 +51,15 @@ pkgs=(
     "xdg-utils"
     "exa"
 
+    # Rofi stuff
+    "rofi-emoji"               # Emoji selector
+    "rofi-calc"                # Calculator
 
     # Some fonts used on my configs
     "ttf-firacode-nerd"
     "noto-fonts-emoji"
 )
+
 # Install all pkgs
 output=""
 for pkg in "${pkgs[@]}"; do
