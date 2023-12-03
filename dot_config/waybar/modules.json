@@ -18,6 +18,7 @@
     // Taskbar
     "wlr/taskbar": {
         "format": "{icon}",
+        "icon-theme": "Oranchelo",
         "icon-size": 18,
         "tooltip-format": "{title}",
         "on-click": "activate",
