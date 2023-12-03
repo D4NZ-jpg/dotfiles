@@ -27,7 +27,7 @@ pkgs=(
     "way-displays"             # Set displays
     
     "swww"                     # Wallpaper setup
-    "python-pywal"             # Colorschemes
+    "pywal-git"                # Colorschemes
     "waybar"                   # Infobar
 
     "wl-clipboard"             # Clipboard manager
@@ -37,6 +37,7 @@ pkgs=(
     "htop"                     # Task manager
     "dunst"                    # Notifications
     "neofetch"                 # Flexing
+    "xorg-xwayland"             # Cserver (for compatibility)
 
     # Icons
     "oranchelo-icon-theme"
@@ -72,6 +73,17 @@ if [ "$output" != "" ]; then
     echo "Installing missing packages..."
     echo "$output"
     yay -S $output
+fi
+
+# Discord install (with better discord)
+if ! pacman -Qi discord &> /dev/null; then
+    read -p "Do you want to intall discord? (y/n) " answer
+    answer=${answer,,}
+
+    if [[ $answer == "y" || $answer == "yes" ]]; then
+        yay -S discord betterdiscordctl-git
+        betterdiscordctl install
+    fi
 fi
 
 # Set zsh as default shell

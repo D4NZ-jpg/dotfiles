@@ -1,0 +1,100 @@
+/**
+ * @name Zelk
+ * @version 1.2.2
+ * @description a smooth theme inspired by zorin. Modified by dan for pywal template
+ * @author schnensch 
+ * @author Danz
+ * @source https://github.com/schnensch0/zelk
+ */
+
+@import url(https://schnensch0.github.io/zelk/main.css);
+@import url(https://discord-custom-covers.github.io/usrbg/dist/usrbg.css);
+@import url(https://mwittrien.github.io/BetterDiscordAddons/Themes/_res/SettingsIcons.css);
+/*-------------VARIABLES-------------*/
+:root {{
+  /* set to 'unset' to show */
+  --scrollbars: none;
+  /* user notes */
+  --notes: none;
+  /* direct message box */
+  --message: none;
+  /* set to '4px solid' to show */
+  --embed-color: none;
+  /* set to 'Inter', sans-serif !important to use Inter font*/
+  --font-primary: Whitney, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: Whitney, "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  --border-radius-1: 10px;
+  --border-radius-2: 8px;
+}}
+/*-----------CUSTOM COLORS-----------*/
+/*---------------BASIC---------------*/
+.theme-dark, .theme-light {{
+  --accent-color: {color3};
+  --background-1: {background};
+  --background-2: rgb(calc({background.red}* 255 * 1.2), calc({background.green}* 255 * 1.2), calc({background.blue}* 255*1.2));
+  --background-accent: var(--background-2)
+  --border-color: transparent 
+}}
+
+/*-------------ADVANCED--------------*/
+.theme-dark, .theme_light {{
+  /* background */
+  --background-primary: var(--background-1);
+  --background-primary-alt: var(--background-1);
+  --background-secondary: var(--background-1);
+  --background-secondary-alt: var(--background-1);
+  --background-tertiary: var(--background-2);
+  --background-accent-gradient: var(--background-2);
+  --background-floating: var(--background-1);
+  --background-mentioned: #bde6fb10;
+  --background-mentioned-hover: #bde6fb15;
+  /* modifiers */
+  --background-modifier-hover: #262e33;
+  --background-modifier-active: #495a63;
+  --background-modifier-selected: var(--accent-color);
+  --background-modifier-accent: transparent;
+  --background-message-hover: transparent;
+  /* text */
+  --text-normal: {foreground};
+  --text-positive: var(--text-normal);
+  --text-muted: #6d8692;
+  --text-link: #edf8fe;
+  --interactive-selected: var(--background-primary);
+  --interactive-active: var(--text-normal);
+  --interactive-normal: var(--text-normal);
+  --interactive-muted: var(--button-background-active);
+  --channels-default: var(--text-muted);
+  --header-primary: var(--text-normal);
+  --header-secondary: var(--text-muted);
+  /* more */
+  --settings-icon-color: #8eacbc;
+  --control-brand-foreground: var(--accent-color);
+  --info-warning-foreground: var(--accent-color);
+  --tab-selected: #354249;
+  --switch: #3d4c53;
+  --activity-card-background: var(--background-1);
+  --brand-experiment: var(--accent-color) !important;
+  /* buttons */
+  --button-background: #2a3439;
+  --button-background-hover: #354249;
+  --button-background-active: #4d5f68;
+  --button-accent: var(--accent-color);
+  --button-accent-hover: #d2f3ff;
+  --button-accent-active: #8dd4f8;
+  --button-destructive: #fb7c7c;
+  --button-destructive-hover: #ff929b;
+  --button-destructive-active: #fa4a4a;
+}}
+
+/*-----------DON'T CHANGE------------*/
+:root {{
+  --outdated-122: none !important;
+}}
+/*  usrbg | snippet by _david_#0218  */
+.userPopout-2j1gM4[style*="--user-background"] .banner-1YaD3N, .root-8LYsGj[style*="--user-background"] .banner-1YaD3N {{
+  height: 120px;
+  background: var(--background-tertiary) var(--user-background) var(--user-popout-position, center) center / cover !important;
+}}
+.root-8LYsGj[style*="--user-background"] .banner-1YaD3N {{
+  height: 240px;
+}}
