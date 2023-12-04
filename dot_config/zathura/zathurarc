@@ -1,0 +1,22 @@
+# Colors
+include ../../.cache/wal/colors-zathura
+
+set window-title-home-tilde true
+set statusbar-basename true
+set selection-clipboard clipboard
+
+# Prev & next page
+map h navigate previous
+map l navigate next
+
+# Prev zoom
+map J zoom out
+map K zoom in
+
+set guioptions n
+
+# Side by side mode
+map D set "first-page-column 1:1"
+
+# Change color
+map <C-i> recolor

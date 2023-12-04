@@ -40,6 +40,7 @@ pkgs=(
     "dunst"                    # Notifications
     "neofetch"                 # Flexing
     "xorg-xwayland"            # Xserver (for compatibility)
+    "zathura"                  # Document reader
 
     # Icons
     "oranchelo-icon-theme"
@@ -54,6 +55,9 @@ pkgs=(
     "xdg-utils"
     "exa"
     "ctpv-git"                 # lf image preview
+    "zathura-pdf-mupdf"        # zathura pdf plugin
+    "zathura-djvu"             # zathura djvu support
+    "zaread-git"               # zathura office support
 
     # Rofi stuff
     "rofi-emoji"               # Emoji selector
@@ -134,5 +138,8 @@ if [ "$SHELL" != "/usr/bin/zsh" ]; then
     zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
     echo "Default shell has been changed, log in again to apply changes"
 fi
+
+# set zathura as default pdf app
+xdg-mime default org.pwmt.zathura.desktop application/pdf
 
 systemctl enable bluetooth.service
