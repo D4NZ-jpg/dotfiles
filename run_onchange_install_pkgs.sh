@@ -39,7 +39,7 @@ pkgs=(
     "htop"                     # Task manager
     "dunst"                    # Notifications
     "neofetch"                 # Flexing
-    "xorg-xwayland"             # Cserver (for compatibility)
+    "xorg-xwayland"            # Xserver (for compatibility)
 
     # Icons
     "oranchelo-icon-theme"
@@ -53,6 +53,7 @@ pkgs=(
     "ripgrep"
     "xdg-utils"
     "exa"
+    "ctpv-git"                 # lf image preview
 
     # Rofi stuff
     "rofi-emoji"               # Emoji selector
