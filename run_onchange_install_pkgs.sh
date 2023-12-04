@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 # Install git if not installed
 if ! pacman -Qi git &> /dev/null; then
     echo "Installing git..."
@@ -83,6 +84,29 @@ if ! pacman -Qi discord &> /dev/null; then
     if [[ $answer == "y" || $answer == "yes" ]]; then
         yay -S discord betterdiscordctl-git
         betterdiscordctl install
+    fi
+fi
+
+# Spotify install (with spicetify)
+if ! pacman -Qi spotify &> /dev/null; then
+    read -p "Do you want to install spotify? (y/n) " answer
+    answer=${answer,,}
+
+    # Install spotify + spicetify
+    if [[ $answer == "y" || $answer == "yes" ]]; then
+        yay -S spotify spicetify-cli
+
+        sudo chmod a+wr /opt/spotify
+        sudo chmod a+wr /opt/spotify/Apps -R
+
+        # log in
+        spotify &> /dev/null&
+        echo ""
+        read -p "Please login to spotify to generate pref file..."
+
+        spicetify config current_theme Dribbblish color_scheme pywal
+        spicetify config inject_css 1 replace_colors 1 overwrite_assets 1 inject_theme_js 1
+        spicetify backup apply
     fi
 fi
 
