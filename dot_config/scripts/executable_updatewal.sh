@@ -17,6 +17,10 @@ kill -USR1 $(pgrep kitty)
 # Copy better discord css
 cp ~/.cache/wal/discord-wal-theme.css ~/.config/BetterDiscord/data/stable/custom.css
 
+# Reload waybar
+killall waybar
+waybar
+
 # Update spotify if spicetify installed (it will close it)
 if command -v spicetify &> /dev/null; then
     spicetify apply
