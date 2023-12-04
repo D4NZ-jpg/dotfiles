@@ -21,7 +21,11 @@ cp ~/.cache/wal/discord-wal-theme.css ~/.config/BetterDiscord/data/stable/custom
 killall waybar
 waybar
 
+# Send update to firefox
+pywalfox update
+
 # Update spotify if spicetify installed (it will close it)
 if command -v spicetify &> /dev/null; then
     spicetify apply
 fi
+

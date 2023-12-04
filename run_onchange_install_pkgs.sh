@@ -30,6 +30,7 @@ pkgs=(
     "swww"                     # Wallpaper setup
     "pywal-git"                # Colorschemes
     "waybar"                   # Infobar
+    "python-pywalfox"          # Firefox follow pywal
 
     "wl-clipboard"             # Clipboard manager
     "wlogout"                  # Logout menu
