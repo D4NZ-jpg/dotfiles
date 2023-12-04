@@ -104,8 +104,22 @@ if ! pacman -Qi spotify &> /dev/null; then
         echo ""
         read -p "Please login to spotify to generate pref file..."
 
+        # Theme
         spicetify config current_theme Dribbblish color_scheme pywal
         spicetify config inject_css 1 replace_colors 1 overwrite_assets 1 inject_theme_js 1
+
+        # Extensions (builtin)
+        spicetify config extensions loopyLoop.js
+        spicetify config extensions trashbin.js
+
+        # Extensions (extra)
+        for file in ~/.config/spicetify/Extensions/*; do
+            if [ -f "$file" ]; then
+                name=$(basename "$file") 
+               spicetify config extensions "$name"
+            fi
+        done
+
         spicetify backup apply
     fi
 fi
