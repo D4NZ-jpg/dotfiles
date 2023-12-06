@@ -51,7 +51,18 @@ return {
             end)
 
             require("lspconfig").lua_ls.setup(lsp.nvim_lua_ls())
-            require("luasnip.loaders.from_snipmate").lazy_load()
+
+            -- If it's in my competitive programming folder load special cp snippets
+            local cwd = vim.fn.getcwd()
+            if string.find(cwd, "/cp/?") then
+                require("luasnip.loaders.from_snipmate").lazy_load({
+                        paths={"~/dev/cp/snippets"}
+                    })
+            else
+                require("luasnip.loaders.from_snipmate").lazy_load()
+            end
+
+
 
             cmp.setup({
                 sources = {
@@ -63,6 +74,9 @@ return {
                 },
                 sorting = {
                     comparators = {
+                        cmp.config.compare.exact,
+                        cmp.config.compare.offset,
+                        cmp.config.compare.recently_used,
                         require("clangd_extensions.cmp_scores"),
                     }
                 }
