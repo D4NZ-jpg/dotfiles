@@ -14,6 +14,8 @@ plug "zap-zsh/exa"
 plug "hlissner/zsh-autopair"
 plug "zap-zsh/vim"
 plug "MichaelAquilina/zsh-auto-notify"
+plug "fdellwing/zsh-bat"
+plug "ajeetdsouza/zoxide"
 
 plug "$HOME/zsh_plugins/copyfile"
 plug "$HOME/zsh_plugins/copypath"

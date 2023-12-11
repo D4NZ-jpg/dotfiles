@@ -54,6 +54,10 @@ pkgs=(
     "ripgrep"
     "xdg-utils"
     "exa"
+    "bat"
+    "zoxide"
+    "fzf"
+    "entr"                     # watch for file changes
     "ctpv-git"                 # lf image preview
     "zathura-pdf-mupdf"        # zathura pdf plugin
     "zathura-djvu"             # zathura djvu support
@@ -90,6 +94,7 @@ if ! pacman -Qi discord &> /dev/null; then
     if [[ $answer == "y" || $answer == "yes" ]]; then
         yay -S discord betterdiscordctl-git
         betterdiscordctl install
+        yay -S vencord-desktop-git
     fi
 fi
 
