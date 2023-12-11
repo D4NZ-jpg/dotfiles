@@ -86,14 +86,12 @@ if [ "$output" != "" ]; then
     yay -S $output
 fi
 
-# Discord install (with better discord)
-if ! pacman -Qi discord &> /dev/null; then
-    read -p "Do you want to intall discord? (y/n) " answer
+# Discord install (Vencord for screen sharing)
+if ! pacman -Qi vencord-desktop-git &> /dev/null; then
+    read -p "Do you want to intall discord (vencord)? (y/n) " answer
     answer=${answer,,}
 
     if [[ $answer == "y" || $answer == "yes" ]]; then
-        yay -S discord betterdiscordctl-git
-        betterdiscordctl install
         yay -S vencord-desktop-git
     fi
 fi

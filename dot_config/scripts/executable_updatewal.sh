@@ -14,8 +14,9 @@ cp $wallpaper ~/.cache/currentWallpaper.jpg
 # Update kitty
 kill -USR1 $(pgrep kitty)
 
-# Copy better discord css
-cp ~/.cache/wal/discord-wal-theme.css ~/.config/BetterDiscord/data/stable/custom.css
+# Copy discord css to correct folder 
+mkdir -p ~/.config/VencordDesktop/VencordDesktop/theme
+cp ~/.cache/wal/discord-wal-theme.css ~/.config/VencordDesktop/VencordDesktop/themes/pywal.theme.css
 
 # Reload waybar
 killall waybar
