@@ -27,6 +27,7 @@ pkgs=(
     "hyprland"                 # WM
     "way-displays"             # Set displays
     
+    "pyprland"                 # Hyprland add-ons
     "swww"                     # Wallpaper setup
     "pywal-16-colors"          # Colorschemes
     "waybar"                   # Infobar

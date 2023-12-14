@@ -1,0 +1,38 @@
+[pyprland]
+plugins = [
+  "scratchpads",
+  "shift_monitors",
+  "magnify",
+  "shift_monitors",
+  "workspaces_follow_focus",
+]
+
+[workspaces_follow_focus]
+max_workspaces = 10
+
+[expose]
+include_special = false
+
+[scratchpads.term]
+animation = "fromTop"
+command = "kitty --class kitty-dropterm"
+class = "kitty-dropterm"
+size = "75% 60%"
+
+[scratchpads.volume]
+animation = "fromRight"
+command = "pavucontrol"
+class = "pavucontrol"
+lazy = true
+size = "40% 90%"
+unfocus = "hide"
+excludes = ["bluetooth"]
+
+[scratchpads.bluetooth]
+animation = "fromRight"
+command = "blueman-manager"
+class = "blueman-manager"
+lazy = true
+size = "40% 90%"
+unfocus = "hide"
+excludes = ["volume"]
