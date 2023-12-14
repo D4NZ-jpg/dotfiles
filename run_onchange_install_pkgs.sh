@@ -28,7 +28,7 @@ pkgs=(
     "way-displays"             # Set displays
     
     "swww"                     # Wallpaper setup
-    "pywal-git"                # Colorschemes
+    "pywal-16-colors"          # Colorschemes
     "waybar"                   # Infobar
     "python-pywalfox"          # Firefox follow pywal
 
@@ -136,7 +136,7 @@ fi
 # Set zsh as default shell
 if [ "$SHELL" != "/usr/bin/zsh" ]; then
     sudo chsh -s /usr/bin/zsh $USER
-    
+
     # Intall plugin manager (Zap)
     zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
     echo "Default shell has been changed, log in again to apply changes"

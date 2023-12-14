@@ -1,6 +1,7 @@
 #!/bin/sh
+#
 # Select random wallpaper
-wal -q -i ~/wallpapers -n
+wal --cols16 -q -i ~/wallpapers -n
 
 # Load pywal scheme
 source "$HOME/.cache/wal/colors.sh"
