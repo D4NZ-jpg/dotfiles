@@ -39,14 +39,6 @@ vim.opt.foldenable = false
 vim.api.nvim_create_autocmd({ "BufEnter" }, { pattern = { "*" }, command = "normal zx" })
 -- Autocommands
 -------------------------------------------------------------------------------
--- Format on write
-vim.cmd([[
-    command! Format execute 'lua vim.lsp.buf.format {async = false}'
-    augroup FormatAutocms
-        autocmd!
-        autocmd BufWritePre * Format
-    augroup END
-    ]])
 
 -- Add image filetypes to neovim
 vim.cmd([[

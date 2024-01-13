@@ -12,7 +12,7 @@ return {
     },
     {
         "VonHeikemen/lsp-zero.nvim",
-        branch = "v2.x",
+        branch = "v3.x",
         event = "InsertEnter",
         dependencies = {
             -- LSP Support
@@ -35,7 +35,7 @@ return {
             { "hrsh7th/cmp-nvim-lua" },
 
             -- Snippets
-            { 
+            {
                 "L3MON4D3/LuaSnip",
                 version = "v2.*",
                 build = "make install_jsregexp"
@@ -48,10 +48,20 @@ return {
         config = function()
             local lsp = require("lsp-zero").preset({})
             local cmp = require("cmp")
+
+            require("mason").setup({})
+            require("mason-lspconfig").setup({
+                handlers = { lsp.default_setup }
+            })
+
             lsp.on_attach(function(_, bufnr)
                 lsp.default_keymaps({ buffer = bufnr })
+
                 require("clangd_extensions.inlay_hints").setup_autocmd()
                 require("clangd_extensions.inlay_hints").set_inlay_hints()
+
+                -- Autoformat on save
+                lsp.buffer_autoformat()
             end)
 
             require("lspconfig").lua_ls.setup(lsp.nvim_lua_ls())
@@ -71,7 +81,7 @@ return {
             cmp.setup({
                 sources = {
                     { name = "nvim_lsp" },
-                    { name = "luasnip" }
+                    { name = "luasnip" },
                 },
                 mapping = {
                     ['<tab>'] = cmp.mapping.confirm({ select = true }),
@@ -92,28 +102,21 @@ return {
         end,
     },
 
-    -- null-ls
+    -- null.ls
     {
-        "jay-babu/mason-null-ls.nvim",
-        dependencies = {
-            "williamboman/mason.nvim",
-            "jose-elias-alvarez/null-ls.nvim",
-        },
-        event = "InsertEnter",
-        opts = {
-            ensure_installed = { "stylelua", "eslint" },
-            automatic_setup = true,
-        },
-        config = function(_, opts)
-            require("mason-null-ls").setup(opts)
-            handlers = {
-                function(source_name, methods)
-                    require("mason-null-ls.automatic_setup")(source_name, methods)
-                end,
-            }
+        "nvimtools/none-ls.nvim",
+        config = function()
+            local null = require("null-ls")
 
-            require("null-ls").setup()
-        end,
+            null.setup({
+                sources = {
+                    null.builtins.formatting.stylua,
+                    null.builtins.diagnostics.eslint,
+                    null.builtins.completion.spell
+                }
+            })
+        end
+
     },
 
     -- Configure cmake for c++
