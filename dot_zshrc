@@ -26,6 +26,7 @@ plug "$HOME/zsh_plugins/gitignore"
 plug "$HOME/zsh_plugins/jsontools"
 
 export EDITOR='nvim'
+export WLR_NO_HARDWARE_CURSORS=1
 
 # Run neofetch on every new shell (gotta flex)
 neofetch
