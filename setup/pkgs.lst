@@ -13,6 +13,7 @@ htop
 dunst
 xorg-xwayland
 xdg-utils
+libnotify
 
 blueman
 bluez
