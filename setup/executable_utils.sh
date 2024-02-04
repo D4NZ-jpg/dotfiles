@@ -51,5 +51,12 @@ installPkgs(){
     fi
 
     echo "Installing packages..."
-    yay -S -q $(cat "$file" )
+    local pkg2Install=()
+
+    while read -r pkg; do
+        if ! isInstalled "$pkg"; then
+            pkg2Install+=("$pkg")
+        fi
+    done < "$file"
+    yay -S -q "${pkg2Install[@]}"
 }
