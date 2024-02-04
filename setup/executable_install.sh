@@ -27,7 +27,6 @@ fi
 while read LINE; do
     name="${LINE%%|*}"; pkgs="${LINE#*|}"
 
-    echo "$name $pkgs"
     read -p "Would you like to install $name? (y/n): " answer < /dev/tty
     if [[ $answer = [Yy] ]]; then
         for pkg in $pkgs; do
@@ -44,5 +43,5 @@ source $HOME/setup/post-install.sh
 
 # Systemd
 while read service ; do
-    service_ctl $service
+    enableCtl $service
 done < $HOME/setup/system_ctl.lst
