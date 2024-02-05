@@ -45,3 +45,8 @@ source $HOME/setup/post-install.sh
 while read service ; do
     enableCtl $service
 done < $HOME/setup/system_ctl.lst
+
+echo ""
+echo "===================="
+echo " [*] Everything configured without problems."
+echo " [~] To configure spotify, log in then run ~/setup/spotify.sh"
