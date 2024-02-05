@@ -15,6 +15,7 @@ xorg-xwayland
 xdg-utils
 xorg-xrdb
 libnotify
+os-prober
 
 pipewire
 pipewire-audio
