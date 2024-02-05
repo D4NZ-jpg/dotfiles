@@ -17,3 +17,11 @@ if isInstalled zsh && [ "$SHELL" != "/usr/bin/zsh" ]; then
     echo "Default shell has been changed, log out to apply changes"
 fi
 
+
+services=(pipewire pipewire-pulse wireplumber)
+for service in "${services[@]}"; do
+    if ! systemctl --user is-enabled "$service" &> /dev/null; then
+        echo "Enabling and starting $service..."
+        systemctl --user enable --now "$service"
+    fi
+done

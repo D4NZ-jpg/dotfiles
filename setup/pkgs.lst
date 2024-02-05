@@ -13,7 +13,14 @@ htop
 dunst
 xorg-xwayland
 xdg-utils
+xorg-xrdb
 libnotify
+
+pipewire
+pipewire-audio
+pipewire-pulse
+pipewire-alsa
+wireplumber
 
 blueman
 bluez
