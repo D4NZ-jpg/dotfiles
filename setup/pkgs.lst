@@ -13,6 +13,9 @@ htop
 dunst
 xorg-xwayland
 xdg-utils
+xdg-desktop-portal
+xdg-desktop-portal-gtk
+xdg-desktop-portal-wlr
 xorg-xrdb
 libnotify
 os-prober
