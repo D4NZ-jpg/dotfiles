@@ -5,6 +5,7 @@ wal --cols16 -q -i ~/wallpapers -n
 
 # Load pywal scheme
 source "$HOME/.cache/wal/colors.sh"
+cp "$HOME/.cache/wal/colors.Xresources" "$HOME/.Xresources"
 
 # set wallpaper
 swww img $wallpaper --transition-step 20 --transition-fps 20
@@ -18,6 +19,7 @@ kill -USR1 $(pgrep kitty)
 # Copy discord css to correct folder 
 mkdir -p ~/.config/VencordDesktop/VencordDesktop/theme
 cp ~/.cache/wal/discord-wal-theme.css ~/.config/VencordDesktop/VencordDesktop/themes/pywal.theme.css
+
 
 # Reload waybar
 killall waybar
