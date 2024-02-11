@@ -1,5 +1,6 @@
 #!/bin/sh
-#
+set -e
+
 # Select random wallpaper
 wal --cols16 -q -i ~/wallpapers -n
 
@@ -17,8 +18,8 @@ cp $wallpaper ~/.cache/currentWallpaper.jpg
 kill -USR1 $(pgrep kitty)
 
 # Copy discord css to correct folder 
-mkdir -p ~/.config/VencordDesktop/VencordDesktop/theme
-cp ~/.cache/wal/discord-wal-theme.css ~/.config/VencordDesktop/VencordDesktop/themes/pywal.theme.css
+mkdir -p ~/.config/vesktop/themes
+cp ~/.cache/wal/discord-wal-theme.css ~/.config/vesktop/themes/pywal.theme.css
 
 
 # Reload waybar
