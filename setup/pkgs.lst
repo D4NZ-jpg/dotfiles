@@ -20,6 +20,10 @@ xorg-xrdb
 libnotify
 os-prober
 
+udisks2
+udiskie
+ntfs-3g
+
 pipewire
 pipewire-audio
 pipewire-pulse
