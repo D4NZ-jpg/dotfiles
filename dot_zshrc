@@ -25,6 +25,9 @@ plug "$HOME/zsh_plugins/git-commit"
 plug "$HOME/zsh_plugins/gitignore"
 plug "$HOME/zsh_plugins/jsontools"
 
+# Task warrior stuff (still needs to be installed separately)
+plug "$HOME/.config/task"
+
 export EDITOR='nvim'
 export WLR_NO_HARDWARE_CURSORS=1
 
