@@ -23,3 +23,5 @@ news.version=2.6.0
 alias.rm=delete
 uda.blocks.type=string
 uda.blocks.label=Blocks
+
+urgency.blocking.coefficient=3.0 # blocking other tasks
