@@ -3,12 +3,6 @@ set -e
 
 source $HOME/setup/utils.sh
 
-# Install virtual-desktops
-if ! hyprpm list | grep -q "virtual-desktop"; then
-    hyprpm add "https://github.com/levnikmyskin/hyprland-virtual-desktops"
-    hyprpm enable virtual-desktops
-fi
-
 # Setup zathura as default pdf app
 if isInstalled zathura; then
     xdg-mime default org.pwmt.zathura.desktop application/pdf
