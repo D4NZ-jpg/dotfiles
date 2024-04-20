@@ -17,6 +17,44 @@ if isInstalled zsh && [ "$SHELL" != "/usr/bin/zsh" ]; then
     echo "Default shell has been changed, log out to apply changes"
 fi
 
+# Configure firefox
+if isInstalled firefox; then
+    name=$(whoami)
+    folder=$(sed -n "/Path=.*.$name$/ s/.*=//p" ~/.mozilla/firefox/profiles.ini)
+    path="$HOME/.mozilla/firefox/$folder"
+
+    if [[ -z "$folder" ]]; then
+        read -p "Would you like to configure Firefox? [y/N]: " answer < /dev/tty
+        if [[ $answer = [Yy] ]]; then
+            firefox -CreateProfile $(whoami)
+
+            folder=$(sed -n "/Path=.*.$name$/ s/.*=//p" ~/.mozilla/firefox/profiles.ini)
+            path="$HOME/.mozilla/firefox/$folder"
+
+            # Install add-ons
+            echo "Downloading firefox addons..."
+
+            mkdir -p "$path/extensions/"
+            addontmp="$(mktemp -d)"
+            mozillaurl="https://addons.mozilla.org"
+
+            while read addon; do
+                echo "Installing $addon"
+
+                addonurl="$(curl --silent "$mozillaurl/en-US/firefox/addon/${addon}/" | grep -o "$mozillaurl/firefox/downloads/file/[^\"]*")"
+                file="${addonurl##*/}"
+                curl -LOs "$addonurl" >"$addontmp/$file"
+                id="$(unzip -p "$file" manifest.json | grep "\"id\"")"
+                id="${id%\"*}"
+                id="${id##*\"}"
+                mv "$file" "$path/extensions/$id.xpi"
+            done < $HOME/setup/firefox/addons.lst
+
+            echo "Addons installed, enable them in firefox's settings"
+        fi
+    fi
+fi
+
 services=(pipewire pipewire-pulse wireplumber)
 for service in "${services[@]}"; do
     if ! systemctl --user is-enabled "$service" &> /dev/null; then
