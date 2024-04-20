@@ -31,7 +31,21 @@ if isInstalled firefox; then
             folder=$(sed -n "/Path=.*.$name$/ s/.*=//p" ~/.mozilla/firefox/profiles.ini)
             path="$HOME/.mozilla/firefox/$folder"
 
-            # Install add-ons
+            # User.js
+            echo "Installing config"
+            arkenfoxurl="$( curl -s https://api.github.com/repos/arkenfox/user.js/releases/latest \ | grep "tag_name" \
+                    | awk '{print "https://github.com/arkenfox/user.js/archive/" substr($2, 2, length($2)-3) ".tar.gz"}')"
+
+            arkenfoxzip=$(mktemp)
+            curl -L -o "$arkenfoxzip" "$arkenfoxurl" # Download zip
+
+            # Extract only the files we're interested on
+            tar -xf "$arkenfoxzip" -C "$path" --strip-components 1 $(tar -tf "$arkenfoxzip" | grep -E "prefsCleaner.*|updater.*|user.js$")
+
+            cp "$HOME/setup/firefox/user-overrides.js" "$path"
+            /bin/bash "$path/updater.sh" -s -u
+
+            # Addons
             echo "Downloading firefox addons..."
 
             mkdir -p "$path/extensions/"
