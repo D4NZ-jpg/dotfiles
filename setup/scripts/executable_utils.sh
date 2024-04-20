@@ -39,7 +39,7 @@ installPkgs(){
     # Install git if missing
     if ! isInstalled git; then
         echo "Installing git..."
-        sudo pacman -S git
+        sudo pacman -S --noconfirm git
     fi
 
     # Install yay for AUR Helper if missing
@@ -58,5 +58,5 @@ installPkgs(){
             pkg2Install+=("$pkg")
         fi
     done < "$file"
-    yay -S -q "${pkg2Install[@]}"
+    yay -S -q --noconfirm --cleanafter --sudoloop "${pkg2Install[@]}"
 }
