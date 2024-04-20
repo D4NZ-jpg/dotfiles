@@ -1,3 +1,3 @@
 #!/bin/sh
 set -e
-source $HOME/setup/install.sh
+source $HOME/setup/scripts/install.sh

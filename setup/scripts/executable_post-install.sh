@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-source $HOME/setup/utils.sh
+source $HOME/setup/scripts/utils.sh
 
 # Setup zathura as default pdf app
 if isInstalled zathura; then
@@ -44,7 +44,7 @@ if isInstalled grub && [ -f /boot/grub/grub.cfg ]; then
         fi
 
         # Theme
-        read -p "Apply GRUB theme? (y/n): " theme 
+        read -p "Apply GRUB theme? [y/N]: " theme 
         if [[ $theme = [Yy] ]]; then
             sudo sed -i "/^GRUB_DEFAULT=/c\GRUB_DEFAULT=saved
             /^GRUB_GFXMODE=/c\GRUB_GFXMODE=1280x1024x32,auto

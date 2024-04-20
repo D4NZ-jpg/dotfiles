@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-source $HOME/setup/utils.sh
+source $HOME/setup/scripts/utils.sh
 
 # Config spicetify-cli (spotify)
 if isInstalled spotify && isInstalled spicetify-cli; then

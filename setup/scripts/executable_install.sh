@@ -4,10 +4,10 @@
 echo "dotfiles by Danz. (I use Arch btw)"
 set -e 
 
-source $HOME/setup/utils.sh
+source $HOME/setup/scripts/utils.sh
 
 # Install
-cp $HOME/setup/pkgs.lst install.lst
+cp $HOME/setup/pkgs/pkgs.lst install.lst
 
 # Nvidia drivers (https://github.com/prasanthrangan/hyprdots/blob/main/Scripts/install.sh)
 if hasNvidia; then
@@ -27,26 +27,26 @@ fi
 while read LINE; do
     name="${LINE%%|*}"; pkgs="${LINE#*|}"
 
-    read -p "Would you like to install $name? (y/n): " answer < /dev/tty
+    read -p "Would you like to install $name? [y/N]: " answer < /dev/tty
     if [[ $answer = [Yy] ]]; then
         for pkg in $pkgs; do
             echo "$pkg" >> install.lst 
         done
     fi
-done < $HOME/setup/extras.lst
+done < $HOME/setup/pkgs/extras.lst
 
 # Install pkgs
 installPkgs install.lst
 
 # Configuring packages
-source $HOME/setup/post-install.sh
+source $HOME/setup/scripts/post-install.sh
 
 # Systemd
 while read service ; do
     enableCtl $service
-done < $HOME/setup/system_ctl.lst
+done < $HOME/setup/pkgs/system_ctl.lst
 
 echo ""
 echo "===================="
 echo " [*] Everything configured without problems."
-echo " [~] To configure spotify, log in then run ~/setup/spotify.sh"
+echo " [~] To configure spotify, log in then run ~/setup/scripts/spotify.sh"
