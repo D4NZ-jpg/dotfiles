@@ -65,6 +65,22 @@ if isInstalled firefox; then
             done < $HOME/setup/firefox/addons.lst
 
             echo "Addons installed, enable them in firefox's settings"
+
+            # Theme (useChrome.css)
+            answer=""
+            read -p "Would you like to install userChrome.css? [y/N]: " answer < /dev/tty
+            if [[ $answer = [Yy] ]]; then
+                cp -r "$HOME/setup/firefox/chrome" "$path"
+
+                # Create symlink to pywal file
+                if [ ! -e "$HOME/.cache/wal/colors.css" ]; then
+                    mkdir -p "$HOME/.cache/wal"
+                    touch "$HOME/.cache/wal/colors.css"
+                fi
+
+                mkdir -p "$path/chrome/includes"
+                ln -s "$HOME/.cache/wal/colors.css" "$path/chrome/includes/colors.css"
+            fi
         fi
     fi
 fi
