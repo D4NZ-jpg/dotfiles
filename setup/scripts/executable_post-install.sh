@@ -81,6 +81,9 @@ if isInstalled firefox; then
                 mkdir -p "$path/chrome/includes"
                 ln -s "$HOME/.cache/wal/colors.css" "$path/chrome/includes/colors.css"
             fi
+
+            # Set default profile
+            sed -i -E "s/Default=.{3,}/Default=$folder/g" "$HOME/.mozilla/firefox/profiles.ini"
         fi
     fi
 fi
