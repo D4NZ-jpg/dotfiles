@@ -31,5 +31,5 @@ plug "$HOME/.config/task"
 export EDITOR='nvim'
 export WLR_NO_HARDWARE_CURSORS=1
 
-# Run neofetch on every new shell (gotta flex)
-neofetch
+# Run fastfetch on every new shell (gotta flex)
+fastfetch
