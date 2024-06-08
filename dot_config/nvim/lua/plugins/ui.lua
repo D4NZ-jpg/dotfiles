@@ -1,16 +1,9 @@
 return {
-    -- colorscheme
     {
-        "nyoom-engineering/oxocarbon.nvim",
+        'sainnhe/everforest',
         config = function()
-            vim.cmd([[colorscheme oxocarbon]])
-
-            --tabs
-            local colors = require("oxocarbon").oxocarbon
-
-            vim.api.nvim_set_hl(0, "TabLineHead", { fg = colors.base00, bg = colors.base09 })
-            vim.api.nvim_set_hl(0, "TabLineIna", { fg = colors.base00, bg = colors.base03 })
-            vim.api.nvim_set_hl(0, "TabLineFill", { fg = colors.base03, bg = colors.base00 })
+            vim.g.everforest_enable_italic = true
+            vim.cmd.colorscheme('everforest')
         end
     },
 

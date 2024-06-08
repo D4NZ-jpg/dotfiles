@@ -2,7 +2,7 @@
 set -e
 
 # Select random wallpaper
-wal --cols16 -q -i ~/wallpapers -n
+wal --cols16 -q -i ~/wallpapers -n -s
 
 # Load pywal scheme
 source "$HOME/.cache/wal/colors.sh"
