@@ -111,7 +111,6 @@ return {
             null.setup({
                 sources = {
                     null.builtins.formatting.stylua,
-                    null.builtins.completion.spell
                 }
             })
         end
