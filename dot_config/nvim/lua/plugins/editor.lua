@@ -7,7 +7,7 @@ return {
         cmd = "Telescope",
         opts = {
             defaults = {
-                file_ignore_patterns = { ".git\\", "node_modules\\", "vendor\\" },
+                file_ignore_patterns = { ".git/.*", "node_modules/.*" },
             },
             extensions = {
                 file_browser = {
