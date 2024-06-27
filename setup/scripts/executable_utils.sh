@@ -20,7 +20,7 @@ hasNvidia(){
 }
 
 # (https://github.com/prasanthrangan/hyprdots/blob/main/Scripts)
-enableCtl(){
+startCtl(){
     local ServChk=$1
 
     if [[ $(systemctl list-units --all -t service --full --no-legend "${ServChk}.service" | sed 's/^\s*//g' | cut -f1 -d' ') == "${ServChk}.service" ]]
@@ -33,6 +33,17 @@ enableCtl(){
         echo "$ServChk service enabled, and running..."
     fi
 }
+
+enableCtl(){
+    local service=$1
+    local status=$(systemctl list-unit-files | grep "$service" | awk '{print $2}')
+
+    if [ "$status" == "enabled" ]; then
+        echo "$service is already enable, enjoy..."
+    else
+        systemctl enable "$service"
+    fi
+    }
 
 installPkgs(){
     file=$1

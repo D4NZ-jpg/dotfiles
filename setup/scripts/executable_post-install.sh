@@ -132,3 +132,11 @@ if isInstalled grub && [ -f /boot/grub/grub.cfg ]; then
         echo -e "\033[0;32m[BOOTLOADER]\033[0m grub is already configured..."
     fi
 fi
+
+# Enable hibernate to disk if swap partition is present
+if [ -n "$(swapon --show=UUID,NAME --noheadings | awk '{ print $1 }')" ]; then
+    if ! grep -q 'resume' /etc/mkinitcpio.conf; then
+        sudo sed -i '/^HOOKS=/s/filesystems /filesystems resume /' /etc/mkinitcpio.conf
+        sudo mkinitcpio -P
+    fi
+fi

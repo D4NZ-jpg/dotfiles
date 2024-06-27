@@ -19,11 +19,22 @@ if hasNvidia; then
         awk -F '|' -v nvc="${nvcode}" '{if ($3 == nvc) {split(FILENAME,driver,"/"); print driver[length(driver)],"\nnvidia-utils"}}' $HOME/setup/.nvidia/nvidia*dkms >>install.lst
     done
     echo -e "\033[0;32m[GPU]\033[0m: detected // ${nvga[@]}"
+
+    # Preserve video memory on suspend
+    enableCtl nvidia-suspend
+    enableCtl nvidia-hibernate
+    enableCtl nvidia-resume
+
+    if ! grep -Fxq "options nvidia NVreg_PreserveVideoMemoryAllocations=1" /etc/modprobe.d/nvidia.conf; then
+        echo "options nvidia NVreg_PreserveVideoMemoryAllocations=1" | sudo tee -a /etc/modprobe.d/nvidia.conf > /dev/null
+        sudo update-initramfs -u
+    fi
 else
     echo "No Nvidia Card detected, skipping Nvidia drivers..."
 fi
 
 # Ask for extras
+echo ""
 while read LINE; do
     name="${LINE%%|*}"; pkgs="${LINE#*|}"
 
@@ -43,7 +54,7 @@ source $HOME/setup/scripts/post-install.sh
 
 # Systemd
 while read service ; do
-    enableCtl $service
+    startCtl $service
 done < $HOME/setup/pkgs/system_ctl.lst
 
 echo ""
