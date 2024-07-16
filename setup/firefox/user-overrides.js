@@ -13,3 +13,6 @@ user_pref("media.eme.enabled", true)
 user_pref("signon.rememberSignons", false);       // Disable ask to save password
 user_pref("browser.tabs.loadInBackground", true); // Switch to new tabs
 user_pref("general.autoScroll", true);            // Allow auto-scroll with middle button
+
+// Disable Website Advertising Preferences
+user_pref("dom.private-attribution.submission.enabled", false);
