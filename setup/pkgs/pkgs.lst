@@ -1,5 +1,9 @@
 zsh
 starship
+meson
+cpio
+cmake
+hyprwayland-scanner
 hyprland
 hypridle-git
 pyprland
@@ -20,6 +24,7 @@ xdg-desktop-portal-wlr
 xorg-xrdb
 libnotify
 os-prober
+googledot-cursor-theme
 
 udisks2
 udiskie
