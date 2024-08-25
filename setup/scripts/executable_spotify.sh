@@ -13,7 +13,7 @@ if isInstalled spotify && isInstalled spicetify-cli; then
     rm -rf Spicetify Comfy 2>> /dev/null
     git clone https://github.com/Comfy-Themes/Spicetify --depth 1 --recursive
     mv Spicetify/Comfy .
-    spicetify config current_theme
+    spicetify config current_theme Comfy
     spicetify config color_scheme Everforest
     spicetify config inject_css 1 replace_colors 1 overwrite_assets 1 inject_theme_js 1
 
