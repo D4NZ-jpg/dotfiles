@@ -4,7 +4,7 @@ data.location=~/.local/share/task
 hooks.location=~/.config/task/hooks
 
 # Color theme (uncomment one to use)
-include light-16.theme
+#include light-16.theme
 #include light-256.theme
 #include dark-16.theme
 #include dark-256.theme
@@ -13,7 +13,7 @@ include light-16.theme
 #include dark-blue-256.theme
 #include dark-violets-256.theme
 #include dark-yellow-green.theme
-#include dark-gray-256.theme
+include dark-gray-256.theme
 #include dark-gray-blue-256.theme
 #include solarized-dark-256.theme
 #include solarized-light-256.theme
@@ -25,3 +25,5 @@ uda.blocks.type=string
 uda.blocks.label=Blocks
 
 urgency.blocking.coefficient=3.0 # blocking other tasks
+urgency.scheduled.coefficient=0.5
+urgency.due.coefficient=15
