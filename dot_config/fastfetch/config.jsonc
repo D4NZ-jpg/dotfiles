@@ -53,7 +53,11 @@
             "keyColor": "blue"
         },
         "break",
-        "break",
-        "colors"
+        {
+            "type": "colors",
+            "paddingLeft": 4,
+            "symbol": "diamond"
+        },
+        "break"
     ]
 }
