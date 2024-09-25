@@ -23,8 +23,7 @@ cp ~/.cache/wal/discord-wal-theme.css ~/.config/vesktop/themes/pywal.theme.css
 
 
 # Reload waybar
-killall waybar
-waybar
+killall -SIGUSR2 waybar
 
 # Send update to firefox
 pywalfox update
