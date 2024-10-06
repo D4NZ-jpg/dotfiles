@@ -307,5 +307,13 @@ return {
         "stevearc/dressing.nvim",
         config = true,
         event = "VeryLazy",
+    },
+
+    -- Highlight todo comments
+    {
+        "folke/todo-comments.nvim",
+        dependencies = { "nvim-lua/plenary.nvim" },
+        config = true,
+        event = "VeryLazy",
     }
 }
