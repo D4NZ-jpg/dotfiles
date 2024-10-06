@@ -19,7 +19,13 @@ vim.keymap.set("n", "<C-j>", "<cmd>cprev<cr>zz")
 vim.keymap.set("i", "<C-k>", "<cmd>lua require('luasnip').jump(1)<cr>")
 vim.keymap.set("i", "<C-j>", "<cmd>lua require('luasnip').jump(-1)<cr>")
 
+-- Terminal
 vim.keymap.set("t", "<C-q>", "<C-\\><C-n>")
+vim.keymap.set("t", "<A-h>", "<C-\\><C-n><C-w>h")
+vim.keymap.set("t", "<A-j>", "<C-\\><C-n><C-w>j")
+vim.keymap.set("t", "<A-k>", "<C-\\><C-n><C-w>k")
+vim.keymap.set("t", "<A-l>", "<C-\\><C-n><C-w>l")
+
 
 -- Add git diff as command
 vim.cmd([[command! Diff :DiffviewOpen]])
@@ -72,7 +78,7 @@ return {
     ["<C-t>"] = {
         name = "+Tabs",
         a = { "<cmd>$tabnew<cr><cmd>Alpha<cr>", "New Tab" },
-        c = { "<cmd>tabclose<cr>", "Close Tab" },
+        q = { "<cmd>tabclose<cr>", "Close Tab" },
         o = { "<cmd>tabonly<cr>", "Close Others" },
         h = { "<cmd>tabp<cr>", "Previous Tab" },
         l = { "<cmd>tabn<cr>", "Next Tab" },
