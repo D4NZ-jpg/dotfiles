@@ -154,7 +154,7 @@ return {
     {
         "brenoprata10/nvim-highlight-colors",
         config = true,
-        ft = { "html", "css", "scss", "sass" }
+        ft = { "html", "css", "scss", "sass", "svelte" }
     },
 
     -- color current window border
