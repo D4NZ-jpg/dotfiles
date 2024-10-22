@@ -34,6 +34,19 @@ return {
             { "saadparwaiz1/cmp_luasnip" },
             { "hrsh7th/cmp-nvim-lua" },
 
+            -- copilot
+            {
+                "zbirenbaum/copilot-cmp",
+                config = true,
+                dependencies = {
+                    "zbirenbaum/copilot.lua",
+                    opts = {
+                        suggestion = { enabled = false },
+                        panel = { enabled = false },
+                    }
+                }
+            },
+
             -- Snippets
             {
                 "L3MON4D3/LuaSnip",
@@ -70,8 +83,8 @@ return {
             local cwd = vim.fn.getcwd()
             if string.find(cwd, "/cp/?") then
                 require("luasnip.loaders.from_snipmate").lazy_load({
-                        paths={"~/dev/cp/snippets"}
-                    })
+                    paths = { "~/dev/cp/snippets" }
+                })
             else
                 require("luasnip.loaders.from_snipmate").lazy_load()
             end
@@ -82,6 +95,7 @@ return {
                 sources = {
                     { name = "nvim_lsp" },
                     { name = "luasnip" },
+                    { name = "copilot" }
                 },
                 mapping = {
                     ['<tab>'] = cmp.mapping.confirm({ select = true }),
@@ -305,5 +319,5 @@ return {
                 desc = "Step (return) out of function"
             }
         },
-    }
+    },
 }
