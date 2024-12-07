@@ -1,4 +1,4 @@
-@import "../../.cache/wal/colors-waybar.css";
+@import "./colors.css";
 
 * {
     font-family: "Fira Sans Semibold", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
@@ -13,22 +13,21 @@
 
 window#waybar {
     background: rgba(255, 18, 27, 0);
-    color: #cdd6f4;
+    color: #ff0000;
 }
 #workspaces button {
     padding: 5px;
-    color: @color2;
+    color: @on_primary_fixed;
     margin-right: 5px;
 }
 
 #workspaces button.active {
-    color: @foreground;
+    color: @on_primary_container;
 }
 
 #workspaces button.focused {
-    color: #a6adc8;
-    background: #eba0ac;
-    border-radius: 20px;
+    color: @on_primary_fixed;
+    background: @primary_fixed;
 }
 
 #workspaces button.urgent {
@@ -38,8 +37,8 @@ window#waybar {
 }
 
 #workspaces button:hover {
-    background: #11111b;
-    color: #cdd6f4;
+    background: @secondary_container;
+    color: @on_secondary_container;
     border-radius: 20px;
 }
 
@@ -60,12 +59,11 @@ window#waybar {
 #cpu,
 #memory,
 #backlight {
-    background: @background;
+    background: @primary_container;
     opacity: 0.8;
     padding: 0px 10px;
     margin: 0;
     margin-top: 5px;
-    border: 1px solid #181825;
 }
 
 #temperature {
@@ -73,7 +71,7 @@ window#waybar {
 }
 
 #temperature.critical {
-    color: #eba0ac;
+    color: @error;
 }
 
 #backlight {
@@ -88,7 +86,7 @@ window#waybar {
 }
 
 #workspaces {
-    background: @background;
+    background: @primary_container;
     border-radius: 20px;
     margin-left: 5px;
     padding-right: 0px;
@@ -103,7 +101,7 @@ window#waybar {
 }
 
 #clock {
-    color: @foreground;
+    color: @on_primary_container;
     border-radius: 0 20px 20px 0;
     border-right: 0px;
     transition: 0.3s;
@@ -112,17 +110,17 @@ window#waybar {
 }
 
 #network {
-    color: @foreground;
+    color: @on_primary_container;
     border-left: 0px;
     border-right: 0px;
 }
 
 #bluetooth {
-    color: @foreground; 
+    color: @on_primary_container; 
 } 
 
 #pulseaudio {
-    color: @foreground;
+    color: @on_primary_container;
     border-left: 0px;
     border-right: 0px;
     border-radius: 20px 0 0 20px;
@@ -131,7 +129,7 @@ window#waybar {
 
 
 #battery {
-    color: @foreground;
+    color: @on_primary_container;
     border-radius: 0 20px 20px 0;
     margin-right: 5px;
     border-left: 0px;

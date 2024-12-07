@@ -1,0 +1,13 @@
+[config.wallpaper]
+command = "swww"
+arguments = ["img", "--transition-type", "any"]
+set = true
+
+[templates.rofi]
+input_path = './templates/rofi-colors.rasi'
+output_path = '~/.config/rofi/colors.rasi'
+
+[templates.waybar]
+input_path = './templates/colors.css'
+output_path = '~/.config/waybar/colors.css'
+post_hook = 'pkill -SIGUSR2 waybar'

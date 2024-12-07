@@ -1,3 +1,7 @@
+@theme "/dev/null"
+@import "./colors.rasi"
+@import "./style.rasi"
+
 configuration{
     modi: "drun,window,emoji";
     icon-theme: "Oranchelo";
@@ -15,5 +19,3 @@ configuration{
 
 }
 
-@theme "/dev/null"
-@import "~/.cache/wal/colors-rofi-dark.rasi"
