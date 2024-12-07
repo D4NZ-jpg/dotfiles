@@ -71,12 +71,14 @@ return {
 
     -- fast moving around file
     {
-        "ggandor/leap.nvim",
-        dependencies = { "tpope/vim-repeat" },
-        config = function()
-            require("leap").add_default_mappings()
-        end,
-        keys = { "s", "S" },
+        "folke/flash.nvim",
+        event = "VeryLazy",
+        config = true,
+        keys = {
+            { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end,       desc = "Flash" },
+            { "S", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+            { "r", mode = "o",               function() require("flash").remote() end,     desc = "Remote Flash" },
+        },
     },
 
     -- fast comments
