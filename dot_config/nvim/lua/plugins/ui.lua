@@ -56,13 +56,12 @@ return {
                 return buf
             end
             local theme = {
-                fill = 'TabLineFill',
-                head = 'TabLineHead',
-                current_tab = 'TabLineHead',
-                inactive_tab = 'TabLineIna',
-                tab = 'TabLine',
-                win = 'TabLineHead',
-                tail = 'TabLineHead',
+                fill = 'Normal',
+                head = 'MiniTablineCurrent',
+                current_tab = 'MiniTablineCurrent',
+                inactive_tab = 'MiniTablineVisible',
+                win = 'MiniTablineCurrent',
+                tail = 'MiniTablineCurrent',
             }
 
             require('tabby.tabline').set(function(line)
