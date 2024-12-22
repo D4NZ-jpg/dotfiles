@@ -1,20 +1,14 @@
 return {
     {
         'sainnhe/everforest',
+        event = "VimEnter",
         config = function()
-            vim.g.everforest_enable_italic = true
+            vim.g.everforest_better_performance=1
+            vim.g.everforest_transparent_background=2
             vim.cmd.colorscheme('everforest')
         end
     },
-
-    -- transparent background
-    {
-        "xiyaowong/transparent.nvim",
-        config = function()
-            vim.g.transparent_enabled = true
-        end,
-    },
-
+ 
     -- tabs
     {
         "nanozuki/tabby.nvim",
