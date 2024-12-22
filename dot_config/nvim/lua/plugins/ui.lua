@@ -195,6 +195,16 @@ return {
         end,
     },
 
+    -- Better notifications
+    {
+        "folke/snacks.nvim",
+        opts = {
+            notifier = {
+                enabled = true
+            }
+        }
+    },
+
     -- better ui
     {
         "stevearc/dressing.nvim",
