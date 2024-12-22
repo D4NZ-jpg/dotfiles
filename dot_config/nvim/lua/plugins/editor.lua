@@ -4,7 +4,11 @@ return {
         "folke/snacks.nvim",
         priority = 1000,
         lazy = false,
-        config = true,
+        opts = {
+            quickfile = {
+                enabled = true
+            }
+        }
     },
 
     -- telescope & file browser
