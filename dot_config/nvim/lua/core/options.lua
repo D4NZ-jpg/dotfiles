@@ -1,5 +1,6 @@
 vim.opt.number = true         -- Show line numbers
 vim.opt.relativenumber = true -- Show numbers relative to current line
+vim.opt.cmdheight = 0         -- Height of command bar
 
 vim.opt.cc = "80"             -- Show column at 80 chars
 
