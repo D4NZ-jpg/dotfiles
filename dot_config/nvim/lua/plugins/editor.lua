@@ -17,6 +17,13 @@ return {
         dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-web-devicons",
             "nvim-telescope/telescope-file-browser.nvim" },
         cmd = "Telescope",
+        keys = {
+            { "<leader>ff", "<cmd>Telescope find_files hidden=true<cr>",            desc = "Find File" },
+            { "<leader>fh", "<cmd>Telescope help_tags<cr>",                         desc = "Help" },
+            { "<leader>fl", "<cmd>Telescope live_grep<cr>",                         desc = "Live Grep" },
+            { "<leader>fr", "<cmd>Telescope oldfiles<cr>",                          desc = "Open Recent File" },
+            { "<leader>ft", "<cmd>Telescope file_browser hidden=true<cr>",          desc = "Browse Files" },
+        },
         opts = {
             defaults = {
                 file_ignore_patterns = { ".git/.*", "node_modules/.*" },
