@@ -181,6 +181,14 @@ return {
     {
         "folke/which-key.nvim",
         event = "VeryLazy",
+        opts = {
+            preset = "modern",
+        },
+        config = function(_, opts)
+            require("which-key").setup(opts)
+            require("which-key").add(require("core.keymaps"));
+        end,
+
         keys =
         {
             {
@@ -191,8 +199,5 @@ return {
                 desc = "Buffer Local Keymaps (which-key)",
             },
         },
-        config = function()
-            require("which-key").add(require("core.keymaps"));
-        end,
     },
 }
