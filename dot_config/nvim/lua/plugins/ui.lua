@@ -105,19 +105,15 @@ return {
 
     -- indent guides
     {
-        "lukas-reineke/indent-blankline.nvim",
-        main = "ibl",
-        event = { "BufReadPost", "BufNewFile" },
-        config = true,
-    },
-
-    -- show current indent
-    {
-        "echasnovski/mini.indentscope",
-        event = { "BufReadPost", "BufNewFile" },
-        config = function()
-            require("mini.indentscope").setup()
-        end,
+        "folke/snacks.nvim",
+        opts = {
+            indent = {
+                enabled = true,
+                scope = {
+                    only_current = true,
+                }
+            }
+        }
     },
 
     -- statusline
