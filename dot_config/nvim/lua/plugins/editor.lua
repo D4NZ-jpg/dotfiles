@@ -33,19 +33,6 @@ return {
         end,
     },
 
-    -- which-key
-    {
-        "folke/which-key.nvim",
-        event = "VeryLazy",
-        config = function()
-            vim.o.timeout = true
-            vim.o.timeoutlen = 300
-            local wk = require("which-key")
-            wk.setup()
-            wk.register(require("core.keymaps"))
-        end,
-    },
-
     -- undotree
     {
         "mbbill/undotree",
@@ -181,5 +168,24 @@ return {
         keys = {
             { "<leader>a", "<cmd>AerialToggle!<CR>", desc = "Toggle Aerial (Outline)" }
         }
+    },
+
+    -- which-key
+    {
+        "folke/which-key.nvim",
+        event = "VeryLazy",
+        keys =
+        {
+            {
+                "<leader>?",
+                function()
+                    require("which-key").show({ global = false })
+                end,
+                desc = "Buffer Local Keymaps (which-key)",
+            },
+        },
+        config = function()
+            require("which-key").add(require("core.keymaps"));
+        end,
     },
 }

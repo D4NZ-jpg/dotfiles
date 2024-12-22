@@ -27,38 +27,32 @@ vim.keymap.set("t", "<A-k>", "<C-\\><C-n><C-w>k")
 vim.keymap.set("t", "<A-l>", "<C-\\><C-n><C-w>l")
 
 return {
-    ["<leader>f"] = {
-        name = "+File/Find",
-        f = { "<cmd>Telescope find_files hidden=true<cr>", "Find File" },
-        r = { "<cmd>Telescope oldfiles<cr>", "Open Recent File" },
-        n = { "<cmd>enew<cr>", "New File" },
-        t = { "<cmd>Telescope file_browser hidden=true<cr>", "Browse Files" },
-        h = { "<cmd>Telescope help_tags<cr>", "Help" },
-        l = { "<cmd>Telescope live_grep<cr>", "Live Grep" },
-    },
-    ["<C-t>"] = {
-        name = "+Tabs",
-        a = { "<cmd>$tabnew<cr>", "New Tab" },
-        q = { "<cmd>tabclose<cr>", "Close Tab" },
-        o = { "<cmd>tabonly<cr>", "Close Others" },
-        h = { "<cmd>tabp<cr>", "Previous Tab" },
-        l = { "<cmd>tabn<cr>", "Next Tab" },
-        g = { "<cmd>execute 'tabn ' .. input('Tab number: ')<cr>", "Jump to tab number" },
+    { "<C-t>",      group = "Tabs" },
+    { "<C-t>a",     "<cmd>tabnew<cr>",                                      desc = "New Tab" },
+    { "<C-t>g",     "<cmd>execute 'tabn ' .. input('Tab number: ')<cr>",    desc = "Jump to tab number" },
+    { "<C-t>h",     "<cmd>tabp<cr>",                                        desc = "Previous Tab" },
+    { "<C-t>l",     "<cmd>tabn<cr>",                                        desc = "Next Tab" },
 
-        m = {
-            name = "+Move",
-            h = { "<cmd>-tabmove<cr>", "Move current tab to previous position" },
-            l = { "<cmd>+tabmove<cr>", "Move current tab to next position" },
-        },
-    },
-    ["<leader>k"] = { "<cmd>lnext<cr>zz", "Lnext" },
-    ["<leader>j"] = { "<cmd>lprev<cr>zz", "Lprev" },
-    ["<leader>r"] = { ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>", "Replace current word" },
-    ["<leader>c"] = "+CMake",
-    ["<leader>g"] = {
-        name = "+Git",
-        g = { "<cmd>lua Snacks.lazygit()<cr>", "LazyGit" },
-        b = { "<cmd>lua Snacks.gitbrowse()<cr>", "Open in browser" },
-    },
+    { "<C-t>m",     group = "Move" },
+    { "<C-t>mh",    "<cmd>-tabmove<cr>",                                    desc = "Move current tab to previous position" },
+    { "<C-t>ml",    "<cmd>+tabmove<cr>",                                    desc = "Move current tab to next position" },
+    { "<C-t>o",     "<cmd>tabonly<cr>",                                     desc = "Close Others" },
+    { "<C-t>q",     "<cmd>tabclose<cr>",                                    desc = "Close Tab" },
+    { "<leader>c",  desc = "+CMake" },
 
+    { "<leader>f",  group = "File/Find" },
+    { "<leader>ff", "<cmd>Telescope find_files hidden=true<cr>",            desc = "Find File" },
+    { "<leader>fh", "<cmd>Telescope help_tags<cr>",                         desc = "Help" },
+    { "<leader>fl", "<cmd>Telescope live_grep<cr>",                         desc = "Live Grep" },
+    { "<leader>fn", "<cmd>enew<cr>",                                        desc = "New File" },
+    { "<leader>fr", "<cmd>Telescope oldfiles<cr>",                          desc = "Open Recent File" },
+    { "<leader>ft", "<cmd>Telescope file_browser hidden=true<cr>",          desc = "Browse Files" },
+
+    { "<leader>g",  group = "Git" },
+    { "<leader>gb", "<cmd>lua Snacks.gitbrowse()<cr>",                      desc = "Open in browser" },
+    { "<leader>gg", "<cmd>lua Snacks.lazygit()<cr>",                        desc = "LazyGit" },
+    { "<leader>j",  "<cmd>lprev<cr>zz",                                     desc = "Lprev" },
+    { "<leader>k",  "<cmd>lnext<cr>zz",                                     desc = "Lnext" },
+    { "<leader>r",  ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>", desc = "Replace current word" },
 }
+
