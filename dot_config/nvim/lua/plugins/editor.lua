@@ -1,4 +1,12 @@
 return {
+    -- snacks 
+    {
+        "folke/snacks.nvim",
+        priority = 1000,
+        lazy = false,
+        config = true,
+    },
+
     -- telescope & file browser
     {
         "nvim-telescope/telescope.nvim",

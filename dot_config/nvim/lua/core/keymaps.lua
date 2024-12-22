@@ -77,7 +77,7 @@ return {
     },
     ["<C-t>"] = {
         name = "+Tabs",
-        a = { "<cmd>$tabnew<cr><cmd>Alpha<cr>", "New Tab" },
+        a = { "<cmd>$tabnew<cr>", "New Tab" },
         q = { "<cmd>tabclose<cr>", "Close Tab" },
         o = { "<cmd>tabonly<cr>", "Close Others" },
         h = { "<cmd>tabp<cr>", "Previous Tab" },
