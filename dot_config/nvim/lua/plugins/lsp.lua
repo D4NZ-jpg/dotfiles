@@ -1,330 +1,138 @@
 return {
-
+    -- LSP
     {
-        "folke/neodev.nvim",
+        'neovim/nvim-lspconfig',
+        event = "InsertEnter",
+        dependencies = { 
+            'saghen/blink.cmp', 
+            "williamboman/mason.nvim",
+            "williamboman/mason-lspconfig.nvim", 
+            },
+
+
         opts = {
-            libtary = {
-                plugins = { "nvim-dap-ui" },
-                types = true
+            servers = {
             }
         },
-        ft = "lua"
-    },
-    {
-        "VonHeikemen/lsp-zero.nvim",
-        branch = "v3.x",
-        event = "InsertEnter",
-        dependencies = {
-            -- LSP Support
-            { "neovim/nvim-lspconfig" },
-            {
-                "williamboman/mason.nvim",
-                config = true,
-                build = function()
-                    pcall(vim.cmd, "MasonUpdate")
-                end,
-            },
-            { "williamboman/mason-lspconfig.nvim" },
 
-            -- Autocompletion
-            { "hrsh7th/nvim-cmp" },
-            { "hrsh7th/cmp-nvim-lsp" },
-            { "hrsh7th/cmp-buffer" },
-            { "hrsh7th/cmp-path" },
-            { "saadparwaiz1/cmp_luasnip" },
-            { "hrsh7th/cmp-nvim-lua" },
+        config = function(_, opts)
+            require("mason").setup()
+            require("mason-lspconfig").setup()
 
-            -- copilot
-            {
-                "zbirenbaum/copilot-cmp",
-                config = true,
-                dependencies = {
-                    "zbirenbaum/copilot.lua",
-                    opts = {
-                        suggestion = { enabled = false },
-                        panel = { enabled = false },
+            local handlers = {
+                -- Default handler
+                function (server_name)
+                    local config = {
+                        capabilities = require('blink.cmp').get_lsp_capabilities()
                     }
-                }
-            },
+                    require("lspconfig")[server_name].setup(config)
+                end,
+            }
 
-            -- Snippets
-            {
-                "L3MON4D3/LuaSnip",
-                version = "v2.*",
-                build = "make install_jsregexp"
-            },
-            { "rafamadriz/friendly-snippets" },
-
-            -- Extras
-            { "p00f/clangd_extensions.nvim" }
-        },
-        config = function()
-            local lsp = require("lsp-zero").preset({})
-            local cmp = require("cmp")
-
-            require("mason").setup({})
-            require("mason-lspconfig").setup({
-                handlers = { lsp.default_setup }
-            })
-
-            lsp.on_attach(function(_, bufnr)
-                lsp.default_keymaps({ buffer = bufnr })
-
-                require("clangd_extensions.inlay_hints").setup_autocmd()
-                require("clangd_extensions.inlay_hints").set_inlay_hints()
-
-                -- Autoformat on save
-                lsp.buffer_autoformat()
-            end)
-
-            require("lspconfig").lua_ls.setup(lsp.nvim_lua_ls())
-
-            -- If it's in my competitive programming folder load special cp snippets
-            local cwd = vim.fn.getcwd()
-            if string.find(cwd, "/cp/?") then
-                require("luasnip.loaders.from_snipmate").lazy_load({
-                    paths = { "~/dev/cp/snippets" }
-                })
-            else
-                require("luasnip.loaders.from_snipmate").lazy_load()
+            -- Set handler for each config in opts.server
+            for server, config in pairs(opts.servers) do
+                handlers[server] = function ()
+                    config.capabilities = require('blink.cmp').get_lsp_capabilities(config.capabilities)
+                    require("lspconfig")[server].setup(config)
+                end
             end
 
+            require("mason-lspconfig").setup_handlers(handlers)
 
-
-            cmp.setup({
-                sources = {
-                    { name = "nvim_lsp" },
-                    { name = "luasnip" },
-                    { name = "copilot" }
-                },
-                mapping = {
-                    ['<tab>'] = cmp.mapping.confirm({ select = true }),
-                },
-                sorting = {
-                    comparators = {
-                        cmp.config.compare.exact,
-                        cmp.config.compare.offset,
-                        cmp.config.compare.recently_used,
-                        require("clangd_extensions.cmp_scores"),
-                    }
-                }
-            })
-            lsp.setup()
-
-            -- Since this is lazy loading, it doesn't attach automatically if a file is alredy open
+            -- Force LSP to start, when lazy loading
             vim.cmd([[LspStart]])
         end,
     },
 
-    -- null.ls
+    -- Completion
     {
-        "nvimtools/none-ls.nvim",
-        config = function()
-            local null = require("null-ls")
-
-            null.setup({
-                sources = {
-                    null.builtins.formatting.stylua,
-                }
-            })
-        end
-
-    },
-
-    -- Configure cmake for c++
-    {
-        'cdelledonne/vim-cmake',
-        keys = {
-            {
-                "<leader>cg",
-                "<cmd>CMakeGenerate build<cr>",
-                desc =
-                "Generate build system"
-            },
-            {
-                "<leader>cb",
-                "<cmd>CMakeBuild <cr>",
-                desc =
-                "Build project"
-            },
-            {
-                "<leader>cq",
-                "<cmd>CMakeClose<cr>",
-                desc = "Close Cmake window"
-            },
-            {
-                "<leader>cc",
-                "<cmd>CMakeClean<cr>",
-                desc = "Remove build system and build files"
-            }
-
-        },
-        config = function()
-            vim.g.cmake_link_compile_commands = 1
-            vim.g.cmake_generate_options = { "-G MinGW Makefiles" }
-        end
-    },
-
-    -- Debug
-    {
-        "mfussenegger/nvim-dap",
-        config = function()
-            local dap = require('dap')
-
-            dap.defaults.fallback.external_terminal = {
-                command = "kitty",
-                args = { '-e' }
-
-            }
-
-            dap.adapters.codelldb = {
-                type = 'server',
-                port = "${port}",
-                executable = {
-                    command = "codelldb",
-                    args = { "--port", "${port}" }
-                },
-            }
-
-            dap.configurations.cpp = {
-                {
-                    name = "Launch file",
-                    type = "codelldb",
-                    request = "launch",
-                    stdio = function()
-                        local cwd = vim.fn.getcwd()
-                        -- If not CP, normal
-                        if not string.find(cwd, "/cp/?") then
-                            return nil
-                        end
-
-
-                        -- Get this file's testcases
-                        local path = vim.fn.expand("%:p:h") .. "/testcases/*"
-                        local files = vim.fn.glob(path, false, true)
-
-                        -- escape pattern
-                        local escape_list = { "%", ".", "^", "$", "*", "+", "?", "[", "]", "(", ")", "{", "}", "|", "\\" }
-                        local file_pattern = vim.fn.expand("%:t:r")
-                        for _, esc in pairs(escape_list) do
-                            file_pattern = file_pattern:gsub("%" .. esc, "%%" .. esc)
-                        end
-                        file_pattern = file_pattern .. ".in(%d+)"
-
-                        -- Get matching files
-                        local matching_files = {}
-
-                        for _, file in ipairs(files) do
-                            local match = file:match(file_pattern)
-                            if match then
-                                matching_files[tonumber(match)] = file
-                            end
-                        end
-
-                        -- Prepare list for inputlist()
-                        local file_list = {}
-                        for key, _ in pairs(matching_files) do
-                            table.insert(file_list, "Testcase #" .. key)
-                        end
-
-                        table.sort(file_list)
-                        table.insert(file_list, 1, "Select a testcase: ")
-
-                        local choice = vim.fn.inputlist(file_list)
-
-                        -- Return the selected file
-                        return { matching_files[choice], nil, nil }
-                    end,
-                    program = function()
-                        -- Check if 'cp' is a parent folder (check the competitest config)
-                        local cwd = vim.fn.getcwd()
-                        if string.find(cwd, "/cp/?") then
-                            local path = vim.fn.expand("%:p:h") .. "/bin/"
-                            local file = vim.fn.expand("%:t:r")
-                            return path .. file
-                        end
-                        return vim.fn.input('Path to executable: ', cwd .. '/', 'file')
-                    end,
-                    cwd = '${workspaceFolder}',
-                    stopOnEntry = false,
-                },
-            }
-        end,
-
+        'saghen/blink.cmp', 
+        event = "InsertEnter",
+        version = 'v0.x',
         dependencies = {
-            {
-                "rcarriga/nvim-dap-ui",
+            'rafamadriz/friendly-snippets',
+            'saghen/blink.compat',
+            { 
+                'L3MON4D3/LuaSnip', 
+                version = 'v2.*',
+                build = "make install_jsregexp",
                 config = function()
-                    local dap, dapui = require('dap'), require('dapui')
-                    dapui.setup()
-                    dap.listeners.after.event_initialized["dapui_config"] = function()
-                        dapui.open()
+                    -- If in my competitive programming folder load special cp snippets
+                    local cwd = vim.fn.getcwd()
+                    if string.find(cwd, "/dev/cp/?") then
+                        require("luasnip.loaders.from_snipmate").lazy_load({
+                            paths = { "$HOME/dev/cp/snippets" }
+                        })
+                    else
+                        require("luasnip.loaders.from_snipmate").lazy_load()
                     end
-                    dap.listeners.before.event_terminated["dapui_config"] = function()
-                        dapui.close()
-                    end
-                    dap.listeners.before.event_exited["dapui_config"] = function()
-                        dapui.close()
-                    end
-                end
-            },
-            {
-                "theHamsta/nvim-dap-virtual-text",
-                dependencies = { "nvim-treesitter/nvim-treesitter" },
-                opts = {
-                    higlight_new_as_changed = true,
-                    only_first_definition = false,
-                    all_references = true,
-                }
-            },
-            "VonHeikemen/lsp-zero.nvim",
-        },
-
-        keys = {
-            {
-                "<leader>ds",
-                "<cmd>lua require('dap').continue()<cr>",
-                desc =
-                "Start/Continue debug session"
-            },
-            {
-                "<leader>dc",
-                [[
-                <cmd>lua require('dap').terminate()<cr>
-                <cmd>lua require('dap').close()<cr>
-                <cmd>lua require('dapui').close()<cr>
-                ]],
-                desc =
-                "Terminate debug session"
-            },
-            {
-                "<leader>dt",
-                "<cmd>lua require('dap').toggle_breakpoint()<cr>",
-                desc =
-                "Toggle breakpoint"
-            },
-            {
-                "<leader>di",
-                "<cmd>lua require('dap').step_into()<cr>",
-                desc = "Step into"
-            },
-            {
-                "<leader>do",
-                "<cmd>lua require('dap').step_over()<cr>",
-                desc = "Step over"
-            },
-            {
-                "<leader>dr",
-                "<cmd>lua require('dap').step_out()<cr>",
-                desc = "Step (return) out of function"
+                end,
             }
+        },
+        opts = {
+            keymap = { preset = 'default' },
+            appearance = {
+                use_nvim_cmp_as_default = true,
+                nerd_font_variant = 'mono'
+            },
+
+            sources = {
+                default = { 'lsp', 'path', 'luasnip', 'buffer' },
+                providers = {
+                    luasnip = {
+                        name = 'Luasnip',
+                        module = 'blink.cmp.sources.luasnip',
+                        opts = {
+                            use_show_condition = true,
+                            show_autosnippets = true,
+                        },
+                    },
+                },
+            },
+
+            signature = { enabled = true },
+            snippets = {
+                expand = function(snippet) require('luasnip').lsp_expand(snippet) end,
+                active = function(filter)
+                    if filter and filter.direction then
+                    return require('luasnip').jumpable(filter.direction)
+                    end
+                    return require('luasnip').in_snippet()
+                end,
+                jump = function(direction) require('luasnip').jump(direction) end,
+            },
+        },
+    },
+
+    -- Copilot
+    {
+        "zbirenbaum/copilot.lua",
+        event = "InsertEnter",
+        cmd = "Copilot",
+        build = ":Copilot auth",
+        opts = {
+            suggestion = {
+            enabled = true,
+            auto_trigger = true,
+            hide_during_completion = true,
+            keymap = {
+                accept = "<M-y>",
+                next = "<M-]>",
+                prev = "<M-[>",
+            },
+            },
+            panel = { enabled = false },
+            filetypes = {
+                markdown = true,
+                help = true,
+            },
         },
     },
 
     -- Flutter
     {
         'nvim-flutter/flutter-tools.nvim',
-        lazy = false,
+        dependencies = {"lspconfig"},
         dependencies = {
             'nvim-lua/plenary.nvim',
             'stevearc/dressing.nvim', -- optional for vim.ui.select
