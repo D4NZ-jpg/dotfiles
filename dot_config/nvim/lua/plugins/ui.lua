@@ -13,6 +13,9 @@ return {
     {
         "nanozuki/tabby.nvim",
         event = "TabNewEntered",
+        keys = {
+            { "<C-t>j", "<cmd>Tabby jump_to_tab<cr>", desc = "Enter tab jump mode"},
+        },
         config = function()
             local function tab_name(tab)
                 return string.gsub(tab, "%[..%]", "")
@@ -68,7 +71,7 @@ return {
                         local hl = tab.is_current() and theme.current_tab or theme.inactive_tab
                         return {
                             line.sep('', hl, theme.fill),
-                            tab.number(),
+                            tab.in_jump_mode() and tab.jump_key() or tab.number(),
                             "",
                             tab_name(tab.name()),
                             "",

@@ -29,7 +29,6 @@ vim.keymap.set("t", "<A-l>", "<C-\\><C-n><C-w>l")
 return {
     { "<C-t>",      group = "Tabs" },
     { "<C-t>a",     "<cmd>tabnew<cr>",                                      desc = "New Tab" },
-    { "<C-t>g",     "<cmd>execute 'tabn ' .. input('Tab number: ')<cr>",    desc = "Jump to tab number" },
     { "<C-t>h",     "<cmd>tabp<cr>",                                        desc = "Previous Tab" },
     { "<C-t>l",     "<cmd>tabn<cr>",                                        desc = "Next Tab" },
 
