@@ -94,5 +94,10 @@ return {
     ["<leader>j"] = { "<cmd>lprev<cr>zz", "Lprev" },
     ["<leader>r"] = { ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>", "Replace current word" },
     ["<leader>c"] = "+CMake",
-    ["<leader>g"] = "+Git",
+    ["<leader>g"] = {
+        name = "+Git",
+        g = { "<cmd>lua Snacks.lazygit()<cr>", "LazyGit" },
+        b = { "<cmd>lua Snacks.gitbrowse()<cr>", "Open in browser" },
+    },
+
 }

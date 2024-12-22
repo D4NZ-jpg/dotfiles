@@ -48,16 +48,6 @@ return {
         keys = { { "<leader>l", "<cmd>UndotreeToggle<cr>", desc = "Toggle undotree" } },
     },
 
-    -- git
-    {
-        "tpope/vim-fugitive",
-        cmd = { "Git", "G" },
-        keys = {
-            { "<leader>ga", "<cmd>execute 'G add ' .. input('File: ')<cr>",          desc = "Stage files" },
-            { "<leader>gc", "<cmd>execute 'G commit -m ' .. input('Message: ')<cr>", desc = "Commit changes" }
-        }
-    },
-
     -- git diff
     {
         "sindrets/diffview.nvim",
@@ -66,15 +56,6 @@ return {
             { "<leader>gd", "<cmd>DiffviewOpen<cr>", desc = "Show git differences" }
         },
         cmd = "DiffviewOpen"
-    },
-
-    -- lazygit
-    {
-        "kdheepak/lazygit.nvim",
-        cmd = "LazyGit",
-        keys = {
-            { "<leader>gg", "<cmd>LazyGit<cr>", desc = "Open LazyGit" }
-        }
     },
 
     -- fast moving around file
