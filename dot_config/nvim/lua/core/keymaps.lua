@@ -27,25 +27,24 @@ vim.keymap.set("t", "<A-k>", "<C-\\><C-n><C-w>k")
 vim.keymap.set("t", "<A-l>", "<C-\\><C-n><C-w>l")
 
 return {
-    { "<C-t>",      group = "Tabs" },
-    { "<C-t>a",     "<cmd>tabnew<cr>",                                      desc = "New Tab" },
-    { "<C-t>h",     "<cmd>tabp<cr>",                                        desc = "Previous Tab" },
-    { "<C-t>l",     "<cmd>tabn<cr>",                                        desc = "Next Tab" },
-    { "<C-t>o",     "<cmd>tabonly<cr>",                                     desc = "Close Others" },
-    { "<C-t>q",     "<cmd>tabclose<cr>",                                    desc = "Close Tab" },
+  { "<C-t>",      group = "Tabs" },
+  { "<C-t>a",     "<cmd>tabnew<cr>",                                      desc = "New Tab" },
+  { "<C-t>h",     "<cmd>tabp<cr>",                                        desc = "Previous Tab" },
+  { "<C-t>l",     "<cmd>tabn<cr>",                                        desc = "Next Tab" },
+  { "<C-t>o",     "<cmd>tabonly<cr>",                                     desc = "Close Others" },
+  { "<C-t>q",     "<cmd>tabclose<cr>",                                    desc = "Close Tab" },
 
-    { "<C-t>m",     group = "Move" },
-    { "<C-t>mh",    "<cmd>-tabmove<cr>",                                    desc = "Move current tab to previous position" },
-    { "<C-t>ml",    "<cmd>+tabmove<cr>",                                    desc = "Move current tab to next position" },
+  { "<C-t>m",     group = "Move" },
+  { "<C-t>mh",    "<cmd>-tabmove<cr>",                                    desc = "Move current tab to previous position" },
+  { "<C-t>ml",    "<cmd>+tabmove<cr>",                                    desc = "Move current tab to next position" },
 
-    { "<leader>f",  group = "Find" },
+  { "<leader>f",  group = "Find" },
 
-    { "<leader>g",  group = "Git" },
-    { "<leader>gb", "<cmd>lua Snacks.gitbrowse()<cr>",                      desc = "Open in browser" },
-    { "<leader>gg", "<cmd>lua Snacks.lazygit()<cr>",                        desc = "LazyGit" },
+  { "<leader>g",  group = "Git" },
+  { "<leader>gb", "<cmd>lua Snacks.gitbrowse()<cr>",                      desc = "Open in browser" },
+  { "<leader>gg", "<cmd>lua Snacks.lazygit()<cr>",                        desc = "LazyGit" },
 
-    { "<leader>j",  "<cmd>lprev<cr>zz",                                     desc = "Lprev" },
-    { "<leader>k",  "<cmd>lnext<cr>zz",                                     desc = "Lnext" },
-    { "<leader>r",  ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>", desc = "Replace current word" },
+  { "<leader>j",  "<cmd>lprev<cr>zz",                                     desc = "Lprev" },
+  { "<leader>k",  "<cmd>lnext<cr>zz",                                     desc = "Lnext" },
+  { "<leader>r",  ":%s/\\<<C-r><C-w>\\>/<C-r><C-w>/gI<Left><Left><Left>", desc = "Replace current word" },
 }
-
