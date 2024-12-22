@@ -132,8 +132,8 @@ return {
     -- Flutter
     {
         'nvim-flutter/flutter-tools.nvim',
-        dependencies = {"lspconfig"},
         dependencies = {
+            'neovim/nvim-lspconfig',
             'nvim-lua/plenary.nvim',
             'stevearc/dressing.nvim', -- optional for vim.ui.select
         },
