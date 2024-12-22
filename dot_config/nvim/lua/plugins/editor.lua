@@ -59,7 +59,10 @@ return {
         keys = {
             { "<leader>gd", "<cmd>DiffviewOpen<cr>", desc = "Show git differences" }
         },
-        cmd = "DiffviewOpen"
+        cmd = "DiffviewOpen",
+        init = function ()
+            vim.cmd([[command! Diff :DiffviewOpen]])
+        end
     },
 
     -- fast moving around file

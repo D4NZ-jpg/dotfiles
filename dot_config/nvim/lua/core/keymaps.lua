@@ -26,9 +26,6 @@ vim.keymap.set("t", "<A-j>", "<C-\\><C-n><C-w>j")
 vim.keymap.set("t", "<A-k>", "<C-\\><C-n><C-w>k")
 vim.keymap.set("t", "<A-l>", "<C-\\><C-n><C-w>l")
 
-
--- Add git diff as command
-vim.cmd([[command! Diff :DiffviewOpen]])
 return {
     ["<leader>f"] = {
         name = "+File/Find",
