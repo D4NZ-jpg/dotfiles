@@ -49,5 +49,42 @@ return {
             }
         },
         cmd = "CompetiTest",
+        init = function()
+            -- Add shortened commands for Competitest.
+            -- "CP" -> CompetiTest run
+            -- "CP problem" -> CompetiTest receive problem
+            -- "CP contest" -> CompetiTest receive contest
+
+            vim.cmd([[
+                "Call the appropriate CompetiTest command
+                function! s:CompetiTestFunction(arg) abort
+                if a:arg == ""
+                    " Create bin folder if not existing
+                    if !isdirectory("./bin")
+                        call mkdir("./bin")
+                    endif
+
+                    execute "CompetiTest run"
+                else
+                    " Create .gitignore to hide input and binary files in telescope 🔭
+                    if !filereadable(".gitignore")
+                    call writefile(["testcases\nbin"], ".gitignore")
+                endif
+
+                    execute 'CompetiTest receive ' . a:arg
+                endif
+            endfunction
+
+            "Tab completion of the command with 'contest' or 'problem'
+            function! s:CompetiTestComplete(...) abort
+                let l:options = ['problem', 'contest']
+                return join(l:options, "\n")
+            endfunction
+
+            "The actual command
+            command! -bar -nargs=? -complete=custom,s:CompetiTestComplete CP call s:CompetiTestFunction(<q-args>)
+        ]])
+
+        end
     }
 }
