@@ -86,7 +86,7 @@ return {
           local cwd = vim.fn.getcwd()
           if string.find(cwd, "/dev/cp/?") then
             require("luasnip.loaders.from_snipmate").lazy_load({
-              paths = { "$HOME/dev/cp/snippets" }
+              paths = { "~/dev/cp/snippets" }
             })
           else
             require("luasnip.loaders.from_snipmate").lazy_load()
