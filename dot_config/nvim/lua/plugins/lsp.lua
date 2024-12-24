@@ -7,6 +7,9 @@ return {
       'saghen/blink.cmp',
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
+      "jay-babu/mason-null-ls.nvim",
+      "nvimtools/none-ls.nvim",
+      "nvim-lua/plenary.nvim",
     },
 
 
@@ -36,6 +39,10 @@ return {
 
       require("mason").setup()
       require("mason-lspconfig").setup()
+      require("null-ls").setup({ debug = true })
+      require("mason-null-ls").setup({
+        handlers = {},
+      })
 
       -- Default handler
       local handlers = {
