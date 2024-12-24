@@ -102,7 +102,7 @@ return {
       },
 
       sources = {
-        default = { 'lsp', 'path', 'luasnip', 'buffer' },
+        default = { 'lazydev', 'lsp', 'path', 'luasnip', 'buffer' },
         providers = {
           luasnip = {
             name = 'Luasnip',
@@ -111,6 +111,11 @@ return {
               use_show_condition = true,
               show_autosnippets = true,
             },
+          },
+          lazydev = {
+            name = "LazyDev",
+            module = "lazydev.integrations.blink",
+            score_offset = 100,
           },
         },
       },
@@ -164,5 +169,13 @@ return {
     },
     config = true,
     ft = "dart"
-  }
+  },
+
+  -- Neovim configs
+  {
+    "folke/lazydev.nvim",
+    ft = "lua",
+    config = true,
+  },
+
 }
