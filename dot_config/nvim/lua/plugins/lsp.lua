@@ -140,6 +140,10 @@ return {
     event = "InsertEnter",
     cmd = "Copilot",
     build = ":Copilot auth",
+    cond = function()
+      local cwd = vim.fn.getcwd()
+      return not string.find(cwd, "/dev/cp/?")
+    end,
     opts = {
       suggestion = {
         enabled = true,
