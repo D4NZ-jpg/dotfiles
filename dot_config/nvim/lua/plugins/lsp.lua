@@ -157,8 +157,8 @@ return {
       },
       panel = { enabled = false },
       filetypes = {
-        markdown = true,
-        help = true,
+        markdown = false,
+        help = false,
       },
     },
   },

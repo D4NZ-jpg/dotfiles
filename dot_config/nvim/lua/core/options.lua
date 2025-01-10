@@ -10,6 +10,7 @@ vim.opt.tabstop = 4           -- 1 Tab = 4 Spaces
 vim.opt.shiftwidth = 4        -- Use 4 spaces when shiftint
 vim.opt.shiftround = true     -- When shifting round to nearest
 vim.opt.smartindent = true
+vim.opt.conceallevel = 1      -- Show concealable characters
 
 vim.opt.tgc = true
 vim.opt.clipboard = "unnamedplus"
