@@ -10,6 +10,31 @@ function find_obsidian_dir(path)
   return find_obsidian_dir(parent)
 end
 
+function parseDate(dateStr)
+  local patterns = {
+    -- YYYY-MM-DD
+    { pattern = "(%d+)-(%d+)-(%d+)",   order = { "year", "month", "day" } },
+    -- DD/MM/YYYY
+    { pattern = "(%d+)/(%d+)/(%d+)",   order = { "day", "month", "year" } },
+    -- MM.DD.YYYY
+    { pattern = "(%d+)%.(%d+)%.(%d+)", order = { "month", "day", "year" } }
+  }
+
+  for _, format in ipairs(patterns) do
+    local v1, v2, v3 = dateStr:match(format.pattern)
+    if v1 then
+      local values = { v1 = tonumber(v1), v2 = tonumber(v2), v3 = tonumber(v3) }
+      local year = values[format.order[1] == "year" and "v1" or format.order[2] == "year" and "v2" or "v3"]
+      local month = values[format.order[1] == "month" and "v1" or format.order[2] == "month" and "v2" or "v3"]
+      local day = values[format.order[1] == "day" and "v1" or format.order[2] == "day" and "v2" or "v3"]
+
+      -- Convert to a single comparable number (YYYYMMDD)
+      return year * 10000 + month * 100 + day
+    end
+  end
+  return nil -- If no pattern matches
+end
+
 return {
   {
     "D4NZ-jpg/obsidian.nvim",
@@ -78,8 +103,8 @@ return {
             end, notes)
 
             -- sort by date
-            table.sort(notes, function(a, b)
-              return a.metadata.date < b.metadata.date
+            table.sort(notes, function(a, b) -- 2024-10-20
+              return parseDate(a.metadata.date) < parseDate(b.metadata.date)
             end)
 
             return notes[#notes].id
