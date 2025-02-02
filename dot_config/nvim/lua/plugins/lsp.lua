@@ -101,17 +101,11 @@ return {
         nerd_font_variant = 'mono'
       },
 
+      snippets={preset='luasnip'},
+
       sources = {
-        default = { 'lazydev', 'lsp', 'path', 'luasnip', 'buffer' },
+        default = { 'lazydev', 'lsp', 'path', 'snippets', 'buffer' },
         providers = {
-          luasnip = {
-            name = 'Luasnip',
-            module = 'blink.cmp.sources.luasnip',
-            opts = {
-              use_show_condition = true,
-              show_autosnippets = true,
-            },
-          },
           lazydev = {
             name = "LazyDev",
             module = "lazydev.integrations.blink",
