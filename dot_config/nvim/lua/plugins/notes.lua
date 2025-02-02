@@ -1,3 +1,5 @@
+local settings_dir = ".settings"
+
 function find_obsidian_dir(path)
   if vim.fn.isdirectory(path .. "/.obsidian") == 1 then
     return path
@@ -39,7 +41,11 @@ return {
   {
     "D4NZ-jpg/obsidian.nvim",
     version = "*",
-    dependencies = "nim-lua/plenary.nvim",
+    dependencies = {
+      "nim-lua/plenary.nvim",
+      "3rd/image.nvim",
+
+    },
     event = { "VeryLazy", "VimEnter *.md" },
 
     -- Load only on Obsidian directories
@@ -86,8 +92,26 @@ return {
       note_id_func = function(title)
         return title:lower():gsub("%s+", "-")
       end,
+
+      attachments = {
+        img_folder = settings_dir .. "/attachments",
+        confirm_img_paste = false,
+        img_name_func = function(current_note)
+          local name = vim.fn.input "Image alt: "
+          return string.format("%s-%s", current_note.id, name)
+        end,
+        img_text_func = function(client, path)
+          local current_note = client:current_note().id
+
+          local escaped_note = current_note:gsub("([%(%)%.%%%+%-%*%?%[%]%^%$])", "%%%1")
+          local name = path.filename:match(".*/" .. escaped_note .. "%-(.*)%.png$"):gsub("-", " ")
+
+          local filename = vim.fn.fnamemodify(path.filename, ":t")
+          return string.format("![%s](%s)", name, filename)
+        end,
+      },
       templates = {
-        folder = ".settings/templates",
+        folder = settings_dir .. "/templates",
         date_format = "%d/%m/%Y",
         output_dir_key = "target_dir",
         substitutions = {
@@ -122,5 +146,24 @@ return {
 
       },
     },
-  }
+  },
+  {
+    "3rd/image.nvim",
+    lazy = true,
+    opts = {
+      integrations = {
+        markdown = {
+          only_render_image_at_cursor = true,
+          clear_in_insert_mode = true,
+          resolve_image_path = function(document_path, image_path, fallback)
+            local obsidian_dir = find_obsidian_dir(vim.fn.expand(document_path))
+            if obsidian_dir ~= nil then
+              return obsidian_dir .. "/" .. settings_dir .. "/attachments/" .. image_path
+            end
+            return fallback(document_path, image_path)
+          end
+        }
+      }
+    }
+  },
 }
