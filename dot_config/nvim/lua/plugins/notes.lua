@@ -92,6 +92,10 @@ return {
       note_id_func = function(title)
         return title:lower():gsub("%s+", "-")
       end,
+      follow_url_func = function(url)
+        vim.notify("Opening URL: " .. url)
+        vim.fn.jobstart("xdg-open " .. url)
+      end,
 
       attachments = {
         img_folder = settings_dir .. "/attachments",
