@@ -245,4 +245,24 @@ config by D4NZ-jpg]],
       }
     },
   },
+
+  -- Zen mode
+  {
+    "folke/snacks.nvim",
+    keys = {
+      {
+        "<leader>zz",
+        function()
+          require('snacks').zen()
+        end,
+        desc = "Zen mode"
+      },
+    },
+    opts = {
+      zen = {
+        enabled = true
+      }
+    },
+  }
+
 }
