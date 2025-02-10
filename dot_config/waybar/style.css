@@ -132,7 +132,5 @@ window#waybar {
 
 #battery {
     color: @foreground;
-    border-radius: 0 20px 20px 0;
-    margin-right: 5px;
     border-left: 0px;
 }
