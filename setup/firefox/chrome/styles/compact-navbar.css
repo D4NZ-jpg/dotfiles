@@ -1,0 +1,23 @@
+/* set vars for compact navbar */
+:root {
+  --navbar-height: 1.88rem;
+}
+
+.tab-text {
+  font-size: 0.8rem;
+}
+
+#tabbrowser-tabs,
+#TabsToolbar-customization-target {
+  max-height: var(--navbar-height);
+  min-height: 0rem;
+  position: relative;
+  top: -2px;
+  left: -2px;
+}
+
+.tab-content,
+#tabbrowser-arrowscrollbox {
+  position: relative;
+  max-height: calc(var(--navbar-height) * 1.1);
+}

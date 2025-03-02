@@ -1,0 +1,25 @@
+#urlbar-container {
+  position: fixed !important;
+  top: -20vh !important;
+  left: 20vw !important;
+  width: 60vw !important;
+  background: transparent !important;
+  border-radius: 10px !important;
+  padding: 5px !important;
+  pointer-events: none;
+  z-index: 99 !important;
+
+  /* Rounded corners */
+  border-radius: 10rem !important;
+}
+
+#urlbar-container:focus-within {
+  top: 20vh !important;
+  pointer-events: auto; /* Allow interaction when focused */
+}
+
+/* Hide and disable interaction when not focused */
+#urlbar-container:not(:focus-within) {
+  top: -20vh !important;
+  pointer-events: none;
+}
