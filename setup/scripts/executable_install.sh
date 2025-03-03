@@ -21,6 +21,9 @@ else
     echo "Chaotic-aur found, skipping..."
 fi
 
+# Set parallel downloads
+sudo sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 5/' /etc/pacman.conf
+
 # Install
 cp "$HOME/setup/pkgs/pkgs.lst" "install.lst"
 
