@@ -1,136 +1,138 @@
-[aws]
-symbol = "  "
-
-[buf]
-symbol = " "
+add_newline = true
+format = "[╭╴](fg:arrow)$username$os$git_branch$directory$fill$cmd_duration $time( via $python$conda$nodejs$c$rust$java)\n[╰─](fg:arrow)$character"
+palette = "normal"
 
 [c]
+disabled = false
+format = "[$symbol($version(-$name)) ]($style)"
+style = "fg:clang"
 symbol = " "
+version_format = "$raw"
+
+[character]
+error_symbol = "[󰍟](fg:red)"
+success_symbol = "[󰍟](fg:arrow)"
+
+[cmd_duration]
+disabled = false
+format = "took [$duration]($style) "
+min_time = 500
+style = "bold fg:duration"
 
 [conda]
+disabled = false
+format = "[$symbol$environment ]($style)"
+ignore_base = false
+style = "fg:conda"
 symbol = " "
 
-[dart]
-symbol = " "
-
 [directory]
-read_only = " 󰌾"
+before_repo_root_style = "fg:directory"
+format = "at [$path](bold $style)[$read_only]($read_only_style) "
+read_only = "  "
+read_only_style = "fg:directory"
+style = "fg:directory"
+truncate_to_repo = true
+truncation_length = 2
+truncation_symbol = "…/"
 
 [docker_context]
+disabled = false
 symbol = " "
 
-[elixir]
-symbol = " "
-
-[elm]
-symbol = " "
-
-[fossil_branch]
-symbol = " "
+[fill]
+symbol = ""
 
 [git_branch]
+format = "via [$symbol$branch]($style) "
+style = "bold fg:git"
 symbol = " "
 
-[golang]
-symbol = " "
-
-[guix_shell]
-symbol = " "
-
-[haskell]
-symbol = " "
-
-[haxe]
-symbol = " "
-
-[hg_branch]
-symbol = " "
-
-[hostname]
-ssh_symbol = " "
+[git_status]
+disabled = true
+format = "[$all_status$ahead_behind ]($style)"
+style = "fg:text_color bg:git"
 
 [java]
+disabled = false
+format = "[$symbol$version ]($style)"
+style = "fg:java"
 symbol = " "
-
-[julia]
-symbol = " "
-
-[lua]
-symbol = " "
-
-[memory_usage]
-symbol = "󰍛 "
-
-[meson]
-symbol = "󰔷 "
-
-[nim]
-symbol = "󰆥 "
-
-[nix_shell]
-symbol = " "
+version_format = "$raw"
 
 [nodejs]
+disabled = false
+format = "[$symbol$version ]($style)"
+style = "fg:node"
 symbol = " "
+version_format = "$raw"
+
+[os]
+disabled = true
+format = "on [($name)]($style) "
+style = "bold blue"
 
 [os.symbols]
-Alpaquita = " "
-Alpine = " "
-Amazon = " "
-Android = " "
-Arch = " "
-Artix = " "
-CentOS = " "
-Debian = " "
-DragonFly = " "
-Emscripten = " "
-EndeavourOS = " "
-Fedora = " "
-FreeBSD = " "
-Garuda = "󰛓 "
-Gentoo = " "
-HardenedBSD = "󰞌 "
-Illumos = "󰈸 "
-Linux = " "
-Mabox = " "
-Macos = " "
-Manjaro = " "
-Mariner = " "
-MidnightBSD = " "
-Mint = " "
-NetBSD = " "
-NixOS = " "
-OpenBSD = "󰈺 "
-openSUSE = " "
-OracleLinux = "󰌷 "
-Pop = " "
-Raspbian = " "
-Redhat = " "
-RedHatEnterprise = " "
-Redox = "󰀘 "
-Solus = "󰠳 "
-SUSE = " "
-Ubuntu = " "
-Unknown = " "
-Windows = "󰍲 "
+Alpine = " "
+Arch = " "
+Debian = " "
+EndeavourOS = " "
+Fedora = " "
+Linux = " "
+Macos = " "
+Manjaro = " "
+Mint = " "
+NixOS = " "
+Pop = " "
+SUSE = " "
+Ubuntu = " "
+Windows = " "
+openSUSE = " "
 
 [package]
-symbol = "󰏗 "
+disabled = false
 
-[pijul_channel]
-symbol = " "
+[palettes.normal]
+arrow = "blue"
+clang = "#caf0f8"
+conda = "#70e000"
+directory = "blue"
+duration = "red"
+git = "#f17f29"
+git_status = "#DFEBED"
+java = "#F86279"
+node = "#a5e6ba"
+os = "blue"
+os_admin = "blue"
+python = "#edf67d"
+rust = "#ffdac6"
+text_color = "#EDF2F4"
+text_light = "#26272A"
+time = "blue"
 
 [python]
+disabled = false
+format = "[$symbol$pyenv_prefix($version)( \\($virtualenv\\)) ]($style)"
+style = "fg:python"
 symbol = " "
-
-[rlang]
-symbol = "󰟔 "
-
-[ruby]
-symbol = " "
+version_format = "$raw"
 
 [rust]
-symbol = " "
+disabled = false
+format = "[$symbol$version ]($style)"
+style = "fg:rust"
+symbol = "󱘗 "
+version_format = "$raw"
 
-[scala]
-symbol = " "
+[time]
+disabled = false
+format = "[$time]($style) "
+style = "bold fg:time"
+time_format = "%H:%M"
+
+[username]
+disabled = false
+format = "[$user](fg:$style) "
+show_always = true
+style_root = "bold os_admin"
+style_user = "bold os"
