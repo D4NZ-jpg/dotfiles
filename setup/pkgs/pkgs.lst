@@ -5,7 +5,7 @@ cpio
 cmake
 hyprwayland-scanner
 hyprland
-hypridle-git
+hypridle
 pyprland
 swww
 pywal-16-colors
@@ -61,6 +61,7 @@ rofi-calc
 lf
 ctpv-git
 
+ttf-jetbrains-mono-nerd
 ttf-firacode-nerd
 noto-fonts-emoji
 
