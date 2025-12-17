@@ -7,8 +7,9 @@
 # Shell Prompt
 . "./prompt.zsh"
 
-# Run fastfetch on every new shell (gotta flex)
-fastfetch
 
 . "./utils.zsh"
 . "./alias.zsh"
+
+# Run fastfetch on every new shell (gotta flex)
+fastfetch

@@ -1,5 +1,8 @@
 # Prompt Config
 
+bindkey -v # Vim mode
+bindkey -M viins 'kk' vi-cmd-mode # Escape with 'kk'
+
 ## Transient prompt
 
 starship_transient_prompt_func() {
@@ -42,9 +45,12 @@ zle-line-init() {
     zle .accept-line
   fi
 
+
   return ret
 }
 
 zle -N zle-line-init
+
+# Evaluate
 
 eval "$(starship init zsh)"

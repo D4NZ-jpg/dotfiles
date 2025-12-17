@@ -1,0 +1,18 @@
+[".config/zsh/plugins/autosuggestions"]
+    type = "archive"
+    url = "https://github.com/zsh-users/zsh-autosuggestions/archive/master.tar.gz"
+    exact = true
+    stripComponents = 1
+
+[".config/zsh/plugins/syntax-highlighting"]
+    type = "archive"
+    url = "https://github.com/zsh-users/zsh-syntax-highlighting/archive/master.tar.gz"
+    exact = true
+    stripComponents = 1
+
+[".config/zsh/plugins/gitignore/gitignore.zsh"]
+    type = "file"
+    url = "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/refs/heads/master/plugins/gitignore/gitignore.plugin.zsh"
+    exact = true
+
+
