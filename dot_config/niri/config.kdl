@@ -3,7 +3,6 @@ spawn-at-startup "xwayland-satellite" // XWayland support
 
 spawn-at-startup "udiskie" // Mount removable drives
 
-
 environment {
     DISPLAY ":0"
     QT_QPA_PLATFORM "wayland"
@@ -37,6 +36,7 @@ output "eDP-1" {
 layout {
     gaps 8
     center-focused-column "on-overflow"
+    background-color "transparent"
 
     preset-column-widths {
         proportion 0.25
@@ -66,7 +66,25 @@ layout {
 prefer-no-csd
 screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 animations {
-    slowdown 0.5
+    slowdown 0.3
+}
+
+gestures {
+    hot-corners {
+        off
+    }
+}
+
+overview {
+    zoom 0.5
+    workspace-shadow {
+        off
+    }
+}
+
+layer-rule {
+    match namespace="^wpaperd-.*$"
+    place-within-backdrop true
 }
 
 // Open the Firefox picture-in-picture player as floating by default.
@@ -94,7 +112,7 @@ binds {
     Mod+T hotkey-overlay-title="Open a Terminal: kitty" { spawn "kitty"; }
     Mod+B hotkey-overlay-title="Open the Browser: firefox" { spawn "firefox"; }
 
-    Mod+Return hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
+    Mod+Space hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 
 
@@ -162,8 +180,8 @@ binds {
 
     Mod+Shift+Page_Down { move-workspace-down; }
     Mod+Shift+Page_Up   { move-workspace-up; }
-    Mod+Shift+U         { move-workspace-down; }
-    Mod+Shift+I         { move-workspace-up; }
+    Mod+Shift+U         { move-workspace-up; }
+    Mod+Shift+I         { move-workspace-down; }
 
     Mod+WheelScrollDown      cooldown-ms=150 { focus-workspace-down; }
     Mod+WheelScrollUp        cooldown-ms=150 { focus-workspace-up; }
@@ -215,6 +233,7 @@ binds {
     Mod+Shift+F { reset-window-height; }
     Mod+F { maximize-column; }
     Mod+Alt+F { fullscreen-window; }
+    Mod+Ctrl+Shift+F { toggle-windowed-fullscreen; }
 
     Mod+Ctrl+F { expand-column-to-available-width; }
 
@@ -229,6 +248,7 @@ binds {
 
     Mod+V       { toggle-window-floating; }
     Mod+Shift+V { switch-focus-between-floating-and-tiling; }
+
 
     Mod+W { toggle-column-tabbed-display; }
 
