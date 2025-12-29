@@ -7,5 +7,8 @@ return {
             { "mason-org/mason.nvim", opts = {} },
             "neovim/nvim-lspconfig",
         },
+        init = function()
+            vim.highlight.priorities.semantic_tokens = 90
+        end
     }
 }

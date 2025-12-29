@@ -41,9 +41,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
         keymap.set("n", "]d", function()
             vim.diagnostic.jump({ count = 1, float = true })
         end, opts)
-        opts.desc = "Show documentation for word under cursor"
-        keymap.set("n", "K", vim.lsp.buf.hover, opts)
-
     end,
 })
 
