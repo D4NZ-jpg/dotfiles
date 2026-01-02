@@ -25,6 +25,7 @@ xorg-xrdb
 libnotify
 os-prober
 googledot-cursor-theme
+tree-sitter-cli
 
 udisks2
 udiskie

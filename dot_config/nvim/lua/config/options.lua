@@ -37,6 +37,9 @@ vim.opt.undofile = true       -- Enable persistent undo
 vim.opt.undodir = vim.fn.stdpath("data") .. "/undo"  -- Undo directory
 vim.opt.clipboard = "unnamedplus"  -- Use system clipboard
 
+-- Fold
+vim.o.foldlevel = 99
+
 -- Performance
 vim.opt.updatetime = 50       -- Faster completion (default 4000ms)
 
