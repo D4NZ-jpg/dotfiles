@@ -1,3 +1,7 @@
+#Enable completion
+autoload -Uz compinit
+compinit -d ~/.cache/zsh/zcompdump
+
 # Plugins
 . "./plugins.zsh"
 
