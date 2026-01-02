@@ -1,3 +1,4 @@
+command_timeout = 5000
 add_newline = true
 format = "[╭╴](fg:arrow)$username$os$git_branch$directory$fill$cmd_duration $time( via $python$conda$nodejs$c$rust$java)\n[╰─](fg:arrow)$character"
 palette = "normal"
