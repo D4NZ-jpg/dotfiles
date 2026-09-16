@@ -94,6 +94,15 @@ for service in "${services[@]}"; do
     fi
 done
 
+# Compiled Hyprland plugins need matching headers and interactive sudo.
+if isInstalled hyprpm; then
+    if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
+        bash "$HOME/setup/scripts/hyprland-plugins.sh"
+    else
+        echo 'After logging into Hyprland, run ~/setup/scripts/hyprland-plugins.sh'
+    fi
+fi
+
 # Some parts taken from: 
 # https://github.com/prasanthrangan/hyprdots/blob/main/Scripts/install_pre.sh
 
