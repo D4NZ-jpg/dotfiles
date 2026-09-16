@@ -1,7 +1,7 @@
 -- Native special-workspace scratchpads; no Pyprland or legacy IPC commands.
 local M = {}
 local specs = {
-    term = { class = "kitty-dropterm", command = "kitty --class kitty-dropterm", width = 0.75, height = 0.60, edge = "top" },
+    term = { class = "kitty-dropterm", command = "kitty --class kitty-dropterm", width = 0.75, height = 0.75, edge = "center" },
     volume = { class = "pavucontrol", command = "pavucontrol", width = 0.40, height = 0.90, edge = "right", unfocus = true },
     bluetooth = { class = "blueman-manager", command = "blueman-manager", width = 0.40, height = 0.90, edge = "right", unfocus = true },
 }
@@ -46,7 +46,7 @@ function M.new(api)
                 run(api, api.dsp.workspace.toggle_special("pad-" .. name))
             end
             local box = M.geometry(mon, specs[name])
-            run(api, api.dsp.window.float({ window = window, action = "set" }))
+            run(api, api.dsp.window.float({ window = window, action = "enable" }))
             run(api, api.dsp.window.resize({ window = window, x = box.width, y = box.height }))
             run(api, api.dsp.window.move({ window = window, x = box.x, y = box.y }))
             run(api, api.dsp.focus({ window = window }))
@@ -77,7 +77,7 @@ function M.new(api)
             match = { class = "^(" .. spec.class .. ")$" },
             float = true, workspace = "special:pad-" .. name .. " silent" })
         api.workspace_rule({ workspace = "special:pad-" .. name,
-            animation = spec.edge == "top" and "slidevert" or "slide" })
+            animation = spec.edge == "right" and "slide" or "slidevert" })
     end
     api.on("window.open", function(window)
         local name = name_for(window)
