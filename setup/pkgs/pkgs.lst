@@ -7,8 +7,7 @@ hyprwayland-scanner
 hyprland
 hypridle
 pyprland
-swww
-pywal-16-colors
+swaybg
 waybar
 wl-clipboard
 wlogout
@@ -65,6 +64,3 @@ ctpv-git
 ttf-jetbrains-mono-nerd
 ttf-firacode-nerd
 noto-fonts-emoji
-
-wpaperd
-niri
