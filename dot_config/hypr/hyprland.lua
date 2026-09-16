@@ -33,7 +33,7 @@ hl.curve("myBezier", { type = "bezier", points = { { 0.05, 0.9 }, { 0.1, 1.05 } 
 for _, anim in ipairs({
     { "windows", 5, "myBezier" }, { "windowsOut", 5, "default", "popin 80%" },
     { "border", 7, "default" }, { "borderangle", 8, "default" },
-    { "fade", 5, "default" }, { "workspaces", 4, "default", "slidevert" },
+    { "fade", 5, "default" }, { "workspaces", 2.5, "default", "slidevert" },
 }) do
     hl.animation({ leaf = anim[1], enabled = true, speed = anim[2], bezier = anim[3], style = anim[4] })
 end
