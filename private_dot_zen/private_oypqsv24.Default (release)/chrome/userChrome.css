@@ -1,0 +1,47 @@
+/* Charcoal browser chrome. Does not style web content. */
+:root {
+  --zen-primary-color: #afa286 !important;
+  color-scheme: dark !important;
+  --zen-main-browser-background: #262626 !important;
+  --zen-main-browser-background-toolbar: #262626 !important;
+  --zen-themed-toolbar-bg-transparent: #262626 !important;
+  --zen-colors-primary: #39362f !important;
+  --zen-colors-secondary: #302e29 !important;
+  --zen-colors-tertiary: #262626 !important;
+  --zen-colors-border: #49453d !important;
+  --toolbox-textcolor: #d5c8ac !important;
+  --toolbar-bgcolor: #262626 !important;
+  --toolbar-color: #d5c8ac !important;
+  --lwt-text-color: #d5c8ac !important;
+  --sidebar-background-color: #262626 !important;
+  --sidebar-text-color: #d5c8ac !important;
+  --tab-selected-bgcolor: #39362f !important;
+  --tab-selected-textcolor: #d5c8ac !important;
+  --toolbarbutton-hover-background: #39362f !important;
+  --toolbarbutton-active-background: #49453d !important;
+  --toolbar-field-background-color: #302e29 !important;
+  --toolbar-field-color: #d5c8ac !important;
+  --toolbar-field-border-color: #49453d !important;
+  --toolbar-field-focus-background-color: #302e29 !important;
+  --toolbar-field-focus-color: #d5c8ac !important;
+  --toolbar-field-focus-border-color: #afa286 !important;
+}
+
+/* Override Zen's generated workspace-gradient surfaces, not web content. */
+.zen-browser-generic-background::before,
+.zen-browser-generic-background::after {
+  background: #262626 !important;
+}
+
+#navigator-toolbox,
+#sidebar-box {
+  background: #262626 !important;
+  color: #d5c8ac !important;
+}
+
+menupopup,
+panel {
+  --panel-background: #262626 !important;
+  --panel-color: #d5c8ac !important;
+  --panel-border-color: #49453d !important;
+}
