@@ -48,7 +48,7 @@ end
 local function bind(key, callback, opts) hl.bind("SUPER + " .. key, callback, opts) end
 local function exec(command) return hl.dsp.exec_cmd(command) end
 bind("T", exec("kitty"))
-bind("B", exec("firefox"))
+bind("B", exec("zen-browser"))
 bind("Q", hl.dsp.window.close())
 bind("SHIFT + Q", hl.dsp.exit())
 bind("X", hl.dsp.window.float({ action = "toggle" }))
@@ -141,5 +141,5 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("hyprpm reload -n")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-theme 'GoogleDot-White'")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-size 16")
-    hl.exec_cmd("xdg-settings set default-web-browser firefox.desktop")
+    hl.exec_cmd("xdg-settings set default-web-browser zen.desktop")
 end)
