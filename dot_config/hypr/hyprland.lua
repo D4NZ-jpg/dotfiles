@@ -26,7 +26,7 @@ hl.config({
     input = { kb_layout = "us,latam", kb_options = "grp:alt_shift_toggle", follow_mouse = 1,
         sensitivity = 0, touchpad = { natural_scroll = false } },
     general = { layout = "scrolling", gaps_in = 5, gaps_out = 10, border_size = 3,
-        col = { active_border = "rgba(ffffffee)", inactive_border = "rgb(4e5372)" } },
+        col = { active_border = "rgb(afa286)", inactive_border = "rgb(49453d)" } },
     decoration = { rounding = 10, active_opacity = 1, inactive_opacity = 0.9, fullscreen_opacity = 1,
         blur = { enabled = true, size = 4, passes = 3, new_optimizations = true } },
     animations = { enabled = true, workspace_wraparound = false },
