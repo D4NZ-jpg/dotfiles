@@ -1,10 +1,17 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Main install script. (Arch Linux)
 # By: Danz (inspired by prasanthrangan/hyprdots)
 echo "dotfiles by Danz. (I use Arch btw)"
-set -e 
+set -eo pipefail
 
+if (( EUID == 0 )); then
+    echo 'Run the installer as your normal user; privileged steps use sudo.' >&2
+    exit 1
+fi
 source "$HOME/setup/scripts/utils.sh"
+workdir=$(mktemp -d)
+trap 'rm -rf -- "$workdir"' EXIT
+install_list="$workdir/install.lst"
 
 # Install chaotic-aur
 # Check if chaotic-aur is already installed
@@ -24,17 +31,20 @@ fi
 # Set parallel downloads
 sudo sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 5/' /etc/pacman.conf
 
-# Install
-cp "$HOME/setup/pkgs/pkgs.lst" "install.lst"
+# Refresh repositories only as part of a full system upgrade.
+sudo pacman -Syu
+
+# Keep the package queue independent of the caller's working directory.
+cp "$HOME/setup/pkgs/pkgs.lst" "$install_list"
 
 # Nvidia drivers (https://github.com/prasanthrangan/hyprdots/blob/main/Scripts/install.sh)
 if hasNvidia; then
     cat /usr/lib/modules/*/pkgbase | while read krnl; do
-        echo "${krnl}-headers" >>install.lst
+        echo "${krnl}-headers" >>"$install_list"
     done
     IFS=$' ' read -r -d '' -a nvga < <(lspci -k | grep -E "(VGA|3D)" | grep -i nvidia | awk -F ':' '{print $NF}' | tr -d '[]()' && printf '\0')
     for nvcode in "${nvga[@]}"; do
-        awk -F '|' -v nvc="$nvcode" '{if ($3 == nvc) {split(FILENAME,driver,"/"); print driver[length(driver)],"\nnvidia-utils"}}' "$HOME/setup/.nvidia/nvidia*dkms" >>install.lst
+        awk -F '|' -v nvc="$nvcode" '{if ($3 == nvc) {split(FILENAME,driver,"/"); print driver[length(driver)],"\nnvidia-utils"}}' "$HOME/setup/.nvidia/nvidia*dkms" >>"$install_list"
     done
     echo -e "\033[0;32m[GPU]\033[0m: detected // ${nvga[@]}"
 
@@ -53,25 +63,24 @@ fi
 
 # Ask for extras
 echo ""
-while read LINE; do
-    name="${LINE%%|*}"; pkgs="${LINE#*|}"
-
-    read -p "Would you like to install $name? [y/N]: " answer < /dev/tty
+while IFS='|' read -r name packages || [[ -n "$name" ]]; do
+    [[ -z "$name" || "$name" == \#* ]] && continue
+    read -r -p "Would you like to install $name? [y/N]: " answer < /dev/tty
     if [[ $answer = [Yy] ]]; then
-        for pkg in "${pkgs[@]}"; do
-            echo "$pkg" >> install.lst 
-        done
+        read -r -a extra_packages <<< "$packages"
+        printf '%s\n' "${extra_packages[@]}" >> "$install_list"
     fi
 done < "$HOME/setup/pkgs/extras.lst"
 
 # Install pkgs
-installPkgs install.lst
+installPkgs "$install_list"
 
 # Configuring packages
 source "$HOME/setup/scripts/post-install.sh"
 
 # Systemd
-while read service ; do
+while IFS= read -r service || [[ -n "$service" ]]; do
+    [[ -z "$service" || "$service" == \#* ]] && continue
     startCtl "$service"
 done < "$HOME/setup/pkgs/system_ctl.lst"
 
