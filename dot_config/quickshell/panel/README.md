@@ -10,7 +10,8 @@ End preview: `quickshell ipc -c panel call panel preview false`
 Inspect state: `quickshell ipc -c panel call panel status`
 Logs: `quickshell log -c panel --no-color -t 50`
 
-No autostart yet. Each monitor has a 38px overlay, zero exclusive zone,
+Starts automatically on Hyprland login, with duplicate-instance protection.
+Each monitor has a 38px overlay, zero exclusive zone,
 and a 2px input strip while hidden. Hover reveals after 120ms; leaving
 hides after 280ms. Reveal/retract slides take 180ms. The panel never takes
 keyboard focus.
