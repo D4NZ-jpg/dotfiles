@@ -6,19 +6,19 @@
 
     notification_height = 0
 
-    separator_height = 2
+    separator_height = 1
 
-    padding = 8
-    horizontal_padding = 8
-    text_icon_padding = 0
-    frame_width = 2
+    padding = 14
+    horizontal_padding = 16
+    text_icon_padding = 12
+    frame_width = 1
 
-    frame_color = "#89B4FA"
+    frame_color = "#49453d"
     separator_color = frame
 
     sort = yes
     idle_threshold = 120
-    font = monospace 10
+    font = JetBrains Mono 10
     line_height = 0
     markup = full
     alignment = left
@@ -31,11 +31,11 @@
     show_indicators = yes
 
     min_icon_size = 0
-    max_icon_size = 64
+    max_icon_size = 32
 
     icon_path = /usr/share/icons/Papirus-Dark/16x16/status/:/usr/share/icons/Papirus-Dark/16x16/devices/:/usr/share/icons/Papirus-Dark/16x16/actions/:/usr/share/icons/Papirus-Dark/16x16/animations/:/usr/share/icons/Papirus-Dark/16x16/apps/:/usr/share/icons/Papirus-Dark/16x16/categories/:/usr/share/icons/Papirus-Dark/16x16/emblems/:/usr/share/icons/Papirus-Dark/16x16/emotes/:/usr/share/icons/Papirus-Dark/16x16/devices/mimetypes:/usr/share/icons/Papirus-Dark/16x16/panel/:/usr/share/icons/Papirus-Dark/16x16/places/
 
-    dmenu = /usr/bin/wofi -p dunst:
+    dmenu = /usr/bin/rofi -dmenu -p Notifications
     browser = /usr/bin/firefox --new-tab
 
     title = Dunst
@@ -45,14 +45,14 @@
     timeout = 5
 
 [urgency_low]
-    background = "#1E1E2E"
-    foreground = "#CDD6F4"
+    background = "#262626"
+    foreground = "#afa286"
 
 [urgency_normal]
-    background = "#1E1E2E"
-    foreground = "#CDD6F4"
+    background = "#262626"
+    foreground = "#d5c8ac"
 
 [urgency_critical]
-    background = "#1E1E2E"
-    foreground = "#CDD6F4"
-    frame_color = "#FAB387"
+    background = "#262626"
+    foreground = "#d5c8ac"
+    frame_color = "#c49a78"
