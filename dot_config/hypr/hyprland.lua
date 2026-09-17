@@ -7,6 +7,13 @@ local rows = dofile(root .. "/modules/workspace-bindings.lua").new(hl, hs)
 local pads = dofile(root .. "/modules/scratchpads.lua").new(hl)
 -- Exposed for Waybar's Lua IPC actions; no shell helper moves windows.
 workspace_rows = rows
+-- Reuse the same scratchpad controller for panel clicks and keybinds.
+function panel_scratchpad(name, monitor)
+    assert(name == "volume" or name == "bluetooth", "Unknown panel scratchpad")
+    hl.plugin.scrolloverview._dispatch("overview", "off all")
+    hl.dispatch(hl.dsp.focus({ monitor = monitor }))
+    pads.toggle(name)
+end
 
 hl.monitor({ output = "DP-1", mode = "1440x900", position = "0x0", scale = 1 })
 -- Use the actual connector; the legacy config still referred to HDMI-A-1.
@@ -50,6 +57,21 @@ bind("SHIFT + R", hl.dsp.layout("colresize -conf"))
 bind("SPACE", hl.dsp.layout("togglefit"))
 -- ScrollOverview is installed by setup/scripts/hyprland-plugins.sh.
 bind("O", function() hl.plugin.scrolloverview.overview("toggle all") end)
+-- ScrollOverview owns this mode's lifecycle, including mouse/Escape exits.
+-- Quickshell observes the compositor's submap events, not a parallel toggle.
+hl.define_submap("scrolloverview", function()
+    for _, direction in ipairs({ "left", "right", "up", "down" }) do
+        hl.bind(direction, function() hl.plugin.scrolloverview.navigate(direction) end)
+    end
+    hl.bind("RETURN", function() hl.plugin.scrolloverview.overview("select") end)
+    hl.bind("ESCAPE", function() hl.plugin.scrolloverview.overview("off all") end)
+    hl.bind("SUPER + O", function() hl.plugin.scrolloverview.overview("off all") end)
+    hl.bind("mouse:272", function()
+        hl.plugin.scrolloverview.overview("select")
+        hl.plugin.scrolloverview.window("select")
+        hl.plugin.scrolloverview.overview("off all")
+    end, { mouse = true })
+end)
 bind("SHIFT + P", exec("wlogout"))
 bind("CTRL + H", hl.dsp.focus({ monitor = "l" }))
 bind("CTRL + L", hl.dsp.focus({ monitor = "r" }))
@@ -68,7 +90,6 @@ bind("SHIFT + K", function() rows.step(-1, true) end)
 bind("mouse_down", function() rows.step(1, false) end)
 bind("mouse_up", function() rows.step(-1, false) end)
 bind("ALT + P", exec('"$HOME/.config/scripts/rofi-screenshot-wayland.sh"'))
-bind("Z", exec("pkill -SIGUSR1 waybar"))
 bind("mouse:272", hl.dsp.window.drag(), { mouse = true })
 bind("mouse:273", hl.dsp.window.resize(), { mouse = true })
 bind("A", function() pads.toggle("term") end)
@@ -89,7 +110,6 @@ end)
 hl.on("hyprland.start", function()
     hl.exec_cmd('swaybg -i "$HOME/wallpapers/blackhole.png" -m fill')
     hl.exec_cmd("udiskie")
-    hl.exec_cmd('python3 "' .. root .. '/rowbar.py" --launch')
     hl.exec_cmd('hypridle -c "' .. root .. '/hypridle-lua.conf"')
     hl.exec_cmd("hyprpm reload -n")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-theme 'GoogleDot-White'")
