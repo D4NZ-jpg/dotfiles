@@ -1,5 +1,16 @@
-# Colors
-include ../../.cache/wal/colors-zathura
+# Static UI colors; document recoloring remains opt-in with Ctrl+i.
+set default-bg "#262626"
+set default-fg "#d5c8ac"
+set statusbar-bg "#262626"
+set statusbar-fg "#d5c8ac"
+set inputbar-bg "#302e29"
+set inputbar-fg "#d5c8ac"
+set completion-bg "#262626"
+set completion-fg "#d5c8ac"
+set completion-highlight-bg "#49453d"
+set completion-highlight-fg "#d5c8ac"
+set recolor-darkcolor "#d5c8ac"
+set recolor-lightcolor "#262626"
 
 set window-title-home-tilde true
 set statusbar-basename true

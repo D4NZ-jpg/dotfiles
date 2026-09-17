@@ -1,5 +1,5 @@
-/* import pywal colors */
-@import "../../.cache/wal/colors-waybar.css";
+/* Static charcoal and warm-cream palette; no generated cache required. */
+@define-color color11 #afa286;
 
 
 * {
@@ -13,7 +13,7 @@ window {
 }
 
 button {
-    color: #FFFFFF;
+    color: #d5c8ac;
     font-size: 20px;
 
 	background-repeat: no-repeat;
@@ -21,8 +21,8 @@ button {
 	background-size: 25%;
 
 	border-style: solid;
-	background-color: rgba(12,12,12,0.3);
-    border: 3px solid #FFFFFF;
+	background-color: #262626;
+    border: 3px solid #49453d;
 
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 7px 20px 0 rgba(0, 0, 0, 0.19);
 
