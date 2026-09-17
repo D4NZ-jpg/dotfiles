@@ -1,5 +1,7 @@
 base-devel
 pciutils
+# CPU microcode; the mkinitcpio microcode hook loads it at boot. Use amd-ucode on AMD.
+intel-ucode
 git
 python
 zen-browser-bin
