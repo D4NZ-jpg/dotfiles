@@ -1,2 +1,8 @@
 README.md
 screenshots/
+tests/
+
+# Zen profiles contain browsing data, sessions, cookies, and credentials.
+# Only the generic theme and local installer are managed.
+.zen
+.zen/**

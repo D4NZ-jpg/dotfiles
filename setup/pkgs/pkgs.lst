@@ -1,5 +1,6 @@
 base-devel
 git
+python
 zsh
 starship
 meson
