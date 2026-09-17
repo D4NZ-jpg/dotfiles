@@ -12,7 +12,8 @@ ShellRoot {
     property bool overview: false
     property bool launcher: false
     property bool manual: false
-    readonly property bool forced: overview || launcher || manual || networkMenu.running
+    property string networkMonitor: ""
+    readonly property bool forced: overview || launcher || manual || networkMonitor !== ""
     readonly property color ink: "#d5c8ac"
     readonly property color muted: "#afa286"
     readonly property string networkStatus: {
@@ -33,17 +34,42 @@ ShellRoot {
     function openScratchpad(name, monitor) {
         Quickshell.execDetached(["hyprctl", "eval", "panel_scratchpad(" + JSON.stringify(name) + ", " + JSON.stringify(monitor) + ")"]);
     }
+    function closeNetwork() {
+        networkMonitor = "";
+        networkOverviewExit.monitor = "";
+    }
+    function toggleNetwork(monitor) {
+        if (networkMonitor === monitor || (networkOverviewExit.running && networkOverviewExit.monitor === monitor)) {
+            closeNetwork();
+            return;
+        }
+        networkMonitor = "";
+        networkOverviewExit.monitor = monitor;
+        if (!networkOverviewExit.running) networkOverviewExit.running = true;
+    }
+    onOverviewChanged: { if (overview) closeNetwork(); }
+    onLauncherChanged: { if (launcher) closeNetwork(); }
     Process {
-        id: networkMenu
-        command: ["sh", "-c", "hyprctl eval 'hl.plugin.scrolloverview._dispatch(\"overview\", \"off all\")' >/dev/null; exec kitty --class panel-network --title Network nmtui"]
+        id: networkOverviewExit
+        property string monitor: ""
+        command: ["hyprctl", "eval", "hl.plugin.scrolloverview._dispatch(\"overview\", \"off all\")"]
+        onExited: {
+            const requested = monitor;
+            monitor = "";
+            if (!root.launcher && Quickshell.screens.some(s => s.name === requested)) root.networkMonitor = requested;
+        }
     }
     SystemClock { id: clock; precision: SystemClock.Minutes }
     PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
     IpcHandler {
         target: "panel"
         function preview(show: bool): void { root.manual = show; }
+        function network(monitor: string): void {
+            if (monitor === "") root.closeNetwork();
+            else if (Quickshell.screens.some(s => s.name === monitor)) root.toggleNetwork(monitor);
+        }
         function status(): string {
-            return JSON.stringify({overview: root.overview, launcher: root.launcher, manual: root.manual, network: root.networkStatus, networkMenu: networkMenu.running});
+            return JSON.stringify({overview: root.overview, launcher: root.launcher, manual: root.manual, network: root.networkStatus, networkMenu: root.networkMonitor !== "", networkMonitor: root.networkMonitor, networkScanning: Networking.devices.values.some(d => d.type === DeviceType.Wifi && d.scannerEnabled)});
         }
     }
     // Query actual layer state rather than keeping an open/close counter.
@@ -95,6 +121,16 @@ ShellRoot {
             WlrLayershell.namespace: "dan-panel"
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+            Component.onDestruction: {
+                if (root.networkMonitor === modelData.name) root.networkMonitor = "";
+            }
+            LazyLoader {
+                active: root.networkMonitor === panel.screen.name
+                NetworkPopup {
+                    barWindow: panel
+                    onDismissed: root.closeNetwork()
+                }
+            }
             property bool hovered: false
             readonly property bool revealed: root.forced || hovered
             // Hidden panel only owns a two-pixel hover strip; everything else passes through.
@@ -132,7 +168,7 @@ ShellRoot {
                     StatusButton {
                         label: root.networkStatus
                         onActivated: mouseButton => {
-                            if (mouseButton === Qt.LeftButton && !networkMenu.running) networkMenu.running = true;
+                            if (mouseButton === Qt.LeftButton) root.toggleNetwork(panel.screen.name);
                         }
                     }
                     StatusButton {
@@ -141,7 +177,7 @@ ShellRoot {
                             return !audio ? "VOL —" : audio.muted ? "MUTED" : "VOL " + Math.round(audio.volume * 100) + "%";
                         }
                         onActivated: mouseButton => {
-                            if (mouseButton === Qt.LeftButton) root.openScratchpad("volume", panel.screen.name);
+                            if (mouseButton === Qt.LeftButton) { root.closeNetwork(); root.openScratchpad("volume", panel.screen.name); }
                             else {
                                 const audio = Pipewire.defaultAudioSink?.audio;
                                 if (audio) audio.muted = !audio.muted;
@@ -155,7 +191,7 @@ ShellRoot {
                     StatusButton {
                         label: Bluetooth.defaultAdapter?.enabled ? "BT ON" : "BT OFF"
                         onActivated: mouseButton => {
-                            if (mouseButton === Qt.LeftButton) root.openScratchpad("bluetooth", panel.screen.name);
+                            if (mouseButton === Qt.LeftButton) { root.closeNetwork(); root.openScratchpad("bluetooth", panel.screen.name); }
                         }
                     }
                 }
