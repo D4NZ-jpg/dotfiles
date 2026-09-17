@@ -5,6 +5,7 @@ return {
         { "-",          "<cmd>Oil --float<cr>", desc = "Open Oil" },
         { "<leader>fo", "<cmd>Oil --float<cr>", desc = "Open filesystem view" },
     },
+    cmd = { "Oil" },
     opts = {
         columns = {
             "icon",

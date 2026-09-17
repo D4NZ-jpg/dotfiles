@@ -3,10 +3,10 @@ return {
     event = "VeryLazy",
     opts = {
         spec = {
-            { "g", group = "goto" },
-            { "[", group = "prev" },
-            { "]", group = "next" },
-            { "z", group = "fold" },
+            { "g",         group = "goto" },
+            { "[",         group = "prev" },
+            { "]",         group = "next" },
+            { "z",         group = "fold" },
 
             { "<leader>f", group = "Telescope" },
             { "<leader>q", group = "quit/session" },
@@ -17,6 +17,7 @@ return {
             { "<leader>c", group = "code" },
             { "<leader>g", group = "git" },
             { "<leader>t", group = "tests" },
+            { "<leader>d", group = "debugging" }
         },
     },
 }

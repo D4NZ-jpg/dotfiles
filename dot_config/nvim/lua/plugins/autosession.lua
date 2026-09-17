@@ -1,4 +1,5 @@
 return {
+    enabled=false,
     "rmagatti/auto-session",
     lazy = false,
     keys = {
