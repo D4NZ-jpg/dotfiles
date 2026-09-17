@@ -22,7 +22,7 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })
 hl.env("XCURSOR_SIZE", "16")
 hl.env("XCURSOR_THEME", "GoogleDot-White")
 hl.config({
-    cursor = { inactive_timeout = 10, hide_on_key_press = true, hide_on_touch = true },
+    cursor = { default_monitor = "HDMI-A-2", inactive_timeout = 10, hide_on_key_press = true, hide_on_touch = true },
     input = { kb_layout = "us,latam", kb_options = "grp:alt_shift_toggle", follow_mouse = 1,
         sensitivity = 0, touchpad = { natural_scroll = false } },
     general = { layout = "scrolling", gaps_in = 5, gaps_out = 10, border_size = 3,
@@ -131,6 +131,9 @@ hl.bind("catchall", hl.dsp.submap("reset"))
 end)
 
 hl.on("hyprland.start", function()
+    if hl.get_monitor("HDMI-A-2") then
+        hl.dispatch(hl.dsp.focus({ monitor = "HDMI-A-2" }))
+    end
     hl.exec_cmd('swaybg -i "$HOME/wallpapers/blackhole.png" -m fill')
     hl.exec_cmd("udiskie")
     hl.exec_cmd("quickshell -c panel -d --no-duplicate")
