@@ -8,8 +8,9 @@ Stop: `quickshell kill -c panel`
 Preview: `quickshell ipc -c panel call panel preview true`
 End preview: `quickshell ipc -c panel call panel preview false`
 Inspect state: `quickshell ipc -c panel call panel status`
-Toggle network popup: `quickshell ipc -c panel call panel network HDMI-A-2`
-Close network popup: `quickshell ipc -c panel call panel network ''`
+Toggle popups: `quickshell ipc -c panel call panel network HDMI-A-2`,
+`... volume focused` (`focused` resolves the active Hyprland monitor)
+Close the open popup: `quickshell ipc -c panel call panel network ''`
 Logs: `quickshell log -c panel --no-color -t 50`
 
 Starts automatically on Hyprland login, with duplicate-instance protection.
@@ -32,11 +33,24 @@ PipeWire volume and Bluetooth power state. No workspace indicator.
 - Network click toggles a themed popup on that monitor. Escape, Close, or a click
   outside the popup/bar dismisses it. Only one network popup is open at a time.
   The bar stays revealed while it is open.
-- Volume click opens the existing volume scratchpad on the clicked monitor.
-  Scroll changes volume in 5-point steps (0–100%); right-click toggles mute.
+- Volume click toggles a themed popup on that monitor; Super+Ctrl+V opens it
+  on the focused monitor. Scroll on the bar label changes the default sink in
+  5-point steps (0–100%); right-click toggles mute.
 - Bluetooth click opens the existing Bluetooth scratchpad on the clicked monitor.
 - Opening controls dismisses ScrollOverview first. No network, volume or Bluetooth
   setting is changed merely by revealing the bar.
+
+Only one popup is open at a time; opening another replaces it. Both share
+`PanelPopup.qml` for placement, focus and dismissal.
+
+## Volume popup
+
+Uses `Quickshell.Services.Pipewire`. Lists output and input devices with
+volume sliders and mute, marks the default device and lets you pick another
+when several exist, and shows per-application streams. Sliders allow up to
+150% because PipeWire permits it. Opening changes nothing; nodes are bound
+only while the popup is open. `pavucontrol` is no longer used by the desktop
+but remains installed for advanced routing.
 
 ## Network popup
 
@@ -60,10 +74,12 @@ The popup does not bypass Rofi's exclusive input grab. Opening Rofi or overview
 closes it. Connection/password handling has synthetic tests in
 `tests/quickshell-network.qml`; a real network switch is deliberately not part
 of validation. Run from the repository with:
-`python3 tests/quickshell-network.py`.
-The runner copies the component and fixture to a temporary offscreen shell;
-23 checks cover scanner restoration, saved credentials, password retry/clearing,
-security types, connection feedback, and closing without disconnecting.
+`python3 tests/quickshell-panel.py`.
+The runner copies the components and fixtures to a temporary offscreen shell.
+23 network checks cover scanning, saved credentials, password retry/clearing,
+security types, connection feedback, and closing without disconnecting;
+13 volume checks cover node classification, labels, slider/volume sync,
+default-device selection and that opening never mutes anything.
 
 Verified on Hyprland 0.56.2 / ScrollOverview 5e96ae20ec73 / Quickshell 0.3.1:
 - two overlay-layer surfaces and zero reserved space on both monitors;

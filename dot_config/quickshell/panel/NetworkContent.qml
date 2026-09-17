@@ -29,7 +29,42 @@ Item {
         }
     }
     implicitWidth: 380
-    implicitHeight: Math.min(480, layout.implicitHeight)
+    // Repeater rows are not laid out until the window is mapped, so the
+    // pre-map height is computed from the device and network lists. Keep the
+    // constants in sync with the delegates below.
+    implicitHeight: Math.min(480, fixedHeight + Math.max(60, listHeight + 4))
+    readonly property int fixedHeight: (connectivity !== "" ? 15 + 12 : 0) + (hasWifi ? 31 + 12 : 0) + 1 + 12
+        + (message !== "" ? 12 + 15 : 0) + (needsPassword ? 12 + 99 : 0)
+    // networks.values is an ObjectModel snapshot; track its count through the
+    // model's own change signal so the height updates when scans add rows.
+    property int networkRevision: 0
+    Instantiator {
+        model: menu.service.devices.values
+        delegate: Connections {
+            required property var modelData
+            // Synthetic models may use plain objects; only QObjects can be targets.
+            target: typeof modelData.networks === "object" && modelData.networks.objectName !== undefined ? modelData.networks : null
+            ignoreUnknownSignals: true
+            function onValuesChanged() { menu.networkRevision++; }
+        }
+    }
+    readonly property int listHeight: {
+        const revision = networkRevision;
+        let total = 0, sections = 0;
+        for (const device of service.devices.values) {
+            const wifi = device.type === DeviceType.Wifi;
+            let h = 12; // device title
+            if (!device.nmManaged || (!wifi && !device.hasLink)) h += 6 + 15;
+            const count = (!wifi || service.wifiEnabled) ? device.networks.values.length : 0;
+            if (wifi && service.wifiEnabled && count === 0) h += 6 + 15;
+            h += count * (6 + 65);
+            total += h;
+            sections++;
+        }
+        if (available && sections === 0) total += 15;
+        return total + Math.max(0, sections - 1) * 12;
+    }
+    readonly property int layoutWidth: width > 0 ? width : implicitWidth
     focus: true
     Keys.onEscapePressed: dismissed()
 
@@ -161,7 +196,7 @@ Item {
             ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
             Column {
                 id: list
-                width: scroll.availableWidth
+                width: menu.layoutWidth
                 spacing: 12
                 Repeater {
                     model: menu.service.devices.values

@@ -12,8 +12,10 @@ ShellRoot {
     property bool overview: false
     property bool launcher: false
     property bool manual: false
-    property string networkMonitor: ""
-    readonly property bool forced: overview || launcher || manual || networkMonitor !== ""
+    // At most one popup is open: `popup` names it, `popupMonitor` places it.
+    property string popup: ""
+    property string popupMonitor: ""
+    readonly property bool forced: overview || launcher || manual || popup !== ""
     readonly property color ink: "#d5c8ac"
     readonly property color muted: "#afa286"
     readonly property string networkStatus: {
@@ -31,32 +33,50 @@ ShellRoot {
         return connecting ? "CONNECTING" : "DISCONNECTED";
     }
 
+    // IPC accepts a monitor name, "focused" for the active Hyprland monitor,
+    // or "" to close.
+    function ipcPopup(name, monitor) {
+        if (monitor === "focused") monitor = Hyprland.focusedMonitor?.name ?? "";
+        if (monitor === "") closePopup();
+        else if (Quickshell.screens.some(s => s.name === monitor)) togglePopup(name, monitor);
+    }
     function openScratchpad(name, monitor) {
         Quickshell.execDetached(["hyprctl", "eval", "panel_scratchpad(" + JSON.stringify(name) + ", " + JSON.stringify(monitor) + ")"]);
     }
-    function closeNetwork() {
-        networkMonitor = "";
-        networkOverviewExit.monitor = "";
+    function closePopup() {
+        popup = "";
+        popupMonitor = "";
+        overviewExit.popup = "";
+        overviewExit.monitor = "";
     }
-    function toggleNetwork(monitor) {
-        if (networkMonitor === monitor || (networkOverviewExit.running && networkOverviewExit.monitor === monitor)) {
-            closeNetwork();
+    function togglePopup(name, monitor) {
+        const pending = overviewExit.running && overviewExit.popup === name && overviewExit.monitor === monitor;
+        if ((popup === name && popupMonitor === monitor) || pending) {
+            closePopup();
             return;
         }
-        networkMonitor = "";
-        networkOverviewExit.monitor = monitor;
-        if (!networkOverviewExit.running) networkOverviewExit.running = true;
+        popup = "";
+        popupMonitor = "";
+        overviewExit.popup = name;
+        overviewExit.monitor = monitor;
+        if (!overviewExit.running) overviewExit.running = true;
     }
-    onOverviewChanged: { if (overview) closeNetwork(); }
-    onLauncherChanged: { if (launcher) closeNetwork(); }
+    onOverviewChanged: { if (overview) closePopup(); }
+    onLauncherChanged: { if (launcher) closePopup(); }
+    // Dismiss the overview before showing a popup so input is not contested.
     Process {
-        id: networkOverviewExit
+        id: overviewExit
+        property string popup: ""
         property string monitor: ""
         command: ["hyprctl", "eval", "hl.plugin.scrolloverview._dispatch(\"overview\", \"off all\")"]
         onExited: {
-            const requested = monitor;
+            const name = popup, requested = monitor;
+            popup = "";
             monitor = "";
-            if (!root.launcher && Quickshell.screens.some(s => s.name === requested)) root.networkMonitor = requested;
+            if (!root.launcher && name !== "" && Quickshell.screens.some(s => s.name === requested)) {
+                root.popupMonitor = requested;
+                root.popup = name;
+            }
         }
     }
     SystemClock { id: clock; precision: SystemClock.Minutes }
@@ -64,12 +84,10 @@ ShellRoot {
     IpcHandler {
         target: "panel"
         function preview(show: bool): void { root.manual = show; }
-        function network(monitor: string): void {
-            if (monitor === "") root.closeNetwork();
-            else if (Quickshell.screens.some(s => s.name === monitor)) root.toggleNetwork(monitor);
-        }
+        function network(monitor: string): void { root.ipcPopup("network", monitor); }
+        function volume(monitor: string): void { root.ipcPopup("volume", monitor); }
         function status(): string {
-            return JSON.stringify({overview: root.overview, launcher: root.launcher, manual: root.manual, network: root.networkStatus, networkMenu: root.networkMonitor !== "", networkMonitor: root.networkMonitor, networkScanning: Networking.devices.values.some(d => d.type === DeviceType.Wifi && d.scannerEnabled)});
+            return JSON.stringify({overview: root.overview, launcher: root.launcher, manual: root.manual, network: root.networkStatus, popup: root.popup, popupMonitor: root.popupMonitor, networkScanning: Networking.devices.values.some(d => d.type === DeviceType.Wifi && d.scannerEnabled)});
         }
     }
     // Query actual layer state rather than keeping an open/close counter.
@@ -122,14 +140,15 @@ ShellRoot {
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             Component.onDestruction: {
-                if (root.networkMonitor === modelData.name) root.networkMonitor = "";
+                if (root.popupMonitor === modelData.name) root.closePopup();
             }
             LazyLoader {
-                active: root.networkMonitor === panel.screen.name
-                NetworkPopup {
-                    barWindow: panel
-                    onDismissed: root.closeNetwork()
-                }
+                active: root.popup === "network" && root.popupMonitor === panel.screen.name
+                NetworkPopup { barWindow: panel; onDismissed: root.closePopup() }
+            }
+            LazyLoader {
+                active: root.popup === "volume" && root.popupMonitor === panel.screen.name
+                VolumePopup { barWindow: panel; onDismissed: root.closePopup() }
             }
             property bool hovered: false
             readonly property bool revealed: root.forced || hovered
@@ -168,7 +187,7 @@ ShellRoot {
                     StatusButton {
                         label: root.networkStatus
                         onActivated: mouseButton => {
-                            if (mouseButton === Qt.LeftButton) root.toggleNetwork(panel.screen.name);
+                            if (mouseButton === Qt.LeftButton) root.togglePopup("network", panel.screen.name);
                         }
                     }
                     StatusButton {
@@ -177,7 +196,7 @@ ShellRoot {
                             return !audio ? "VOL —" : audio.muted ? "MUTED" : "VOL " + Math.round(audio.volume * 100) + "%";
                         }
                         onActivated: mouseButton => {
-                            if (mouseButton === Qt.LeftButton) { root.closeNetwork(); root.openScratchpad("volume", panel.screen.name); }
+                            if (mouseButton === Qt.LeftButton) root.togglePopup("volume", panel.screen.name);
                             else {
                                 const audio = Pipewire.defaultAudioSink?.audio;
                                 if (audio) audio.muted = !audio.muted;
@@ -191,7 +210,7 @@ ShellRoot {
                     StatusButton {
                         label: Bluetooth.defaultAdapter?.enabled ? "BT ON" : "BT OFF"
                         onActivated: mouseButton => {
-                            if (mouseButton === Qt.LeftButton) { root.closeNetwork(); root.openScratchpad("bluetooth", panel.screen.name); }
+                            if (mouseButton === Qt.LeftButton) { root.closePopup(); root.openScratchpad("bluetooth", panel.screen.name); }
                         }
                     }
                 }

@@ -9,7 +9,7 @@ local pads = dofile(root .. "/modules/scratchpads.lua").new(hl)
 workspace_rows = rows
 -- Reuse the same scratchpad controller for panel clicks and keybinds.
 function panel_scratchpad(name, monitor)
-    assert(name == "volume" or name == "bluetooth", "Unknown panel scratchpad")
+    assert(name == "bluetooth", "Unknown panel scratchpad")
     hl.plugin.scrolloverview._dispatch("overview", "off all")
     hl.dispatch(hl.dsp.focus({ monitor = monitor }))
     pads.toggle(name)
@@ -127,7 +127,8 @@ bind("ALT + P", exec('"$HOME/.config/scripts/rofi-screenshot-wayland.sh"'))
 bind("mouse:272", hl.dsp.window.drag(), { mouse = true })
 bind("mouse:273", hl.dsp.window.resize(), { mouse = true })
 bind("A", function() pads.toggle("term") end)
-bind("CTRL + V", function() pads.toggle("volume") end)
+-- Volume is a panel popup on the focused monitor rather than a scratchpad.
+bind("CTRL + V", exec("quickshell ipc -c panel call panel volume focused"))
 bind("CTRL + B", function() pads.toggle("bluetooth") end)
 hl.bind("XF86MonBrightnessDown", exec("brightnessctl set 10%-"))
 hl.bind("XF86MonBrightnessUp", exec("brightnessctl set +10%"))

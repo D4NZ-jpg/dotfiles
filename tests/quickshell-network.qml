@@ -3,7 +3,7 @@ import Quickshell
 import Quickshell.Networking
 import "panel" as Panel
 
-// Run through quickshell-network.py, which copies this fixture into a sandbox.
+// Run through quickshell-panel.py, which copies this fixture into a sandbox.
 // All mutations target these fake objects, never the real Networking singleton.
 ShellRoot {
     id: suite
