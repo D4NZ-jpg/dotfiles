@@ -3,17 +3,17 @@ configuration{
     icon-theme: "Oranchelo";
     show-icons: true;
     terminal: "kitty";
-    drun-display-format: "{icon} {name}";
+    drun-display-format: "{name}";
     disable-history: false;
     hide-scrollbar: true;
-    display-drun: "   Apps ";
-    display-run: "   Run ";
-    display-window: "  Window";
-    display-Network: " 󰤨  Network";
-    display-emoji: " 󰞅 Emojis";
-    sidebar-mode: true;
+    display-drun: "Apps";
+    display-run: "Run";
+    display-window: "Windows";
+    display-Network: "Network";
+    display-emoji: "Emoji";
+    display-calc: "Calculate";
+    sidebar-mode: false;
 
 }
 
-@theme "/dev/null"
-@import "~/.cache/wal/colors-rofi-dark.rasi"
+@theme "~/.config/rofi/charcoal.rasi"

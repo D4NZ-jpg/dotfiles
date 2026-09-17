@@ -1,0 +1,73 @@
+* {
+    font: "JetBrains Mono 12";
+    background-color: transparent;
+    text-color: #d5c8ac;
+    border-color: #49453d;
+    spacing: 0;
+}
+window {
+    location: center;
+    anchor: center;
+    width: 640px;
+    background-color: #262626;
+    border: 1px;
+    border-radius: 12px;
+    padding: 16px;
+}
+mainbox {
+    children: [ inputbar, message, listview ];
+    spacing: 12px;
+}
+inputbar {
+    children: [ prompt, entry ];
+    spacing: 14px;
+    padding: 10px 8px 16px;
+    border: 0px 0px 1px;
+}
+prompt {
+    text-color: #afa286;
+    vertical-align: 0.5;
+}
+entry {
+    placeholder: "Search…";
+    placeholder-color: #8c8577;
+    vertical-align: 0.5;
+}
+listview {
+    columns: 1;
+    lines: 7;
+    fixed-height: true;
+    scrollbar: false;
+    spacing: 4px;
+}
+element {
+    children: [ element-icon, element-text ];
+    padding: 10px 12px;
+    spacing: 12px;
+    border-radius: 7px;
+}
+element normal.normal, element alternate.normal {
+    background-color: transparent;
+    text-color: #d5c8ac;
+}
+element selected.normal {
+    background-color: #afa286;
+    text-color: #262626;
+}
+element-icon {
+    size: 22px;
+    background-color: inherit;
+    text-color: inherit;
+}
+element-text {
+    background-color: inherit;
+    text-color: inherit;
+    vertical-align: 0.5;
+    highlight: bold;
+}
+message {
+    background-color: #302e29;
+    border-radius: 7px;
+    padding: 10px 12px;
+}
+textbox { text-color: #d5c8ac; }
