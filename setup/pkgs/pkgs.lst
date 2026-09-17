@@ -1,6 +1,7 @@
 base-devel
 git
 python
+zen-browser-bin
 zsh
 starship
 meson

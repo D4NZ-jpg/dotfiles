@@ -6,7 +6,7 @@ The public policies in `addon-policies.json` automatically install:
 - [uBlock Origin](https://addons.mozilla.org/firefox/addon/ublock-origin/)
 - [SponsorBlock](https://addons.mozilla.org/firefox/addon/sponsorblock/)
 
-For Arch's `zen-browser-bin`, install the policies with:
+The main post-install script installs these policies through `zen-setup.sh`, prompting for sudo as needed. For Arch's `zen-browser-bin`, you can also install or refresh the policies independently with:
 
 ```sh
 sudo python3 "$HOME/.config/zen-style/install-addons.py"

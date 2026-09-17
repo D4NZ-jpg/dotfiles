@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply only browser styling to local Zen profiles; never collect profile data."""
+"""Apply browser styling and privacy defaults locally; never collect profile data."""
 import configparser
 import os
 from pathlib import Path
@@ -9,6 +9,32 @@ IMPORT = '@import url("chezmoi-theme.css");'
 PREFS = {
     "toolkit.legacyUserProfileCustomizations.stylesheets": "true",
     "zen.view.window.scheme": "0",
+    # Strict ETP; leave its evolving feature set to the browser.
+    "browser.contentblocking.category": '"strict"',
+    "privacy.trackingprotection.enabled": "true",
+    "privacy.trackingprotection.pbmode.enabled": "true",
+    "dom.security.https_only_mode": "true",
+    "dom.security.https_only_mode_pbm": "true",
+    # Do not send partially typed searches to the search provider.
+    "browser.search.suggest.enabled": "false",
+    "browser.urlbar.suggest.searches": "false",
+    "browser.urlbar.quicksuggest.enabled": "false",
+    # Block new notification requests; existing site grants are left intact.
+    "permissions.default.desktop-notification": "2",
+    # Camera, microphone and location continue to require site permission.
+    "permissions.default.camera": "0",
+    "permissions.default.microphone": "0",
+    "permissions.default.geo": "0",
+    # Bitwarden handles passwords. Do not delete existing saved information.
+    "signon.rememberSignons": "false",
+    "signon.autofillForms": "false",
+    "extensions.formautofill.addresses.enabled": "false",
+    "extensions.formautofill.creditCards.enabled": "false",
+    # Keep browser security checks enabled.
+    "browser.safebrowsing.malware.enabled": "true",
+    "browser.safebrowsing.phishing.enabled": "true",
+    "browser.safebrowsing.downloads.enabled": "true",
+    "xpinstall.signatures.required": "true",
 }
 
 
@@ -80,7 +106,7 @@ def apply(root, theme):
 def main():
     theme = Path(__file__).with_name("theme.css").read_text()
     count = apply(Path.home() / ".zen", theme)
-    print(f"Zen styling applied to {count} local profile(s). Restart Zen to load changes.")
+    print(f"Zen styling and privacy defaults applied to {count} local profile(s). Restart Zen to load changes.")
 
 
 if __name__ == "__main__":

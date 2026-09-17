@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -e
 
 source $HOME/setup/scripts/utils.sh
@@ -15,76 +15,8 @@ if isInstalled zsh && [ "$SHELL" != "/usr/bin/zsh" ]; then
     echo "Default shell has been changed, log out to apply changes"
 fi
 
-# Configure firefox
-if isInstalled firefox; then
-    name=$(whoami)
-    folder=$(sed -n "/Path=.*.$name$/ s/.*=//p" ~/.mozilla/firefox/profiles.ini)
-    path="$HOME/.mozilla/firefox/$folder"
-
-    if [[ -z "$folder" ]]; then
-        read -p "Would you like to configure Firefox? [y/N]: " answer < /dev/tty
-        if [[ $answer = [Yy] ]]; then
-            firefox -CreateProfile $(whoami)
-
-            folder=$(sed -n "/Path=.*.$name$/ s/.*=//p" ~/.mozilla/firefox/profiles.ini)
-            path="$HOME/.mozilla/firefox/$folder"
-
-            # User.js
-            echo "Installing config"
-            arkenfoxurl="$( curl -s https://api.github.com/repos/arkenfox/user.js/releases/latest \ | grep "tag_name" \
-                    | awk '{print "https://github.com/arkenfox/user.js/archive/" substr($2, 2, length($2)-3) ".tar.gz"}')"
-
-            arkenfoxzip=$(mktemp)
-            curl -L -o "$arkenfoxzip" "$arkenfoxurl" # Download zip
-
-            # Extract only the files we're interested on
-            tar -xf "$arkenfoxzip" -C "$path" --strip-components 1 $(tar -tf "$arkenfoxzip" | grep -E "prefsCleaner.*|updater.*|user.js$")
-
-            cp "$HOME/setup/firefox/user-overrides.js" "$path"
-            /bin/bash "$path/updater.sh" -s -u
-
-            # Addons
-            echo "Downloading firefox addons..."
-
-            mkdir -p "$path/extensions/"
-            addontmp="$(mktemp -d)"
-            mozillaurl="https://addons.mozilla.org"
-
-            while read addon; do
-                echo "Installing $addon"
-
-                addonurl="$(curl --silent "$mozillaurl/en-US/firefox/addon/${addon}/" | grep -o "$mozillaurl/firefox/downloads/file/[^\"]*")"
-                file="${addonurl##*/}"
-                curl -LOs "$addonurl" >"$addontmp/$file"
-                id="$(unzip -p "$file" manifest.json | grep "\"id\"")"
-                id="${id%\"*}"
-                id="${id##*\"}"
-                mv "$file" "$path/extensions/$id.xpi"
-            done < $HOME/setup/firefox/addons.lst
-
-            echo "Addons installed, enable them in firefox's settings"
-
-            # Theme (useChrome.css)
-            answer=""
-            read -p "Would you like to install userChrome.css? [y/N]: " answer < /dev/tty
-            if [[ $answer = [Yy] ]]; then
-                cp -r "$HOME/setup/firefox/chrome" "$path"
-
-                # Create symlink to pywal file
-                if [ ! -e "$HOME/.cache/wal/colors.css" ]; then
-                    mkdir -p "$HOME/.cache/wal"
-                    touch "$HOME/.cache/wal/colors.css"
-                fi
-
-                mkdir -p "$path/chrome/includes"
-                ln -s "$HOME/.cache/wal/colors.css" "$path/chrome/includes/colors.css"
-            fi
-
-            # Set default profile
-            sed -i -E "s/Default=.{3,}/Default=$folder/g" "$HOME/.mozilla/firefox/profiles.ini"
-        fi
-    fi
-fi
+# Initialize Zen and apply public styling/privacy/addon configuration.
+bash "$HOME/setup/scripts/zen-setup.sh"
 
 services=(pipewire pipewire-pulse wireplumber)
 for service in "${services[@]}"; do

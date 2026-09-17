@@ -40,6 +40,19 @@ class ThemeTests(unittest.TestCase):
             self.assertEqual(before, {f: (f.read_bytes(), f.stat().st_mtime_ns) for f in before})
             self.assertEqual((p / "cookies.sqlite").read_bytes(), b"synthetic untouched database")
 
+    def test_balanced_privacy_defaults(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d)
+            (p / 'user.js').write_text('user_pref("browser.contentblocking.category", "standard");\nuser_pref("network.trr.mode", 2);\n')
+            style.apply_profile(p, '/* theme */')
+            prefs = (p / 'user.js').read_text()
+            for key, value in style.PREFS.items():
+                self.assertIn(f'user_pref("{key}", {value});', prefs)
+            self.assertIn('user_pref("network.trr.mode", 2);', prefs)
+            self.assertNotIn('"standard"', prefs)
+            self.assertNotIn('privacy.resistFingerprinting', prefs)
+            self.assertNotIn('network.cookie.lifetimePolicy', prefs)
+
     def test_migrate_original_theme(self):
         with tempfile.TemporaryDirectory() as d:
             p = Path(d)
