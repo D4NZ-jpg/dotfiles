@@ -1,4 +1,5 @@
 base-devel
+pciutils
 git
 python
 zen-browser-bin

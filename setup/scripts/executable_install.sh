@@ -12,6 +12,11 @@ source "$HOME/setup/scripts/utils.sh"
 workdir=$(mktemp -d)
 trap 'rm -rf -- "$workdir"' EXIT
 install_list="$workdir/install.lst"
+source "$HOME/setup/scripts/nvidia.sh"
+command -v lspci >/dev/null || { echo 'Install pciutils before running setup.' >&2; exit 1; }
+# Resolve the complete GPU plan before changing repositories or packages.
+nvidia_packages=$(planNvidia "$HOME/setup/.nvidia")
+nvidia_driver=${nvidia_packages%%$'\n'*}
 
 # Install chaotic-aur
 # Check if chaotic-aur is already installed
@@ -31,34 +36,31 @@ fi
 # Set parallel downloads
 sudo sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 5/' /etc/pacman.conf
 
+# Enable multilib (needed for lib32 Nvidia/Vulkan libs used by Steam/Wine)
+if ! grep -q "^\[multilib\]" /etc/pacman.conf; then
+    sudo sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' /etc/pacman.conf
+fi
+
 # Refresh repositories only as part of a full system upgrade.
 sudo pacman -Syu
 
 # Keep the package queue independent of the caller's working directory.
 cp "$HOME/setup/pkgs/pkgs.lst" "$install_list"
 
-# Nvidia drivers (https://github.com/prasanthrangan/hyprdots/blob/main/Scripts/install.sh)
-if hasNvidia; then
-    cat /usr/lib/modules/*/pkgbase | while read krnl; do
-        echo "${krnl}-headers" >>"$install_list"
+# Queue the selected driver family and headers; no driver configuration yet.
+if [[ -n "$nvidia_driver" ]]; then
+    printf '%s\n' "$nvidia_packages" >> "$install_list"
+    shopt -s nullglob
+    kernel_files=(/usr/lib/modules/*/pkgbase)
+    shopt -u nullglob
+    (( ${#kernel_files[@]} > 0 )) || { echo 'No installed kernel metadata found; cannot select DKMS headers.' >&2; exit 1; }
+    for kernel_file in "${kernel_files[@]}"; do
+        read -r kernel < "$kernel_file"
+        printf '%s-headers\n' "$kernel" >> "$install_list"
     done
-    IFS=$' ' read -r -d '' -a nvga < <(lspci -k | grep -E "(VGA|3D)" | grep -i nvidia | awk -F ':' '{print $NF}' | tr -d '[]()' && printf '\0')
-    for nvcode in "${nvga[@]}"; do
-        awk -F '|' -v nvc="$nvcode" '{if ($3 == nvc) {split(FILENAME,driver,"/"); print driver[length(driver)],"\nnvidia-utils"}}' "$HOME/setup/.nvidia/nvidia*dkms" >>"$install_list"
-    done
-    echo -e "\033[0;32m[GPU]\033[0m: detected // ${nvga[@]}"
-
-    # Preserve video memory on suspend
-    enableCtl nvidia-suspend
-    enableCtl nvidia-hibernate
-    enableCtl nvidia-resume
-
-    if ! grep -Fxq "options nvidia NVreg_PreserveVideoMemoryAllocations=1" /etc/modprobe.d/nvidia.conf; then
-        echo "options nvidia NVreg_PreserveVideoMemoryAllocations=1" | sudo tee -a /etc/modprobe.d/nvidia.conf > /dev/null
-        sudo update-initramfs -u
-    fi
+    printf 'Selected NVIDIA branch: %s\n' "$nvidia_driver"
 else
-    echo "No Nvidia Card detected, skipping Nvidia drivers..."
+    echo 'No NVIDIA display GPU detected; skipping driver setup.'
 fi
 
 # Ask for extras
@@ -74,6 +76,11 @@ done < "$HOME/setup/pkgs/extras.lst"
 
 # Install pkgs
 installPkgs "$install_list"
+
+# Driver packages must exist before service or initramfs configuration.
+if [[ -n "$nvidia_driver" ]]; then
+    configureNvidia "$nvidia_driver"
+fi
 
 # Configuring packages
 source "$HOME/setup/scripts/post-install.sh"
