@@ -1,4 +1,4 @@
--- Keybind/Waybar adapter only. Workspace allocation and navigation belong to hyprsplit.
+-- Keybind adapter only. Workspace allocation and navigation belong to hyprsplit.
 local M = {}
 function M.new(api, hs)
     local rows = {}

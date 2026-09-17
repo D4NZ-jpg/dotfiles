@@ -13,7 +13,7 @@ Meet the beloved members of this house, each playing a crucial role in our harmo
 - **Neovim** 📝: My sanctuary for code, turning every keystroke into a symphony.
 - **Zsh** 🐚: The shell that's always ready to greet me, customized for a seamless day-to-day dialogue.
 - **Rofi** 🚀: The speedy launcher, opening doors to my applications faster than the blink of an eye.
-- **Waybar** 📊: A window to my system's heart, offering customizable notifications and insightful status updates.
+- **Quickshell**: An on-demand top bar with clock, network, volume, and Bluetooth controls.
 - **Wlogout** 🚪🌌: Ensuring each farewell is as smooth and peaceful as a night's slumber.
 
 ## Housekeeping 🧹🏠

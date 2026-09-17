@@ -5,7 +5,7 @@ hs.config({ num_workspaces = 20, persistent_workspaces = false })
 hs.monitor_priority({ "DP-1", "HDMI-A-2" })
 local rows = dofile(root .. "/modules/workspace-bindings.lua").new(hl, hs)
 local pads = dofile(root .. "/modules/scratchpads.lua").new(hl)
--- Exposed for Waybar's Lua IPC actions; no shell helper moves windows.
+-- Exposed for Lua IPC actions; no shell helper moves windows.
 workspace_rows = rows
 -- Reuse the same scratchpad controller for panel clicks and keybinds.
 function panel_scratchpad(name, monitor)
