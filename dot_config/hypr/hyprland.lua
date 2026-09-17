@@ -30,7 +30,7 @@ hl.config({
     decoration = { rounding = 10, active_opacity = 1, inactive_opacity = 0.9, fullscreen_opacity = 1,
         blur = { enabled = true, size = 4, passes = 3, new_optimizations = true } },
     animations = { enabled = true, workspace_wraparound = false },
-    scrolling = { direction = "right", column_width = 0.5, fullscreen_on_one_column = false,
+    scrolling = { direction = "right", column_width = 1.0, fullscreen_on_one_column = false,
         focus_fit_method = 1, follow_focus = true, explicit_column_widths = "0.333, 0.5, 0.667, 1.0",
         wrap_focus = false, wrap_swapcol = false },
     plugin = { scrolloverview = { layout = "vertical", scale = 0.5, blur = false } },
