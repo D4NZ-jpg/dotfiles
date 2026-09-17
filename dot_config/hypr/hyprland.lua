@@ -7,13 +7,6 @@ local rows = dofile(root .. "/modules/workspace-bindings.lua").new(hl, hs)
 local pads = dofile(root .. "/modules/scratchpads.lua").new(hl)
 -- Exposed for Lua IPC actions; no shell helper moves windows.
 workspace_rows = rows
--- Reuse the same scratchpad controller for panel clicks and keybinds.
-function panel_scratchpad(name, monitor)
-    assert(name == "bluetooth", "Unknown panel scratchpad")
-    hl.plugin.scrolloverview._dispatch("overview", "off all")
-    hl.dispatch(hl.dsp.focus({ monitor = monitor }))
-    pads.toggle(name)
-end
 
 hl.monitor({ output = "DP-1", mode = "1440x900", position = "0x0", scale = 1 })
 -- Use the actual connector; the legacy config still referred to HDMI-A-1.
@@ -127,9 +120,9 @@ bind("ALT + P", exec('"$HOME/.config/scripts/rofi-screenshot-wayland.sh"'))
 bind("mouse:272", hl.dsp.window.drag(), { mouse = true })
 bind("mouse:273", hl.dsp.window.resize(), { mouse = true })
 bind("A", function() pads.toggle("term") end)
--- Volume is a panel popup on the focused monitor rather than a scratchpad.
+-- Volume and Bluetooth are panel popups on the focused monitor.
 bind("CTRL + V", exec("quickshell ipc -c panel call panel volume focused"))
-bind("CTRL + B", function() pads.toggle("bluetooth") end)
+bind("CTRL + B", exec("quickshell ipc -c panel call panel bluetooth focused"))
 hl.bind("XF86MonBrightnessDown", exec("brightnessctl set 10%-"))
 hl.bind("XF86MonBrightnessUp", exec("brightnessctl set +10%"))
 -- Preserve the existing notes shortcut without relying on a legacy submap file.

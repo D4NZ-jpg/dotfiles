@@ -9,7 +9,7 @@ import unittest
 
 REPO = Path(__file__).resolve().parent.parent
 PANEL = REPO / "dot_config/quickshell/panel"
-COMPONENTS = ("NetworkContent.qml", "VolumeContent.qml", "PanelAction.qml")
+COMPONENTS = ("NetworkContent.qml", "VolumeContent.qml", "BluetoothContent.qml", "PanelAction.qml")
 
 
 def run_fixture(fixture: str, marker: str) -> str:
@@ -42,6 +42,9 @@ class PanelPopupTests(unittest.TestCase):
 
     def test_volume_flows(self):
         print(run_fixture("quickshell-volume.qml", "VOLUME_TESTS"))
+
+    def test_bluetooth_flows(self):
+        print(run_fixture("quickshell-bluetooth.qml", "BLUETOOTH_TESTS"))
 
 
 if __name__ == "__main__":

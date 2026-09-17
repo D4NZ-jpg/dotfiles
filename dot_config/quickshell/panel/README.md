@@ -36,9 +36,11 @@ PipeWire volume and Bluetooth power state. No workspace indicator.
 - Volume click toggles a themed popup on that monitor; Super+Ctrl+V opens it
   on the focused monitor. Scroll on the bar label changes the default sink in
   5-point steps (0–100%); right-click toggles mute.
-- Bluetooth click opens the existing Bluetooth scratchpad on the clicked monitor.
+- Bluetooth click toggles a themed popup on that monitor; Super+Ctrl+B opens it
+  on the focused monitor.
 - Opening controls dismisses ScrollOverview first. No network, volume or Bluetooth
-  setting is changed merely by revealing the bar.
+  setting is changed merely by revealing the bar. No scratchpads remain in use
+  by the bar; the terminal scratchpad (Super+A) is unrelated.
 
 Only one popup is open at a time; opening another replaces it. Both share
 `PanelPopup.qml` for placement, focus and dismissal.
@@ -51,6 +53,15 @@ when several exist, and shows per-application streams. Sliders allow up to
 150% because PipeWire permits it. Opening changes nothing; nodes are bound
 only while the popup is open. `pavucontrol` is no longer used by the desktop
 but remains installed for advanced routing.
+
+## Bluetooth popup
+
+Uses `Quickshell.Bluetooth`. Shows adapter power with a toggle, paired devices
+(connect, disconnect, forget, battery) and a fixed-height scrolling list of
+named nearby devices discovered while the popup is open. Discovery stops on
+close. Pairing works for devices that need no PIN or confirmation; Quickshell
+has no pairing agent, so devices that require one must be paired in
+`blueman-manager`, which stays installed. Pairing does not mark devices trusted.
 
 ## Network popup
 
@@ -79,7 +90,9 @@ The runner copies the components and fixtures to a temporary offscreen shell.
 23 network checks cover scanning, saved credentials, password retry/clearing,
 security types, connection feedback, and closing without disconnecting;
 13 volume checks cover node classification, labels, slider/volume sync,
-default-device selection and that opening never mutes anything.
+default-device selection and that opening never mutes anything; 18 Bluetooth
+checks cover list filtering, discovery start/stop without duplicate writes,
+and connect/disconnect/pair/forget routing without trusting devices.
 
 Verified on Hyprland 0.56.2 / ScrollOverview 5e96ae20ec73 / Quickshell 0.3.1:
 - two overlay-layer surfaces and zero reserved space on both monitors;

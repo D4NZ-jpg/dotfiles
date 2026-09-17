@@ -40,9 +40,6 @@ ShellRoot {
         if (monitor === "") closePopup();
         else if (Quickshell.screens.some(s => s.name === monitor)) togglePopup(name, monitor);
     }
-    function openScratchpad(name, monitor) {
-        Quickshell.execDetached(["hyprctl", "eval", "panel_scratchpad(" + JSON.stringify(name) + ", " + JSON.stringify(monitor) + ")"]);
-    }
     function closePopup() {
         popup = "";
         popupMonitor = "";
@@ -86,6 +83,7 @@ ShellRoot {
         function preview(show: bool): void { root.manual = show; }
         function network(monitor: string): void { root.ipcPopup("network", monitor); }
         function volume(monitor: string): void { root.ipcPopup("volume", monitor); }
+        function bluetooth(monitor: string): void { root.ipcPopup("bluetooth", monitor); }
         function status(): string {
             return JSON.stringify({overview: root.overview, launcher: root.launcher, manual: root.manual, network: root.networkStatus, popup: root.popup, popupMonitor: root.popupMonitor, networkScanning: Networking.devices.values.some(d => d.type === DeviceType.Wifi && d.scannerEnabled)});
         }
@@ -150,6 +148,10 @@ ShellRoot {
                 active: root.popup === "volume" && root.popupMonitor === panel.screen.name
                 VolumePopup { barWindow: panel; onDismissed: root.closePopup() }
             }
+            LazyLoader {
+                active: root.popup === "bluetooth" && root.popupMonitor === panel.screen.name
+                BluetoothPopup { barWindow: panel; onDismissed: root.closePopup() }
+            }
             property bool hovered: false
             readonly property bool revealed: root.forced || hovered
             // Hidden panel only owns a two-pixel hover strip; everything else passes through.
@@ -210,7 +212,7 @@ ShellRoot {
                     StatusButton {
                         label: Bluetooth.defaultAdapter?.enabled ? "BT ON" : "BT OFF"
                         onActivated: mouseButton => {
-                            if (mouseButton === Qt.LeftButton) { root.closePopup(); root.openScratchpad("bluetooth", panel.screen.name); }
+                            if (mouseButton === Qt.LeftButton) root.togglePopup("bluetooth", panel.screen.name);
                         }
                     }
                 }

@@ -2,7 +2,6 @@
 local M = {}
 local specs = {
     term = { class = "kitty-dropterm", command = "kitty --class kitty-dropterm", width = 0.75, height = 0.75, edge = "center" },
-    bluetooth = { class = "blueman-manager", command = "blueman-manager", width = 0.40, height = 0.90, edge = "right", unfocus = true },
 }
 local function run(api, dispatcher)
     local result = api.dispatch(dispatcher)
