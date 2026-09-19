@@ -14,6 +14,8 @@ hl.monitor({ output = "HDMI-A-2", mode = "1920x1080", position = "1440x0", scale
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })
 hl.env("XCURSOR_SIZE", "16")
 hl.env("XCURSOR_THEME", "GoogleDot-White")
+-- Qt apps read qt6ct/qt5ct (Fusion + charcoal palette, Oranchelo icons)
+hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
 hl.config({
     cursor = { default_monitor = "HDMI-A-2", inactive_timeout = 10, hide_on_key_press = true, hide_on_touch = true },
     input = { kb_layout = "us,latam", kb_options = "grp:alt_shift_toggle", follow_mouse = 1,
@@ -155,5 +157,10 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("hyprpm reload -n")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-theme 'GoogleDot-White'")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-size 16")
+    -- GTK/libadwaita apps and the GTK portal read these over the settings
+    -- portal; settings.ini alone is ignored on Wayland by GTK4.
+    hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'")
+    hl.exec_cmd("gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3-dark'")
+    hl.exec_cmd("gsettings set org.gnome.desktop.interface icon-theme 'Tela-brown-dark'")
     hl.exec_cmd("xdg-settings set default-web-browser zen.desktop")
 end)

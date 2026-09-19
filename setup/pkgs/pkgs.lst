@@ -51,7 +51,9 @@ bluez-utils
 
 brightnessctl
 
-oranchelo-icon-theme
+adw-gtk-theme
+qt6ct
+qt5ct
 fastfetch
 
 ripgrep

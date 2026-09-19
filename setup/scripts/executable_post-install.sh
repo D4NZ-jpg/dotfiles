@@ -17,6 +17,7 @@ fi
 
 # Initialize Zen and apply public styling/privacy/addon configuration.
 bash "$HOME/setup/scripts/zen-setup.sh"
+bash "$HOME/setup/scripts/icons.sh"
 
 services=(pipewire pipewire-pulse wireplumber)
 for service in "${services[@]}"; do

@@ -1,6 +1,6 @@
 configuration{
     modi: "drun,window,emoji";
-    icon-theme: "Oranchelo";
+    icon-theme: "Tela-brown-dark";
     show-icons: true;
     terminal: "kitty";
     drun-display-format: "{name}";
