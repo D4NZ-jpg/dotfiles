@@ -1,4 +1,6 @@
-command_timeout = 5000
+# Cold boot: the java/node probes can take seconds before the binaries are
+# cached; a short timeout prints a warning on the first prompt.
+command_timeout = 10000
 add_newline = true
 format = "[╭╴](fg:arrow)$username$os$git_branch$directory$fill$cmd_duration $time( via $python$conda$nodejs$c$rust$java)\n[╰─](fg:arrow)$character"
 palette = "normal"
@@ -11,14 +13,14 @@ symbol = " "
 version_format = "$raw"
 
 [character]
-error_symbol = "[󰍟](fg:red)"
+error_symbol = "[󰍟](fg:#c98a7a)"
 success_symbol = "[󰍟](fg:arrow)"
 
 [cmd_duration]
 disabled = false
 format = "took [$duration]($style) "
 min_time = 500
-style = "bold fg:duration"
+style = "fg:duration"
 
 [conda]
 disabled = false
@@ -55,7 +57,8 @@ format = "[$all_status$ahead_behind ]($style)"
 style = "fg:text_color bg:git"
 
 [java]
-disabled = false
+# JVM startup is the slowest probe and the version rarely matters in the prompt.
+disabled = true
 format = "[$symbol$version ]($style)"
 style = "fg:java"
 symbol = " "
@@ -93,23 +96,26 @@ openSUSE = " "
 [package]
 disabled = false
 
+# Charcoal: the desktop palette. Frame and time in muted grey, name and
+# directory in cream, git in the accent, language versions in the kitty
+# ANSI tones so they stay readable without shouting.
 [palettes.normal]
-arrow = "blue"
-clang = "#caf0f8"
-conda = "#70e000"
-directory = "blue"
-duration = "red"
-git = "#f17f29"
-git_status = "#DFEBED"
-java = "#F86279"
-node = "#a5e6ba"
-os = "blue"
-os_admin = "blue"
-python = "#edf67d"
-rust = "#ffdac6"
-text_color = "#EDF2F4"
-text_light = "#26272A"
-time = "blue"
+arrow = "#827c70"
+clang = "#8fa3ad"
+conda = "#a3ad7d"
+directory = "#d5c8ac"
+duration = "#d9b090"
+git = "#d9b090"
+git_status = "#afa286"
+java = "#c98a7a"
+node = "#a3ad7d"
+os = "#d5c8ac"
+os_admin = "#c98a7a"
+python = "#e6c6a4"
+rust = "#c98a7a"
+text_color = "#d5c8ac"
+text_light = "#262626"
+time = "#827c70"
 
 [python]
 disabled = false
@@ -128,7 +134,7 @@ version_format = "$raw"
 [time]
 disabled = false
 format = "[$time]($style) "
-style = "bold fg:time"
+style = "fg:time"
 time_format = "%H:%M"
 
 [username]
