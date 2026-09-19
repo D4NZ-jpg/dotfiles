@@ -6,7 +6,7 @@ timestr=%R
 datestr=%a, %e of %B
 
 # Current wallpaper as background
-image=~/.cache/currentWallpaper.jpg
+image=~/wallpapers/blackhole.png
 
 # Fade in
 fade-in=1

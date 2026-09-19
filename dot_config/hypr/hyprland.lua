@@ -27,7 +27,9 @@ hl.config({
         focus_fit_method = 1, follow_focus = true, explicit_column_widths = "0.333, 0.5, 0.667, 1.0",
         wrap_focus = false, wrap_swapcol = false },
     plugin = { scrolloverview = { layout = "vertical", scale = 0.5, blur = false } },
-    misc = { disable_hyprland_logo = true },
+    -- If the lock client dies, keep the session locked and let a new locker
+    -- attach instead of leaving it unrecoverable.
+    misc = { disable_hyprland_logo = true, allow_session_lock_restore = true },
 })
 hl.curve("myBezier", { type = "bezier", points = { { 0.05, 0.9 }, { 0.1, 1.05 } } })
 for _, anim in ipairs({
