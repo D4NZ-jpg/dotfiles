@@ -59,6 +59,7 @@ eza
 bat
 zoxide
 fzf
+tmux
 entr
 
 kitty

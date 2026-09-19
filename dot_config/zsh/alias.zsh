@@ -23,3 +23,9 @@ fi
 if (( $+commands[zoxide] )); then
   eval "$(zoxide init zsh)"
 fi
+
+# tmux workspace note for the current window (shown in the status line)
+note() {
+  [ -z "$TMUX" ] && { echo "not inside tmux"; return 1; }
+  if [ $# -eq 0 ]; then tmux show -wv @note 2>/dev/null; else tmux set -w @note "$*"; fi
+}
