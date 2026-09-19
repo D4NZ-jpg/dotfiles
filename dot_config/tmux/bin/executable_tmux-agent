@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Mark a window as an agent window: after 20s without output it is flagged as
+# waiting for you (status colour + notification). Plain shells are always
+# silent, so this is opt-in per window rather than global.
+#
+#   tmux-agent SESSION INDEX        enable
+#   tmux-agent --off SESSION INDEX  disable
+set -u
+if [ "${1:-}" = "--off" ]; then
+    tmux set -w -t "$2:$3" monitor-silence 0
+    tmux set -w -t "$2:$3" @agent ""
+    tmux display -t "$2:$3" "agent tracking off"
+else
+    tmux set -w -t "$1:$2" monitor-silence 20
+    tmux set -w -t "$1:$2" @agent 1
+    tmux display -t "$1:$2" "agent tracking on (flags after 20s of silence)"
+fi

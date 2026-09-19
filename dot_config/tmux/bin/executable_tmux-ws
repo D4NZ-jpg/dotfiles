@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+# Control tmux workspaces and windows from the shell (and from pi via the
+# tmux-workspaces skill). Every subcommand prints what it did.
+#
+#   tmux-ws list                                   workspaces and their windows
+#   tmux-ws window  [opts] <cmd...>                run a command in a new window
+#   tmux-ws split   [opts] [--right|--down] <cmd...>  run beside the current pane
+#   tmux-ws pi      [opts] [prompt...]             start another pi in a new window
+#   tmux-ws workspace <name> [--dir D] [--focus]   create (or reuse) a workspace
+#   tmux-ws note <text...>                         set this window's note
+#   tmux-ws move <workspace>                       move this window to a workspace
+#
+# opts: --in <workspace>  target workspace (default: current; created if missing)
+#       --dir <path>      working directory (default: current pane's)
+#       --name <name>     window name (default: first word of the command)
+#       --note <text>     note shown in the status line (default: the command)
+#       --focus           switch to the new window/workspace
+set -u
+die() { printf 'tmux-ws: %s\n' "$*" >&2; exit 1; }
+[ -n "${TMUX:-}" ] || die "not inside tmux"
+
+cmd=${1:-}; shift || true
+ws=""; dir=""; name=""; note=""; focus=0; placement="window"
+parse_opts() {
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --in) ws=$2; shift 2 ;;
+            --dir) dir=$2; shift 2 ;;
+            --name) name=$2; shift 2 ;;
+            --note) note=$2; shift 2 ;;
+            --focus) focus=1; shift ;;
+            --right) placement=right; shift ;;
+            --down) placement=down; shift ;;
+            --) shift; break ;;
+            -*) die "unknown option $1" ;;
+            *) break ;;
+        esac
+    done
+    REST=("$@")
+}
+current_ws=$(tmux display -p '#S')
+current_dir=$(tmux display -p '#{pane_current_path}')
+
+ensure_ws() {   # create workspace $1 in dir $2 if missing; returns 1 if it already existed
+    tmux has-session -t "=$1" 2>/dev/null && return 1
+    tmux new-session -d -s "$1" -c "${2:-$HOME}"
+    case "$(realpath "${2:-$HOME}")" in
+        "$HOME/dev/work/"*) tmux set -t "$1" @group work ;;
+        "$HOME/dev/projects/"*) tmux set -t "$1" @group projects ;;
+        "$HOME/dev/side/"*) tmux set -t "$1" @group side ;;
+    esac
+    printf 'created workspace %s\n' "$1"
+    return 0
+}
+first_window() {   # reuse window 1 of a just-created workspace instead of adding a second one
+    tmux respawn-window -k -t "$1:1" -c "$2" "$3" >/dev/null 2>&1 && tmux rename-window -t "$1:1" "$4" && printf '%s:1' "$1"
+}
+
+case "$cmd" in
+list)
+    tmux list-sessions -F '#{session_created}	#{session_name}	#{@group}' | sort -n | while IFS=$'\t' read -r _ s g; do
+        printf '%s%s\n' "${g:+$g/}" "$s"
+        tmux list-windows -t "$s" -F '#I	#W	#{@pi-state}	#{?@note,#{@note},#{@auto-note}}	#{pane_current_path}' | while IFS= read -r l; do
+            i=$(cut -f1 <<<"$l"); w=$(cut -f2 <<<"$l"); st=$(cut -f3 <<<"$l"); n=$(cut -f4 <<<"$l"); d=$(cut -f5 <<<"$l")
+            printf '  %s:%-14s %-8s %-30s %s\n' "$i" "$w" "${st:-}" "${n:-}" "${d/#$HOME/\~}"
+        done
+    done ;;
+window|split)
+    parse_opts "$@"; [ ${#REST[@]} -gt 0 ] || die "$cmd needs a command"
+    ws=${ws:-$current_ws}; dir=${dir:-$current_dir}; name=${name:-${REST[0]##*/}}; note=${note:-${REST[*]}}
+    if [ "$cmd" = split ] && [ "$ws" = "$current_ws" ]; then
+        [ "$placement" = down ] && flag=-v || flag=-h
+        target=$(tmux split-window $flag -P -F '#{pane_id}' ${focus:+} -c "$dir" "${REST[*]}")
+        [ $focus -eq 0 ] && tmux last-pane
+        printf 'split %s in %s: %s\n' "$placement" "$ws" "${REST[*]}"
+    else
+        if ensure_ws "$ws" "$dir"; then target=$(first_window "$ws" "$dir" "${REST[*]}" "$name")
+        else target=$(tmux new-window -d -P -F '#{session_name}:#{window_index}' -t "$ws:" -n "$name" -c "$dir" "${REST[*]}"); fi
+        tmux set -w -t "$target" @note "$note"
+        [ $focus -eq 1 ] && tmux switch-client -t "$target"
+        printf 'window %s: %s\n' "$target" "${REST[*]}"
+    fi ;;
+pi)
+    parse_opts "$@"
+    ws=${ws:-$current_ws}; dir=${dir:-$current_dir}; name=${name:-pi}
+    if [ ${#REST[@]} -gt 0 ]; then
+        launch="pi $(printf '%q' "${REST[*]}")"
+    else launch="pi"; fi
+    # run through the login shell so pi keeps a shell (and its PATH) when it exits
+    launch="exec \${SHELL:-zsh} -lc $(printf '%q' "$launch; exec \${SHELL:-zsh} -l")"
+    if ensure_ws "$ws" "$dir"; then target=$(first_window "$ws" "$dir" "$launch" "$name")
+    else target=$(tmux new-window -d -P -F '#{session_name}:#{window_index}' -t "$ws:" -n "$name" -c "$dir" "$launch"); fi
+    [ -n "$note" ] && tmux set -w -t "$target" @note "$note"
+    [ $focus -eq 1 ] && tmux switch-client -t "$target"
+    printf 'pi started in %s (%s)\n' "$target" "${dir/#$HOME/\~}" ;;
+workspace)
+    [ -n "${1:-}" ] || die "workspace needs a name"
+    wsname=$1; shift; parse_opts "$@"
+    ensure_ws "$wsname" "${dir:-$HOME}" || true
+    [ $focus -eq 1 ] && tmux switch-client -t "$wsname"
+    printf 'workspace %s\n' "$wsname" ;;
+note)
+    [ $# -gt 0 ] || die "note needs text"
+    tmux set -w @note "$*"; printf 'note: %s\n' "$*" ;;
+move)
+    [ -n "${1:-}" ] || die "move needs a workspace"
+    if ensure_ws "$1" "$current_dir"; then
+        # a new workspace has one placeholder window: swap ours in, drop it
+        tmux move-window -t "$1:" && tmux kill-window -t "$1:1"
+    else
+        tmux move-window -t "$1:"
+    fi && printf 'moved window to %s\n' "$1" ;;
+*)
+    sed -n '2,/^set -u/p' "$0" | grep '^#' | sed 's/^# \{0,1\}//'; exit 1 ;;
+esac

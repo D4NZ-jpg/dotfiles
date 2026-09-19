@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Move the current window to another workspace, chosen with the picker.
+# Type a name that does not exist to create that workspace.
+set -u
+. "$(dirname "$(realpath "$0")")/fzf-modal.sh"
+cur=$(tmux display -p '#S')
+sel=$(tmux list-sessions -F '#{session_created}	#{session_name}	#{@group}' | sort -n \
+    | awk -F'\t' -v c="$cur" '$2!=c {printf "%s\t%s%s\n",$2,($3!=""?$3"/":""),$2}' \
+    | fzf --delimiter='\t' --with-nth=2 --reverse --no-sort --prompt='move to > ' "${FZF_MODAL[@]}" \
+          --header='j/k move  Enter move here  / search (type a new name + Enter to create)  q quit' \
+          --bind "$(fzf_modal_normal 'move to > ')" --bind "$(fzf_modal_search 'move to > ')" \
+          --print-query | tail -n1)
+[ -z "$sel" ] && exit 0
+target=${sel%%	*}
+~/.config/tmux/bin/tmux-ws move "$target" >/dev/null && tmux display "moved to $target"

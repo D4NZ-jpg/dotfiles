@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# Open a directory as a workspace (or switch to it if already open), or with
+# --window add a window in a chosen directory to the current workspace.
+# Workspaces are named by you (default: the directory name), so one workspace
+# can hold windows from several directories (a review batch, a course).
+#
+# Modal picker with vim keys.
+#   normal: j/k move, g/G first/last, l descend, h up, Enter open here,
+#           / search, z zoxide, q or Esc quit
+#   search: type to filter, Enter open, Esc back to normal (keeps the match)
+# Sessions are named after the directory and grouped by root
+# (work/projects/side/home).
+set -u
+. "$(dirname "$(realpath "$0")")/fzf-modal.sh"
+mode=${1:-}
+# Browsing starts at ~/dev (plus a few home entries) and can go anywhere.
+top="$HOME/dev"
+home_entries=("$HOME/.local/share/chezmoi" "$HOME/Notes" "$HOME/.config")
+keyfile=$(mktemp); trap 'rm -f "$keyfile"' EXIT
+
+entries() {
+    local base="$1"
+    if [ -z "$base" ]; then
+        find "$top" -mindepth 1 -maxdepth 1 -type d ! -name '.*' 2>/dev/null | sort
+        printf '%s\n' "${home_entries[@]}"
+        return
+    fi
+    find "$base" -mindepth 1 -maxdepth 1 -type d ! -name '.*' 2>/dev/null | sort
+}
+label() {
+    case "$1" in
+        "$HOME/.local/share/chezmoi") printf 'home/dotfiles' ;;
+        "$HOME/Notes") printf 'home/notes' ;;
+        "$HOME/.config") printf 'home/config' ;;
+        "$top/"*) printf '%s' "${1#$top/}" ;;
+        *) printf '%s' "${1/#$HOME/\~}" ;;
+    esac
+}
+base=""
+while :; do
+    prompt="${base:+$(label "$base")/} "
+    : > "$keyfile"
+    sel=$(entries "$base" | while read -r d; do printf '%s\t%s\n' "$d" "$(label "$d")"; done \
+        | fzf --delimiter='\t' --with-nth=2 --reverse --prompt="$prompt" "${FZF_MODAL[@]}" \
+              --header='j/k move  l descend  h up  Enter open  / search  z zoxide  q quit' \
+              --bind "$(fzf_modal_normal "$prompt" "l:execute-silent(echo l > $keyfile)+accept" "h:execute-silent(echo h > $keyfile)+accept" "z:execute-silent(echo z > $keyfile)+accept")" \
+              --bind "$(fzf_modal_search "$prompt")" \
+              --preview 'ls -1 --group-directories-first --color=always {1} 2>/dev/null | head -30' \
+              --preview-window=right,40%,border-left)
+    key=$(cat "$keyfile")
+    [ -z "$sel" ] && [ "$key" != "h" ] && [ "$key" != "z" ] && exit 0
+    dir=${sel%%	*}
+    case "$key" in
+        l)  # descend only if there is something to show; otherwise stay put
+            if [ -d "$dir" ] && [ -n "$(find "$dir" -mindepth 1 -maxdepth 1 -type d ! -name '.*' -print -quit 2>/dev/null)" ]; then
+                base=$(realpath "$dir")
+            fi
+            continue ;;
+        h)
+            if [ -n "$base" ]; then
+                up=$(realpath "$base/..")
+                case "$up" in "$top"|"$HOME/.local/share"|"$HOME/.local") base="" ;; *) base="$up" ;; esac
+            else
+                base="$HOME"   # from the top list, h goes to ~ so anything is reachable
+            fi
+            continue ;;
+        z)
+            dir=$(zoxide query -l 2>/dev/null | fzf --reverse --prompt='zoxide > ') || exit 0
+            [ -z "$dir" ] && exit 0 ;;
+    esac
+    break
+done
+dir=$(realpath "$dir")
+if [ "$mode" = "--window" ]; then
+    tmux new-window -c "$dir" -n "$(basename "$dir")"
+    exit 0
+fi
+default=$(basename "$dir" | tr '.:' '__')
+read -r -e -p "workspace name [$default]: " name </dev/tty
+name=${name:-$default}; name=$(printf '%s' "$name" | tr '.:' '__')
+group=""
+case "$dir" in
+    "$HOME/dev/work/"*)     group=work ;;
+    "$HOME/dev/projects/"*) group=projects ;;
+    "$HOME/dev/side/"*)     group=side ;;
+    "$HOME/.local/share/chezmoi"|"$HOME/Notes"|"$HOME/.config") group=home ;;
+esac
+if ! tmux has-session -t "=$name" 2>/dev/null; then
+    tmux new-session -d -s "$name" -c "$dir"
+    [ -n "$group" ] && tmux set -t "$name" @group "$group"
+fi
+tmux switch-client -t "$name"

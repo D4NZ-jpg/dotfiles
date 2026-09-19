@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Save and restore the workspace layout across reboots.
+#
+#   tmux-persist save      write workspaces, windows, dirs, notes and pi
+#                          session files to the state file (called from the
+#                          status line every few seconds; cheap)
+#   tmux-persist restore   recreate workspaces from the state file; pi windows
+#                          come back as `pi --session <file>`, so each window
+#                          resumes exactly the thread it had, even when several
+#                          shared a directory
+#   tmux-persist show      print the state file
+#
+# Layout inside a window (panes) is not saved; one pane per window.
+set -u
+state="${XDG_STATE_HOME:-$HOME/.local/state}/tmux/workspaces.tsv"
+mkdir -p "$(dirname "$state")"
+
+case "${1:-}" in
+save)
+    tmp="$state.tmp"
+    # one row per window: session  group  index  name  dir  note  pi-session
+    tmux list-windows -a -F '#{session_name}	#{@group}	#{window_index}	#{window_name}	#{pane_current_path}	#{@note}	#{@pi-session}' > "$tmp" 2>/dev/null \
+        && [ -s "$tmp" ] && mv "$tmp" "$state"
+    rm -f "$tmp" ;;
+restore)
+    [ -s "$state" ] || exit 0
+    tmux has-session 2>/dev/null && { echo "tmux-persist: server already running" >&2; exit 1; }
+    while IFS= read -r l; do
+        s=$(cut -f1 <<<"$l"); g=$(cut -f2 <<<"$l"); i=$(cut -f3 <<<"$l"); w=$(cut -f4 <<<"$l")
+        d=$(cut -f5 <<<"$l"); n=$(cut -f6 <<<"$l"); p=$(cut -f7 <<<"$l")
+        [ -d "$d" ] || d=$HOME
+        cmd=""
+        if [ -n "$p" ] && [ -f "$p" ]; then
+            cmd="pi --session $(printf '%q' "$p")"
+        elif [ -n "$p" ]; then
+            cmd="pi"   # session file gone; start fresh in the same dir
+        fi
+        # login shell keeps a prompt after pi exits
+        [ -n "$cmd" ] && cmd="exec \${SHELL:-zsh} -lc $(printf '%q' "$cmd; exec \${SHELL:-zsh} -l")"
+        if ! tmux has-session -t "=$s" 2>/dev/null; then
+            tmux new-session -d -s "$s" -c "$d" -n "$w" ${cmd:+"$cmd"}
+            tmux move-window -s "$s:1" -t "$s:$i" 2>/dev/null
+            [ -n "$g" ] && tmux set -t "$s" @group "$g"
+        else
+            tmux new-window -d -t "$s:$i" -n "$w" -c "$d" ${cmd:+"$cmd"}
+        fi
+        [ -n "$n" ] && tmux set -w -t "$s:$i" @note "$n"
+    done < "$state"
+    printf 'restored %s workspaces\n' "$(cut -f1 "$state" | sort -u | wc -l)" ;;
+show)
+    column -t -s $'\t' -N session,group,idx,name,dir,note,pi-session "$state" 2>/dev/null || cat "$state" ;;
+*)
+    sed -n '2,/^set -u/p' "$0" | grep '^#' | sed 's/^# \{0,1\}//'; exit 1 ;;
+esac

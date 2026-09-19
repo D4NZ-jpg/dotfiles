@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Switch between OPEN workspaces only. Sessions are listed in creation order
+# (never re-sorted), grouped by the @group option, with each window's note.
+# Modal: normal mode ignores typing; j/k move, Enter switch, d close (asks),
+# / search (Esc returns to normal), q quit.
+set -u
+self=$(realpath "$0")
+. "$(dirname "$self")/fzf-modal.sh"
+
+list() {
+    tmux list-sessions -F '#{session_created}	#{session_name}	#{@group}	#{session_windows}	#{session_attached}' \
+        | sort -n | while IFS=$'\t' read -r _ name group windows attached; do
+            wait=$(tmux list-windows -t "$name" -F '#{window_silence_flag}#{window_bell_flag}' | grep -c 1)
+            notes=$(tmux list-windows -t "$name" -F '#{?@note,#{@note},#{@auto-note}}' | grep -v '^$' | paste -sd'|' | cut -c1-60)
+            printf '%s\t%-22s %s%s%s\n' "$name" "${group:+$group/}$name" \
+                "$([ "$wait" -gt 0 ] && printf '● ')" \
+                "$([ "$attached" != 0 ] && printf '⌂ ')" \
+                "${notes:+· $notes}"
+        done
+}
+confirm_close() {   # runs on the popup tty; y/Y kills, anything else cancels
+    local name="$1" n ans
+    n=$(tmux list-windows -t "$name" -F x | wc -l)
+    printf '\n  close workspace %s (%s window%s)? [y/N] ' "$name" "$n" "$([ "$n" = 1 ] || echo s)"
+    read -r -n1 ans </dev/tty; printf '\n'
+    case "$ans" in y|Y) tmux kill-session -t "$name" ;; esac
+}
+case "${1:-}" in
+    --list) list; exit 0 ;;
+    --close) confirm_close "$2"; exit 0 ;;
+esac
+
+sel=$(list | fzf --delimiter='\t' --with-nth=2 --prompt='workspace > ' --no-sort --reverse \
+    --header='j/k move  Enter switch  d close  / search  q quit' \
+    "${FZF_MODAL[@]}" \
+    --bind "$(fzf_modal_normal 'workspace > ' "d:execute($self --close {1})+reload($self --list)")" \
+    --bind "$(fzf_modal_search 'workspace > ')" \
+    --preview 'tmux list-windows -t {1} -F "#I:#W#{?@note,  · #{@note},#{?@auto-note,  · #{@auto-note},}}#{?window_silence_flag,  ●,}"' \
+    --preview-window=right,45%,border-left)
+[ -n "$sel" ] && tmux switch-client -t "${sel%%	*}"

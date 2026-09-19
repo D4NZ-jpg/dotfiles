@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Attention tracking for agent windows.
+#
+#   tmux-attention SESSION INDEX NAME   fired by alert-silence/alert-bell:
+#                                       desktop notification (rate limited)
+#   tmux-attention --seen SESSION INDEX clear the rate limit when you visit
+#   tmux-attention --summary            status-line text of waiting windows
+#   tmux-attention --list               fzf list of waiting windows; Enter jumps
+set -u
+. "$(dirname "$(realpath "$0")")/fzf-modal.sh"
+state="${XDG_RUNTIME_DIR:-/tmp}/tmux-attention"
+mkdir -p "$state"
+cooldown=180
+
+# A window is "waiting" when pi says so (@pi-state asking/error/done) or,
+# for tracked windows without a pi state, when tmux flagged silence or a bell.
+waiting() {
+    tmux list-windows -a -F '#{session_name}	#{window_index}	#{window_name}	#{?@note,#{@note},#{@auto-note}}	#{@pi-state}	#{window_silence_flag}#{window_bell_flag}	#{@pi-last}' \
+        | awk -F'\t' '($5=="asking"||$5=="error"||$5=="done") || ($5=="" && $6 ~ /1/) {print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$7}'
+}
+mark() { case "$1" in asking) printf '?';; error) printf '!';; *) printf '●';; esac; }
+
+case "${1:-}" in
+--seen)
+    rm -f "$state/$2-$3"
+    exit 0 ;;
+--summary)
+    n=$(waiting | wc -l)
+    [ "$n" -eq 0 ] && exit 0
+    names=$(waiting | head -3 | while IFS= read -r l; do printf '%s%s:%s ' "$(mark "$(cut -f5 <<<"$l")")" "$(cut -f1 <<<"$l")" "$(cut -f3 <<<"$l")"; done | sed 's/ $//')
+    printf '#[fg=#d9b090]%s%s ' "$names" "$([ "$n" -gt 3 ] && echo " +$((n-3))")"
+    exit 0 ;;
+--list)
+    sel=$(waiting | while IFS= read -r l; do note=$(cut -f4 <<<"$l"); last=$(cut -f6 <<<"$l"); printf '%s:%s  %s %-20.20s %s\n' "$(cut -f1 <<<"$l")" "$(cut -f2 <<<"$l")" "$(mark "$(cut -f5 <<<"$l")")" "$(cut -f3 <<<"$l")${note:+ · $note}" "${last:+— $last}"; done \
+        | fzf --prompt='waiting > ' --no-sort --reverse "${FZF_MODAL[@]}" \
+              --header='j/k move  Enter jump  / search  q quit' \
+              --bind "$(fzf_modal_normal 'waiting > ')" --bind "$(fzf_modal_search 'waiting > ')" \
+              --preview 'tmux capture-pane -p -t "$(cut -d" " -f1 <<<{})" | tail -25' \
+              --preview-window=down,60%,border-top)
+    [ -n "$sel" ] && tmux switch-client -t "${sel%% *}"
+    exit 0 ;;
+esac
+
+session="$1"; index="$2"; name="$3"
+# pi windows notify themselves (tmux-note.ts) with the real message text
+[ -n "$(tmux show -wv -t "$session:$index" @pi-state 2>/dev/null)" ] && exit 0
+key="$state/$session-$index"
+if [ -f "$key" ]; then
+    now=$(date +%s); last=$(stat -c %Y "$key")
+    [ $((now - last)) -lt "$cooldown" ] && exit 0
+fi
+note=$(tmux show -wv -t "$session:$index" @note 2>/dev/null)
+# last line of real text: drop rules, prompts and box drawing
+context=$(tmux capture-pane -p -t "$session:$index" 2>/dev/null | sed 's/[─-╿╭-╰]//g; s/^[[:space:]]*//; s/[[:space:]]*$//' | grep -v '^$' | tail -1 | cut -c1-120)
+notify-send -a tmux -u normal "$session · $name${note:+ · $note}" "${context:-waiting for you}" 2>/dev/null
+touch "$key"

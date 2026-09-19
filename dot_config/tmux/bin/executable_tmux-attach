@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Kitty's shell: land inside tmux. Attach to the most recently used open
+# workspace, or start a "home" workspace when none exists. Inside an existing
+# tmux (nested kitty from a tmux pane) just run a shell.
+[ -n "${TMUX:-}" ] && exec "${SHELL:-zsh}" -l
+if tmux has-session 2>/dev/null; then
+    exec tmux attach-session
+fi
+# fresh server (after a reboot): bring back the last layout, then attach
+if ~/.config/tmux/bin/tmux-persist restore >/dev/null 2>&1 && tmux has-session 2>/dev/null; then
+    exec tmux attach-session
+fi
+exec tmux new-session -s home -c "$HOME"
