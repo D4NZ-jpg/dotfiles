@@ -139,6 +139,13 @@ hl.on("hyprland.start", function()
     if hl.get_monitor("HDMI-A-2") then
         hl.dispatch(hl.dsp.focus({ monitor = "HDMI-A-2" }))
     end
+    -- Hyprland's own env export happens before this hook, but a portal that
+    -- failed against a previous compositor instance (start-limit-hit after a
+    -- Hyprland exit) is never retried by systemd. Without a working
+    -- Hyprland portal every portal-using app (Zen, file pickers) waits ~50s
+    -- for the D-Bus timeout at launch.
+    hl.exec_cmd("systemctl --user reset-failed xdg-desktop-portal-hyprland xdg-desktop-portal-gtk xdg-desktop-portal; "
+        .. "systemctl --user restart xdg-desktop-portal-hyprland xdg-desktop-portal")
     hl.exec_cmd('swaybg -i "$HOME/wallpapers/blackhole.png" -m fill')
     hl.exec_cmd("udiskie")
     hl.exec_cmd("quickshell -c panel -d --no-duplicate")
