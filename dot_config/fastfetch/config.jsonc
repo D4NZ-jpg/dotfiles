@@ -4,7 +4,8 @@
         "source": "$HOME/.config/fastfetch/logo",
     },
     "display": {
-        "separator": " -> "
+        "separator": " -> ",
+        "color": { "keys": "yellow", "title": "bright_white" }
     },
     "modules": [
         "title",
@@ -40,12 +41,12 @@
         {
             "type": "wm",
             "key": " WM",
-            "keyColor": "blue"
+            "keyColor": "yellow"
         },
         {
             "type": "terminal",
             "key": "└",
-            "keyColor": "blue"
+            "keyColor": "yellow"
         },
         "break",
         {

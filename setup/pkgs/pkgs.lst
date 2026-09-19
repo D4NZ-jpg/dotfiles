@@ -59,6 +59,8 @@ fastfetch
 ripgrep
 eza
 bat
+lazygit
+cava
 zoxide
 fzf
 tmux

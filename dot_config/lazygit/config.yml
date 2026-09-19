@@ -1,0 +1,16 @@
+# Colors reference the terminal palette (kitty charcoal); only the emphasis
+# roles are set so the layout stays stock.
+gui:
+  theme:
+    activeBorderColor: [yellow, bold]
+    inactiveBorderColor: [bright black]
+    searchingActiveBorderColor: [yellow, bold]
+    optionsTextColor: [bright black]
+    selectedLineBgColor: ["#39362f"]
+    inactiveViewSelectedLineBgColor: ["#2c2c2c"]
+    cherryPickedCommitBgColor: [bright black]
+    cherryPickedCommitFgColor: [yellow]
+    unstagedChangesColor: [red]
+    defaultFgColor: [default]
+  nerdFontsVersion: "3"
+  showRandomTip: false
