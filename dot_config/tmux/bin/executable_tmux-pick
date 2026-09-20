@@ -46,7 +46,7 @@ case "${1:-}" in
 esac
 
 sel=$(list | fzf --delimiter='\t' --with-nth=2 --prompt='workspace > ' --no-sort --reverse \
-    --header=$'Enter switch  d close  r rename  m group\nj/k move  / search  q quit' \
+    --header=$'Enter switch  d close       r rename      m group\nj/k move      / search      q quit' \
     "${FZF_MODAL[@]}" \
     --bind "$(fzf_modal_normal 'workspace > ' "d:execute($self --close {1})+reload($self --list)" "r:execute($self --rename {1})+reload($self --list)" "m:execute($self --regroup {1})+reload($self --list)")" \
     --bind "$(fzf_modal_search 'workspace > ')" \

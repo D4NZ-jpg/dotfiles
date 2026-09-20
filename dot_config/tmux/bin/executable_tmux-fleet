@@ -55,7 +55,7 @@ case "${1:-}" in
 esac
 
 sel=$(rows | fzf --ansi --delimiter='\t' --with-nth=2 --no-sort --reverse --prompt='pi > ' "${FZF_MODAL[@]}" \
-    --header=$'? asking  ! error  ● done  … working  · idle\nEnter jump  j/k move  / search  q quit' \
+    --header=$'? asking      ! error       ● done        … working     · idle\nEnter jump    j/k move      / search      q quit' \
     --bind "$(fzf_modal_normal 'pi > ')" --bind "$(fzf_modal_search 'pi > ')" \
     --preview 'tmux capture-pane -p -t {1} | grep -v "^\s*$" | tail -30' \
     --preview-window=down,55%,border-top)

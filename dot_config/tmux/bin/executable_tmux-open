@@ -42,7 +42,7 @@ while :; do
     : > "$keyfile"
     sel=$(entries "$base" | while read -r d; do printf '%s\t%s\n' "$d" "$(label "$d")"; done \
         | fzf --delimiter='\t' --with-nth=2 --reverse --prompt="$prompt" "${FZF_MODAL[@]}" \
-              --header=$'Enter open  l descend  h up  z zoxide\nj/k move  / search  q quit' \
+              --header=$'Enter open    l descend     h up          z zoxide\nj/k move      / search      q quit' \
               --bind "$(fzf_modal_normal "$prompt" "l:execute-silent(echo l > $keyfile)+accept" "h:execute-silent(echo h > $keyfile)+accept" "z:execute-silent(echo z > $keyfile)+accept")" \
               --bind "$(fzf_modal_search "$prompt")" \
               --preview 'ls -1 --group-directories-first --color=always {1} 2>/dev/null | head -30' \
