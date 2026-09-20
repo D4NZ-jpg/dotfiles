@@ -2,7 +2,7 @@
 # Switch between OPEN workspaces only. Sessions are listed in creation order
 # (never re-sorted), grouped by the @group option, with each window's note.
 # Modal: normal mode ignores typing; j/k move, Enter switch, d close (asks),
-# / search (Esc returns to normal), q quit.
+# r rename, m set group, / search (Esc returns to normal), q quit.
 set -u
 self=$(realpath "$0")
 . "$(dirname "$self")/fzf-modal.sh"
@@ -25,15 +25,30 @@ confirm_close() {   # runs on the popup tty; y/Y kills, anything else cancels
     read -r -n1 ans </dev/tty; printf '\n'
     case "$ans" in y|Y) tmux kill-session -t "$name" ;; esac
 }
+rename() {   # prompt on the popup tty; empty input cancels
+    local name="$1" new
+    printf '\n  rename workspace %s to: ' "$name"
+    read -r -e new </dev/tty
+    [ -n "$new" ] && [ "$new" != "$name" ] && tmux rename-session -t "$name" "$new"
+}
+regroup() {   # prompt for a group name; empty clears it
+    local name="$1" cur new
+    cur=$(tmux show -v -t "$name" @group 2>/dev/null)
+    printf '\n  group for %s [%s] (work/projects/side/home, empty clears): ' "$name" "${cur:-none}"
+    read -r -e new </dev/tty
+    tmux set -t "$name" @group "$new"
+}
 case "${1:-}" in
     --list) list; exit 0 ;;
     --close) confirm_close "$2"; exit 0 ;;
+    --rename) rename "$2"; exit 0 ;;
+    --regroup) regroup "$2"; exit 0 ;;
 esac
 
 sel=$(list | fzf --delimiter='\t' --with-nth=2 --prompt='workspace > ' --no-sort --reverse \
-    --header='j/k move  Enter switch  d close  / search  q quit' \
+    --header='j/k move  Enter switch  d close  r rename  m group  / search  q quit' \
     "${FZF_MODAL[@]}" \
-    --bind "$(fzf_modal_normal 'workspace > ' "d:execute($self --close {1})+reload($self --list)")" \
+    --bind "$(fzf_modal_normal 'workspace > ' "d:execute($self --close {1})+reload($self --list)" "r:execute($self --rename {1})+reload($self --list)" "m:execute($self --regroup {1})+reload($self --list)")" \
     --bind "$(fzf_modal_search 'workspace > ')" \
     --preview 'tmux list-windows -t {1} -F "#I:#W#{?@note,  · #{@note},#{?@auto-note,  · #{@auto-note},}}#{?window_silence_flag,  ●,}"' \
     --preview-window=right,45%,border-left)

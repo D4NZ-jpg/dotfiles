@@ -22,7 +22,7 @@ Prefix is `Ctrl+Space`.
 | `prefix h` / `prefix l` | previous / next window |
 | `` Alt+` `` | last workspace |
 | `Alt+h/j/k/l` | pane left/down/up/right |
-| `prefix s` | switch between **open** workspaces (grouped, fixed order; `Ctrl+x` closes one) |
+| `prefix s` | switch workspace (open ones, creation order); `d` closes (asks), `r` renames, `m` sets the group |
 | `prefix o` | **open** a workspace: browse from `~/dev` (`h` at the top goes to `~`), dotfiles, Notes; then name it |
 | `prefix C` | new window in a chosen directory (same browser) inside this workspace |
 | `prefix w` | tree of every workspace and window with notes |
