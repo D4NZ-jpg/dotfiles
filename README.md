@@ -1,41 +1,76 @@
-# 🏠 Welcome to My Dotfiles Home! 🌟
+# dotfiles
 
 ![Screenshot](screenshots/desktop.png)
 
-👋 Welcome! This humble abode of mine 🚪 (aka my dotfiles) is where I keep all the settings for my favorite tools and apps.
+Arch Linux, Hyprland, one palette everywhere: charcoal `#262626`, cream
+`#d5c8ac`, accent `#d9b090`. Managed with [chezmoi](https://www.chezmoi.io).
 
-## The Household Members 🧑‍🤝‍🧑🔧
+## What is here
 
-Meet the beloved members of this house, each playing a crucial role in our harmonious household:
+**Desktop**
 
-- **Hyprland** 🏙️: The cornerstone of my desktop, a Wayland compositor that blends beauty with functionality.
-- **Kitty** 🐱: The sleek and fast terminal emulator, where commands and code coexist in harmony.
-- **Neovim** 📝: My sanctuary for code, turning every keystroke into a symphony.
-- **Zsh** 🐚: The shell that's always ready to greet me, customized for a seamless day-to-day dialogue.
-- **Rofi** 🚀: The speedy launcher, opening doors to my applications faster than the blink of an eye.
-- **Quickshell**: An on-demand top bar with clock, network, volume, and Bluetooth controls.
-- **Wlogout** 🚪🌌: Ensuring each farewell is as smooth and peaceful as a night's slumber.
+- **Hyprland**, configured in Lua (`hypr/hyprland.lua` plus `modules/`):
+  hyprsplit per-monitor workspaces, ScrollOverview, static wallpaper.
+- **Quickshell** panel: an on-demand top bar with clock, network, volume and
+  Bluetooth popups built on Quickshell's own bindings, no external tools
+  (`quickshell/panel/README.md`).
+- **Rofi** for launcher, emoji, calculator and the power menu
+  (Super+Shift+P), with vim keys.
+- **Dunst** notifications, **swaylock** on the wallpaper with a script that
+  recovers from a monitor Hyprland reports at 0×0, **hypridle**.
+- **GTK 3/4** via adw-gtk-theme and a `gtk.css` that maps Adwaita's named
+  colours onto the palette; **Qt 5/6** via qt6ct/qt5ct with Fusion and a
+  matching colour scheme. Icons are Tela (brown), built by
+  `setup/scripts/icons.sh` into `~/.local/share/icons` so only one colour
+  variant is installed.
 
-## Housekeeping 🧹🏠
+**Terminal**
 
-Managing this digital estate is [chezmoi](https://github.com/twpayne/chezmoi), the behind-the-scenes hero, keeping everything orderly and synchronized.
+- **kitty** with the `charcoal.conf` theme; every window lands in tmux.
+- **tmux** as a keyboard-first workspace manager: one session per project,
+  fixed window numbers, per-window notes, modal fzf pickers, `Ctrl+w` pane
+  keys that mirror Vim, persistence across reboots. Pi sessions publish their
+  state to their window; `prefix g` lists the ones waiting, `prefix G` the
+  whole fleet. Details in `tmux/README.md`.
+- **zsh** with starship, lazy nvm, cached completions; **bat**, **lazygit**,
+  **fastfetch**, **cava** on the same palette.
+- **Neovim** (lazy.nvim, LSP, DAP, treesitter). A small plugin makes
+  `Ctrl+w h/j/k/l` hop to the neighbouring tmux pane at a window edge.
 
-## Move In 🚚📦
+**Browser**
 
-To make yourself at home with these configurations, chezmoi is your first stop. Not in your toolkit yet? The [official installation guide](https://www.chezmoi.io/install) will help you get settled.
+- **Zen** styling, privacy prefs and add-on policies applied by
+  `zen-style/apply.py` into whichever profile exists. No profile data is
+  tracked (`zen-style/README.md`).
 
-Then, plant your flag with this command:
+**Pi**
+
+- A tmux extension (`tmux/pi/tmux-note.ts`) and a lazily loaded skill
+  (`tmux/pi/skills/tmux-workspaces`) let pi report its state, notify with its
+  real last message, resume the exact session after a reboot, and open
+  windows, splits or parallel sessions when asked.
+
+## Install
 
 ```bash
 chezmoi init --apply D4NZ-jpg
 ```
 
-This will not only fetch the configurations but also trigger a script that automatically installs all necessary software and some additional goodies to enhance your experience. Sit back and watch your new digital home set itself up! 🌟
+`run_after_install_pkgs.sh` runs `setup/scripts/install.sh`: packages from
+`setup/pkgs/pkgs.lst` (and `extras.lst`), the NVIDIA driver chosen for the
+detected GPU (`nvidia.sh`), services from `system_ctl.lst`, then
+`post-install.sh` (default shell, Zen, icons, Hyprland plugins). Arch only.
 
-Welcome aboard! 🎉 You're now part of this vibrant community.
+New tools go in `setup/pkgs/pkgs.lst`; per-machine paths use chezmoi
+templates (`qt6ct.conf.tmpl`), never absolute home paths.
 
-🚨 Warning: The setup script is exclusively designed for Arch Linux and will not function on other operating systems. For users on different OSes, please utilize your OS's package manager to install the necessary tools.
+## Tests
 
-## Renovations and Improvements 🏗️🛠️
+`tests/` holds Python and QML checks for the installer helpers, the Zen
+scripts, the Quickshell popups and the Neovim DAP config. They run without
+touching the live system:
 
-This home is a living space, always embracing change and improvement. Keep an eye out for new tools, remodeled features, and the occasional fresh coat of paint. Each visit promises something new and exciting!
+```bash
+python tests/installer-utils.py
+python tests/quickshell-panel.py
+```
