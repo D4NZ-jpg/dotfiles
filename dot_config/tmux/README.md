@@ -45,6 +45,27 @@ highlighted directory as the workspace, `z` jumps through zoxide.
 | `prefix a` | mark this window as an agent window: flag after 20 s of silence |
 | `prefix A` | stop tracking this window |
 
+## Panes like Vim windows
+
+`Ctrl+w` works the way it does in Vim, in any pane:
+
+| Keys | Action |
+| --- | --- |
+| `Ctrl+w h/j/k/l` | move to the pane in that direction |
+| `Ctrl+w s` / `v` | split below / right (same directory) |
+| `Ctrl+w q` / `o` | close this pane / all others |
+| `Ctrl+w =` | tile evenly |
+| `Ctrl+w H/J/K/L` | swap the pane in that direction |
+| `Ctrl+w w` / `p` | next / previous pane |
+| `Ctrl+w z` | zoom toggle |
+| `Ctrl+w Ctrl+w` | send a literal Ctrl+w to the shell (delete word) |
+
+When the pane runs Neovim, `Ctrl+w` goes to Neovim untouched, so its own
+window commands apply; `Ctrl+w h/j/k/l` at the edge of the last window
+jumps to the neighbouring tmux pane (`nvim/lua/plugins/tmux-navigate.lua`).
+`Alt+h/j/k/l` still move panes and are forwarded into Neovim the same way.
+Stock vim without the plugin just stops at its edge.
+
 ## Across reboots
 
 The status line snapshots the layout every few seconds
