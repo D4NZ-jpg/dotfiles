@@ -1,6 +1,9 @@
 # Cold boot: the java/node probes can take seconds before the binaries are
 # cached; a short timeout prints a warning on the first prompt.
 command_timeout = 10000
+# Directory scan (package files, .git) can exceed the 30 ms default on a
+# cold cache; the prompt waits at most this long before giving up quietly.
+scan_timeout = 200
 add_newline = true
 format = "[╭╴](fg:arrow)$username$os$git_branch$directory$fill$cmd_duration $time( via $python$conda$nodejs$c$rust$java)\n[╰─](fg:arrow)$character"
 palette = "normal"
