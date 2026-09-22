@@ -8,6 +8,13 @@ if isInstalled zathura; then
     xdg-mime default org.pwmt.zathura.desktop application/pdf
 fi
 
+# imv as the image viewer
+if isInstalled imv; then
+    for m in image/png image/jpeg image/gif image/webp image/bmp image/svg+xml image/tiff image/avif; do
+        xdg-mime default imv.desktop "$m"
+    done
+fi
+
 # Set zsh as default shell
 if isInstalled zsh && [ "$SHELL" != "/usr/bin/zsh" ]; then
     sudo chsh -s /usr/bin/zsh $USER

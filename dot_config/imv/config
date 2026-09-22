@@ -1,0 +1,14 @@
+# Charcoal palette; vim keys are imv's defaults (hjkl pan, +/- zoom, n/p, q).
+[options]
+background = 262626
+overlay = false
+overlay_text_color = d5c8ac
+overlay_background_color = 262626
+overlay_font = JetBrainsMono NFM:11
+upscaling_method = linear
+initial_pan = 0.5 0.5
+suppress_default_binds = false
+
+[binds]
+<Shift+question> = overlay
+i = overlay
