@@ -3,6 +3,7 @@ pciutils
 # CPU microcode; the mkinitcpio microcode hook loads it at boot. Use amd-ucode on AMD.
 intel-ucode
 git
+git-lfs
 python
 zen-browser-bin
 neovim
