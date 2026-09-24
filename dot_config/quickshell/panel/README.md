@@ -9,6 +9,7 @@ Preview: `quickshell ipc -c panel call panel preview true`
 End preview: `quickshell ipc -c panel call panel preview false`
 Inspect state: `quickshell ipc -c panel call panel status`
 Toggle popups: `quickshell ipc -c panel call panel network HDMI-A-2`,
+`... sync HDMI-A-2`,
 `... volume focused` (`focused` resolves the active Hyprland monitor)
 Close the open popup: `quickshell ipc -c panel call panel network ''`
 Logs: `quickshell log -c panel --no-color -t 50`
@@ -105,3 +106,23 @@ Verified on Hyprland 0.56.2 / ScrollOverview 5e96ae20ec73 / Quickshell 0.3.1:
 Still needs user checks: edge-hover feel, pointer-driven overview exits,
 visual stacking, fullscreen apps, monitor unplug/replug, and resource usage.
 A hidden panel still has a two-pixel hover target at the top edge.
+
+## Sync indicator
+
+`SYNC` on the left of the status cluster reflects the git handoff system and
+Syncthing. `sync-status.py` (run by the panel every 2 min and when the popup
+opens; local only, about a second) merges three sources into
+`~/.local/state/projects/panel-status.json`:
+
+- `handoff-status.json`, written by `projects handoff` (clean / pushed /
+  error / skipped, last success time)
+- WIP refs other machines pushed, already fetched by `projects incoming`
+  (`refs/wip/<machine>/<worktree>` in each catalogued repo)
+- Syncthing's REST API on localhost: per-folder state, pending items, errors
+
+Label and colour: `SYNC` muted when idle; `SYNC …` cream while a folder is
+syncing; `SYNC n` in the accent when n incoming worktrees wait (or a handoff
+was skipped); `SYNC !` red when a handoff failed or a folder has errors.
+The popup lists this machine's handoff state, a Syncthing summary with any
+active or erroring folders, and the newest incoming worktrees. Nothing here
+fetches or applies; use `projects incoming` / `projects resume`.

@@ -77,6 +77,35 @@ ShellRoot {
         }
     }
     SystemClock { id: clock; precision: SystemClock.Minutes }
+    // Sync indicator: sync-status.py gathers handoff + Syncthing state into a
+    // JSON file (local only, ~1 s); refreshed every 2 min and whenever the
+    // popup opens. The button colour follows `level`.
+    property var syncStatus: ({})
+    readonly property string syncLevel: syncStatus.level ?? "unknown"
+    readonly property string syncLabel: {
+        const n = (syncStatus.incoming ?? []).length;
+        const st = syncStatus.syncthing ?? {};
+        if (syncLevel === "error") return "SYNC !";
+        if (n > 0) return "SYNC " + n;
+        if (st.syncing > 0) return "SYNC …";
+        return "SYNC";
+    }
+    readonly property color syncInk: syncLevel === "error" ? "#c98a7a" : syncLevel === "attention" ? "#d9b090" : syncLevel === "busy" ? "#d5c8ac" : "#afa286"
+    function refreshSync() { if (!syncCollect.running) syncCollect.running = true; }
+    Process {
+        id: syncCollect
+        command: [Quickshell.env("HOME") + "/.config/quickshell/panel/sync-status.py"]
+        onExited: syncFile.reload()
+    }
+    FileView {
+        id: syncFile
+        path: Quickshell.env("HOME") + "/.local/state/projects/panel-status.json"
+        watchChanges: true
+        onFileChanged: reload()
+        onLoaded: { try { root.syncStatus = JSON.parse(text()); } catch (e) { root.syncStatus = ({}); } }
+    }
+    Timer { interval: 120000; running: true; repeat: true; triggeredOnStart: true; onTriggered: root.refreshSync() }
+    onPopupChanged: { if (popup === "sync") refreshSync(); }
     PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
     IpcHandler {
         target: "panel"
@@ -84,6 +113,7 @@ ShellRoot {
         function network(monitor: string): void { root.ipcPopup("network", monitor); }
         function volume(monitor: string): void { root.ipcPopup("volume", monitor); }
         function bluetooth(monitor: string): void { root.ipcPopup("bluetooth", monitor); }
+        function sync(monitor: string): void { root.ipcPopup("sync", monitor); }
         function status(): string {
             return JSON.stringify({overview: root.overview, launcher: root.launcher, manual: root.manual, network: root.networkStatus, popup: root.popup, popupMonitor: root.popupMonitor, networkScanning: Networking.devices.values.some(d => d.type === DeviceType.Wifi && d.scannerEnabled)});
         }
@@ -149,6 +179,10 @@ ShellRoot {
                 VolumePopup { barWindow: panel; onDismissed: root.closePopup() }
             }
             LazyLoader {
+                active: root.popup === "sync" && root.popupMonitor === panel.screen.name
+                SyncPopup { barWindow: panel; status: root.syncStatus; onRefresh: root.refreshSync(); onDismissed: root.closePopup() }
+            }
+            LazyLoader {
                 active: root.popup === "bluetooth" && root.popupMonitor === panel.screen.name
                 BluetoothPopup { barWindow: panel; onDismissed: root.closePopup() }
             }
@@ -186,6 +220,13 @@ ShellRoot {
                 Row {
                     anchors.right: parent.right; anchors.rightMargin: 20; anchors.verticalCenter: parent.verticalCenter
                     spacing: 4
+                    StatusButton {
+                        label: root.syncLabel
+                        ink: root.syncInk
+                        onActivated: mouseButton => {
+                            if (mouseButton === Qt.LeftButton) root.togglePopup("sync", panel.screen.name);
+                        }
+                    }
                     StatusButton {
                         label: root.networkStatus
                         onActivated: mouseButton => {
