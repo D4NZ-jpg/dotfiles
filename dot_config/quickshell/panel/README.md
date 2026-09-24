@@ -124,5 +124,9 @@ Label and colour: `SYNC` muted when idle; `SYNC …` cream while a folder is
 syncing; `SYNC n` in the accent when n incoming worktrees wait (or a handoff
 was skipped); `SYNC !` red when a handoff failed or a folder has errors.
 The popup lists this machine's handoff state, a Syncthing summary with any
-active or erroring folders, and the newest incoming worktrees. Nothing here
-fetches or applies; use `projects incoming` / `projects resume`.
+active or erroring folders, and the newest incoming worktrees, each with a
+`resume` link. **Hand off** (`h`) runs `projects handoff`; **Resume all**
+(`a`) runs `projects resume` for every incoming worktree. Neither ever uses
+`--force`: a worktree with local edits is reported as "kept local edits"
+and left alone, and taking the other machine's version is a deliberate
+`projects resume --force <name>` in a terminal. `r` refreshes.

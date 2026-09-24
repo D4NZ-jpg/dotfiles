@@ -1,11 +1,16 @@
 import QtQuick
 import QtQuick.Layouts
 
-// Handoff and Syncthing state at a glance. `status` is the object written by
-// sync-status.py (see shell.qml); a synthetic one works for tests.
+// Handoff and Syncthing state at a glance, with the two safe actions:
+// hand off this machine's work, and resume incoming work (never --force;
+// worktrees with local edits are reported instead of overwritten).
+// `status` is the object written by sync-status.py; `runner` executes a
+// `projects` argv and calls back, so tests can substitute a fake.
 Item {
     id: menu
     property var status: ({})
+    // runner(args: string[], done: function(ok: bool, output: string))
+    property var runner: null
     signal dismissed()
     signal refresh()
 
@@ -20,17 +25,23 @@ Item {
     readonly property var incoming: status.incoming ?? []
     readonly property var syncthing: status.syncthing ?? ({ folders: [] })
     readonly property var folders: syncthing.folders ?? []
-    // Show active/erroring folders; idle ones are collapsed into a count.
     readonly property var shownFolders: folders.filter(f => f.state !== "idle" && f.state !== "paused")
     readonly property int idleFolders: folders.filter(f => f.state === "idle").length
     readonly property int maxIncoming: 8
 
-    implicitWidth: 380
+    property string running: ""       // "" | "handoff" | "resume" | "resume:<project>"
+    property string message: ""
+    property bool messageIsError: false
+
+    implicitWidth: 400
     readonly property int rowHeight: 24
     readonly property int titleHeight: 26
+    readonly property int actionHeight: 34
     implicitHeight: {
-        let h = 14 + rowHeight;                      // handoff line
-        h += titleHeight + rowHeight * (shownFolders.length + 1); // syncthing block + summary line
+        let h = 14 + rowHeight;                                   // handoff line
+        h += actionHeight;                                        // action row
+        h += 18;                                                  // message line
+        h += titleHeight + rowHeight * (shownFolders.length + 1); // syncthing block
         h += titleHeight + rowHeight * Math.max(1, Math.min(incoming.length, maxIncoming));
         if (incoming.length > maxIncoming) h += rowHeight;
         return h + 14;
@@ -39,7 +50,11 @@ Item {
 
     focus: true
     Keys.onEscapePressed: dismissed()
-    Keys.onPressed: event => { if (event.key === Qt.Key_R) { refresh(); event.accepted = true; } }
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_R) { refresh(); event.accepted = true; }
+        else if (event.key === Qt.Key_H) { handOff(); event.accepted = true; }
+        else if (event.key === Qt.Key_A) { resumeAll(); event.accepted = true; }
+    }
 
     function ago(epoch) {
         if (!epoch) return "";
@@ -63,6 +78,33 @@ Item {
         return menu.handoff.state === "error" ? bad : menu.handoff.state === "skipped" ? warn : ink;
     }
 
+    // Reduce `projects` output to one line for the message slot.
+    function summarize(args, ok, output) {
+        const lines = output.split("\n").map(l => l.trim()).filter(l => l !== "");
+        const last = lines.length ? lines[lines.length - 1] : "";
+        const blocked = lines.filter(l => l.indexOf("has local changes") !== -1)
+            .map(l => l.replace(/^[✗✓!·\s]*/, "").split(":")[0]);
+        if (blocked.length) return { text: "kept local edits: " + blocked.join(", ") + " (resume --force in a terminal to take the Mac's)", error: true };
+        if (!ok) return { text: last || "failed", error: true };
+        return { text: last.replace(/^[✓\s]*/, ""), error: false };
+    }
+    function run(kind, args) {
+        if (!runner || running !== "") return;
+        running = kind;
+        message = "";
+        messageIsError = false;
+        runner(args, (ok, output) => {
+            const r = summarize(args, ok, output);
+            message = r.text;
+            messageIsError = r.error;
+            running = "";
+            refresh();
+        });
+    }
+    function handOff() { run("handoff", ["handoff"]); }
+    function resumeAll() { run("resume", ["resume"]); }
+    function resumeOne(project) { run("resume:" + project, ["resume", project]); }
+
     component Title: Text {
         Layout.fillWidth: true
         Layout.preferredHeight: menu.titleHeight
@@ -85,6 +127,17 @@ Item {
         verticalAlignment: Text.AlignVCenter
         Layout.preferredHeight: menu.rowHeight
     }
+    component Link: Text {
+        // small inline action, used per incoming row
+        property bool active: true
+        signal clicked()
+        color: active ? menu.warn : menu.dim
+        font.family: "JetBrainsMono NFM"
+        font.pixelSize: 11
+        verticalAlignment: Text.AlignVCenter
+        Layout.preferredHeight: menu.rowHeight
+        MouseArea { anchors.fill: parent; cursorShape: parent.active ? Qt.PointingHandCursor : Qt.ArrowCursor; onClicked: if (parent.active) parent.clicked() }
+    }
 
     ColumnLayout {
         id: layout
@@ -97,6 +150,36 @@ Item {
         Row2 {
             Cell { text: "THIS MACHINE"; color: menu.dim; font.pixelSize: 10; font.letterSpacing: 1.5; Layout.preferredWidth: 110 }
             Cell { text: menu.handoffText(); color: menu.handoffColor(); Layout.fillWidth: true }
+        }
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.preferredHeight: menu.actionHeight
+            spacing: 8
+            PanelAction {
+                objectName: "handoffButton"
+                text: menu.running === "handoff" ? "Handing off…" : "Hand off"
+                enabled: menu.running === "" && !!menu.runner
+                onClicked: menu.handOff()
+            }
+            PanelAction {
+                objectName: "resumeAllButton"
+                text: menu.running === "resume" ? "Resuming…" : "Resume all"
+                enabled: menu.running === "" && !!menu.runner && menu.incoming.length > 0
+                onClicked: menu.resumeAll()
+            }
+            Item { Layout.fillWidth: true }
+            Cell { text: "h · a · r"; color: menu.dim; font.pixelSize: 10 }
+        }
+        Text {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 18
+            text: menu.message
+            textFormat: Text.PlainText
+            color: menu.messageIsError ? menu.bad : menu.muted
+            font.family: "JetBrainsMono NFM"
+            font.pixelSize: 11
+            elide: Text.ElideRight
+            verticalAlignment: Text.AlignVCenter
         }
 
         Title { text: "SYNCTHING" }
@@ -130,8 +213,14 @@ Item {
             Row2 {
                 required property var modelData
                 Cell { text: modelData.project + (modelData.worktree !== "main" ? " / " + modelData.worktree : ""); Layout.fillWidth: true }
-                Cell { text: modelData.from; color: menu.muted; Layout.preferredWidth: 70 }
-                Cell { text: menu.ago(modelData.when); color: menu.dim; Layout.preferredWidth: 32; horizontalAlignment: Text.AlignRight }
+                Cell { text: modelData.from; color: menu.muted; Layout.preferredWidth: 64 }
+                Cell { text: menu.ago(modelData.when); color: menu.dim; Layout.preferredWidth: 28; horizontalAlignment: Text.AlignRight }
+                Link {
+                    objectName: "resumeLink"
+                    text: menu.running === "resume:" + modelData.project ? "…" : "resume"
+                    active: menu.running === "" && !!menu.runner
+                    onClicked: menu.resumeOne(modelData.project)
+                }
             }
         }
         Row2 {

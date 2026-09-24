@@ -50,7 +50,10 @@ ShellRoot {
     })
     property int dismissed: 0
     property int refreshed: 0
-    Panel.SyncContent { id: menu; status: suite.attention; width: 380; height: 600; onDismissed: suite.dismissed++; onRefresh: suite.refreshed++ }
+    property var calls: []
+    property var pendingDone: null
+    function fakeRunner(args, done) { suite.calls.push(args.join(" ")); suite.pendingDone = done; }
+    Panel.SyncContent { id: menu; status: suite.attention; width: 400; height: 700; runner: suite.fakeRunner; onDismissed: suite.dismissed++; onRefresh: suite.refreshed++ }
     Timer {
         interval: 100
         running: true
@@ -81,6 +84,34 @@ ShellRoot {
                 suite.check(suite.dismissed === 1, "dismissed signal reaches the popup");
                 menu.refresh();
                 suite.check(suite.refreshed === 1, "refresh signal reaches the popup");
+                // actions
+                menu.status = suite.attention;
+                const buttons = suite.findAll(menu, o => o.hasOwnProperty("text") && o.hasOwnProperty("down"));
+                const handoffBtn = buttons.find(b => b.objectName === "handoffButton");
+                const resumeBtn = buttons.find(b => b.objectName === "resumeAllButton");
+                suite.check(handoffBtn.enabled && resumeBtn.enabled, "Both actions enabled when idle with incoming work");
+                handoffBtn.clicked();
+                suite.check(suite.calls.join("|") === "handoff", "Hand off runs `projects handoff`");
+                suite.check(menu.running === "handoff" && !handoffBtn.enabled && !resumeBtn.enabled, "Actions disabled while running");
+                suite.check(handoffBtn.text === "Handing off…", "Button shows progress");
+                suite.pendingDone(true, "  ✓ rummy: 1 worktree(s) on server\n\n1 worktree snapshot(s) pushed in 1s\n");
+                suite.check(menu.running === "" && menu.message === "1 worktree snapshot(s) pushed in 1s" && !menu.messageIsError, "Success summary is the last line");
+                suite.check(suite.refreshed === 2, "Completion asks for a refresh");
+                resumeBtn.clicked();
+                suite.check(suite.calls[1] === "resume", "Resume all runs `projects resume` without --force");
+                suite.pendingDone(true, "  ✗ Camtom: main: has local changes; run with --force to snapshot them\n  ✓ kernel: main ← macbook\n\n1 worktree(s) resumed; skipped: Camtom/main\n");
+                suite.check(menu.messageIsError && menu.message.indexOf("kept local edits: Camtom") === 0, "Blocked worktrees are reported, not forced");
+                const links = suite.findAll(menu, o => o.objectName === "resumeLink");
+                suite.check(links.length === 3, "One resume link per incoming row");
+                links[1].clicked();
+                suite.check(suite.calls[2] === "resume nivra-app", "Row link resumes just that project");
+                suite.check(links[1].text === "…", "Row shows progress while running");
+                suite.pendingDone(false, "error: something broke");
+                suite.check(menu.messageIsError && menu.message === "error: something broke", "Failure shows the last output line");
+                menu.status = suite.quiet;
+                suite.check(!resumeBtn.enabled, "Resume all disabled with nothing incoming");
+                menu.runner = null;
+                suite.check(!handoffBtn.enabled, "No runner means no actions");
                 console.log("SYNC_TESTS_PASS " + suite.checks);
             } catch (error) {
                 console.error("SYNC_TESTS_FAIL " + error.message);
