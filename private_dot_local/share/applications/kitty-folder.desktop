@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Kitty Folder Terminal
+GenericName=Terminal emulator
+Comment=Open a folder in a standalone Kitty shell
+StartupNotify=true
+TryExec=kitty
+Exec=kitty --override shell=zsh --directory %f
+Icon=kitty
+Categories=System;TerminalEmulator;
+NoDisplay=true
+Terminal=false
+MimeType=inode/directory;

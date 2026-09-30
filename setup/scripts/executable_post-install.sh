@@ -15,6 +15,11 @@ if isInstalled imv; then
     done
 fi
 
+# Opening a folder should start a standalone shell there instead of attaching tmux.
+if isInstalled kitty; then
+    xdg-mime default kitty-folder.desktop inode/directory
+fi
+
 # Set zsh as default shell
 if isInstalled zsh && [ "$SHELL" != "/usr/bin/zsh" ]; then
     sudo chsh -s /usr/bin/zsh $USER
