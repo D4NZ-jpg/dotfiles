@@ -20,6 +20,9 @@ if isInstalled kitty; then
     xdg-mime default kitty-folder.desktop inode/directory
 fi
 
+# Install the pinned predictive-suggestions binary and generate its Zsh integration.
+bash "$HOME/setup/scripts/deja.sh"
+
 # Set zsh as default shell
 if isInstalled zsh && [ "$SHELL" != "/usr/bin/zsh" ]; then
     sudo chsh -s /usr/bin/zsh $USER

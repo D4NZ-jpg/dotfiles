@@ -8,6 +8,7 @@ python
 zen-browser-bin
 neovim
 zsh
+zsh-syntax-highlighting
 starship
 meson
 cpio
@@ -57,6 +58,7 @@ qt5ct
 fastfetch
 
 ripgrep
+curl
 eza
 bat
 lazygit
