@@ -65,7 +65,8 @@ lazygit
 cava
 zoxide
 fzf
-tmux
+zellij
+mosh
 entr
 
 kitty

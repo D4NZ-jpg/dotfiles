@@ -1,0 +1,46 @@
+# Dedicated, directory-only chooser. Does not load the normal lf config.
+set shell /bin/sh
+set shellopts "-eu"
+set dironly true
+set sortby natural
+set reverse false
+set ratios 1:2:3
+set info ""
+set promptfmt "Local: %d | Enter select, . current, Alt+M machine, q/Esc cancel"
+
+cmd choose-directory ${{
+    selected=${f:-$PWD}
+    [ -d "$selected" ] || selected=$PWD
+    umask 077
+    printf '%s\n' "$selected" > "$ZELLIJ_WS_DIRECTORY_RESULT"
+}}
+cmd choose-current ${{
+    umask 077
+    printf '%s\n' "$PWD" > "$ZELLIJ_WS_DIRECTORY_RESULT"
+}}
+cmd choose-machine ${{
+    umask 077
+    printf '@machine\n' > "$ZELLIJ_WS_DIRECTORY_RESULT"
+}}
+map <a-m> :choose-machine; quit
+map <enter> :choose-directory; quit
+map . :choose-current; quit
+map <esc> quit
+map q quit
+map h updir
+map l open
+map j down
+map k up
+
+# This is a chooser, not a file-editing or shell-command surface.
+cmd chooser-only :echo "Directory selection only"
+map d chooser-only
+map y chooser-only
+map p chooser-only
+map c chooser-only
+map r chooser-only
+map ":" chooser-only
+map "$" chooser-only
+map "%" chooser-only
+map "!" chooser-only
+map "&" chooser-only

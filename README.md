@@ -26,16 +26,18 @@ Arch Linux, Hyprland, one palette everywhere: charcoal `#262626`, cream
 
 **Terminal**
 
-- **kitty** with the `charcoal.conf` theme; every window lands in tmux.
-- **tmux** as a keyboard-first workspace manager: one session per project,
-  fixed window numbers, per-window notes, modal fzf pickers, `Ctrl+w` pane
-  keys that mirror Vim, persistence across reboots. Pi sessions publish their
-  state to their window; `prefix g` lists the ones waiting, `prefix G` the
-  whole fleet. Details in `tmux/README.md`.
+- **kitty** with the `charcoal.conf` theme; new windows attach to the last
+  normal Zellij workspace.
+- **Zellij** as a keyboard-first workspace manager: named project sessions,
+  stable numbered task tabs, shared task notes, directory browsing with lf,
+  fzf workspace/agent pickers, and exact Pi conversation restoration.
+  Ctrl+Space is the prefix; g lists agents needing attention, G the fleet.
+  The top bar shows the workspace name. Optional remote workspaces use SSH
+  and Mosh. Details in [`dot_config/zellij/README.md`](dot_config/zellij/README.md).
 - **zsh** with starship, lazy nvm, cached completions; **bat**, **lazygit**,
   **fastfetch**, **cava** on the same palette.
 - **Neovim** (lazy.nvim, LSP, DAP, treesitter). A small plugin makes
-  `Ctrl+w h/j/k/l` hop to the neighbouring tmux pane at a window edge.
+  `Ctrl+w h/j/k/l` hop to the neighbouring Zellij pane at a window edge.
 
 **Browser**
 
@@ -45,10 +47,11 @@ Arch Linux, Hyprland, one palette everywhere: charcoal `#262626`, cream
 
 **Pi**
 
-- A tmux extension (`tmux/pi/tmux-note.ts`) and a lazily loaded skill
-  (`tmux/pi/skills/tmux-workspaces`) let pi report its state, notify with its
-  real last message, resume the exact session after a reboot, and open
-  windows, splits or parallel sessions when asked.
+- A Zellij extension (`dot_config/zellij/pi/zellij.ts`) and the
+  `terminal-workspaces` skill report Pi state, preserve exact conversation
+  references across reboots, and open task tabs, splits or parallel sessions
+  when asked. Notifications contain task labels, not conversation text.
+  Panes without a saved conversation reference restore as ordinary shells.
 
 ## Install
 
@@ -60,6 +63,13 @@ chezmoi init --apply D4NZ-jpg
 `setup/pkgs/pkgs.lst` (and `extras.lst`), the NVIDIA driver chosen for the
 detected GPU (`nvidia.sh`), services from `system_ctl.lst`, then
 `post-install.sh` (default shell, Zen, icons, Hyprland plugins). Arch only.
+
+`run_after_zellij-plugins.sh` installs checksum-pinned autolock and builds
+our workspace-labelled tab bar from pinned sources with an isolated Rust/WASI
+toolchain. No compiled plugin or private workspace state is tracked.
+
+Tmux config, helpers and its package entry have been removed. Applying these
+files does not stop or uninstall an already running tmux installation.
 
 New tools go in `setup/pkgs/pkgs.lst`; per-machine paths use chezmoi
 templates (`qt6ct.conf.tmpl`), never absolute home paths.
@@ -73,4 +83,12 @@ touching the live system:
 ```bash
 python tests/installer-utils.py
 python tests/quickshell-panel.py
+python tests/zellij-workspaces.py
+python tests/zellij-remotes.py
+python tests/zellij-ssh-reuse.py
+node tests/zellij-extension.mjs
+lua tests/nvim-navigation.lua
 ```
+
+Zellij's native tests use disposable sessions and fake Pi/transport commands.
+Authenticated remote tests are opt-in; see the Zellij README for requirements.

@@ -1,0 +1,73 @@
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -48,6 +48,10 @@
+ 
+ impl ZellijPlugin for State {
+     fn load(&mut self, configuration: BTreeMap<String, String>) {
++        request_permission(&[
++            PermissionType::ReadApplicationState,
++            PermissionType::ChangeApplicationState,
++        ]);
+         self.hide_swap_layout_indication = configuration
+             .get("hide_swap_layout_indication")
+             .map(|s| s == "true")
+--- a/src/line.rs
++++ b/src/line.rs
+@@ -204,9 +204,13 @@
+     dimmed: bool,
+     breadcrumb_ancestry: &[String],
+ ) -> (Vec<LinePart>, Option<(usize, usize)>) {
+-    let prefix_text = " Zellij ".to_string();
+-
+-    let running_text_len = prefix_text.chars().count();
++    let prefix_text = if breadcrumb_ancestry.is_empty() {
++        format!(" {} ", session_name.unwrap_or("workspace"))
++    } else {
++        " ".to_string()
++    };
++
++    let running_text_len = prefix_text.width();
+     let text_color = palette.text_unselected.base;
+     let bg_color = palette.text_unselected.background;
+     let prefix_style = if dimmed {
+@@ -267,18 +271,6 @@
+         }
+         return (parts, breadcrumb_range);
+     }
+-    if let Some(name) = session_name {
+-        let name_part = format!("({}) ", name);
+-        let name_part_len = name_part.width();
+-        let name_part_styled_text = prefix_style.paint(name_part);
+-        if cols.saturating_sub(running_text_len) >= name_part_len {
+-            parts.push(LinePart {
+-                part: name_part_styled_text.to_string(),
+-                len: name_part_len,
+-                tab_index: None,
+-            })
+-        }
+-    }
+     (parts, breadcrumb_range)
+ }
+ 
+@@ -297,7 +289,7 @@
+     cols: usize,
+     palette: Styling,
+     capabilities: PluginCapabilities,
+-    hide_session_name: bool,
++    _hide_session_name: bool,
+     tab_info: Option<&TabInfo>,
+     mode_info: &ModeInfo,
+     hide_swap_layout_indicator: bool,
+@@ -320,10 +312,8 @@
+     } else {
+         tabs_before_active.pop().unwrap()
+     };
+-    let (mut prefix, breadcrumb_range) = match hide_session_name {
+-        true => tab_line_prefix(None, palette, cols, dimmed, &[]),
+-        false => tab_line_prefix(session_name, palette, cols, dimmed, breadcrumb_ancestry),
+-    };
++    let (mut prefix, breadcrumb_range) =
++        tab_line_prefix(session_name, palette, cols, dimmed, breadcrumb_ancestry);
+ 
+     let mut swap_layout_indicator = if hide_swap_layout_indicator {
+         None

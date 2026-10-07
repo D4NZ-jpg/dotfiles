@@ -1,0 +1,489 @@
+#!/usr/bin/env python3
+"""Private, event-driven workspace helpers for the isolated Zellij trial."""
+import argparse
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+
+CONFIG = Path.home() / '.config/zellij'
+BINARY = (os.environ.get('ZELLIJ_TRIAL_BINARY') or shutil.which('zellij') or
+          (str(Path.home() / '.local/bin/zellij') if (Path.home() / '.local/bin/zellij').is_file() else
+           str(Path.home() / '.local/state/dotfiles-review/zellij-trial/runtime/usr/bin/zellij')))
+HOME_STATE = Path(os.environ.get('ZELLIJ_WS_STATE', os.environ.get('ZELLIJ_TRIAL_STATE', str(Path.home() / '.local/state/zellij-workspaces'))))
+STATE = HOME_STATE / 'panes'
+SESSION = os.environ.get('ZELLIJ_SESSION_NAME', '')
+OPTIONS = ['--config-dir', str(CONFIG), '--config', str(CONFIG / 'config.kdl')]
+MARKS = {'working': 'WORK', 'asking': 'ASK', 'done': 'DONE', 'error': 'ERR', 'idle': 'IDLE'}
+ATTENTION = {'asking', 'done', 'error', 'exited'}
+
+
+def clean(text, limit=90):
+    return re.sub(r'\s+', ' ', re.sub(r'[\x00-\x1f\x7f-\x9f]', '', str(text))).strip()[:limit]
+
+
+def pane_id(value):
+    value = str(value)
+    if value.isdigit():
+        value = 'terminal_' + value
+    if not re.fullmatch(r'terminal_\d+', value):
+        raise ValueError('Expected a terminal pane ID')
+    return value
+
+
+def call(*args):
+    if not SESSION:
+        raise ValueError('Run this helper inside Zellij')
+    return subprocess.run([BINARY, *OPTIONS, '-s', SESSION, *args], check=True, text=True,
+                          capture_output=True, timeout=10,
+                          env=dict(os.environ, TMPDIR='/tmp')).stdout.strip()
+
+
+def panes():
+    for attempt in range(4):
+        output = call('action', 'list-panes', '--json', '--all')
+        if output:
+            return [p for p in json.loads(output) if not p.get('is_plugin') and not p.get('exited')]
+        if attempt < 3: time.sleep(.05)
+    raise ValueError('Pane inventory is not ready; refresh the picker')
+
+
+def own_pane():
+    return pane_id(os.environ.get('ZELLIJ_PANE_ID', ''))
+
+
+def state_file():
+    if not SESSION:
+        raise ValueError('Missing ZELLIJ_SESSION_NAME')
+    STATE.mkdir(mode=0o700, parents=True, exist_ok=True)
+    return STATE / (hashlib.sha256(SESSION.encode()).hexdigest() + '.json')
+
+
+def transact(fn, path=None):
+    path = path or state_file()
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    with open(str(path) + '.lock', 'a') as lock:
+        os.chmod(lock.name, 0o600)
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        data = json.loads(path.read_text()) if path.exists() else {}
+        result = fn(data)
+        fd, tmp = tempfile.mkstemp(dir=path.parent, prefix='.write-')
+        try:
+            with os.fdopen(fd, 'w') as out:
+                json.dump(data, out)
+            os.replace(tmp, path)
+        finally:
+            if os.path.exists(tmp):
+                os.unlink(tmp)
+        return result
+
+
+def process_stamp(pid):
+    try:
+        # starttime distinguishes a reused PID from the original agent.
+        return Path(f'/proc/{int(pid)}/stat').read_text().rsplit(')', 1)[1].split()[19]
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def agent_alive(row):
+    return bool(row.get('pid') and row.get('stamp') and
+                process_stamp(row['pid']) == row['stamp'])
+
+
+def title(row):
+    note = clean(row.get('note') or row.get('label') or 'pi', 70)
+    state = row.get('state') if agent_alive(row) else ('exited' if row.get('owner') else None)
+    mark = 'EXIT' if state == 'exited' else MARKS.get(state)
+    # Durable Pi records keep a unique title after live ownership is cleared.
+    # Several agents may share a task name; never collapse their restore identity.
+    identified = row.get('owner') or (row.get('token') and row.get('session_file'))
+    suffix = ' · p' + row['pane'].removeprefix('terminal_') if identified and row.get('pane') else ''
+    return f'[{mark}] {note}{suffix}' if mark else note + suffix
+
+
+def update_title(pid, row):
+    # A concurrent note change must not be overwritten by an older event's title.
+    # Hold the same lock while reading the newest row and applying its title.
+    def apply(data):
+        call('action', 'rename-pane', '--pane-id', pid, '--', title(data.get(pid, row)))
+    transact(apply)
+
+
+def event(args):
+    session_file = getattr(args, 'session_file', None)
+    restore_token = getattr(args, 'restore_token', None)
+    pid = pane_id(args.pane)
+    stamp = process_stamp(args.pid)
+    if not stamp:
+        raise ValueError('Agent process is no longer running')
+    def mutate(data):
+        row = data.setdefault(pid, {})
+        # Ignore a late update/shutdown from an older Pi instance in this pane.
+        if args.state != 'start' and row.get('owner') != args.owner:
+            return None
+        row['updated'] = time.time()
+        prompt = getattr(args, 'last_prompt', None)
+        prompt = clean(prompt, 240) if prompt is not None else None
+        new_activity = (args.state in ('start', 'working', 'asking', 'shutdown') or
+                        (args.state != 'label' and args.state != row.get('state')) or
+                        (prompt is not None and prompt != row.get('last_prompt', '')))
+        if new_activity:
+            row.pop('snoozed', None)
+            row['activity_id'] = row.get('activity_id', 0) + 1
+        if prompt is not None:
+            row['last_prompt'] = prompt
+        elif args.state == 'start':
+            row.pop('last_prompt', None)
+        if args.state == 'start':
+            row.pop('session_file', None)
+            restored = load_agent(restore_token) if restore_token else {}
+            # The inherited token belongs to the original restored conversation,
+            # not a later /new or /resume in the same Pi process.
+            restoring = bool(session_file and restored.get('session_file') == session_file)
+            row.update(owner=args.owner, pid=args.pid, stamp=stamp, pane=pid,
+                       token=restore_token if restoring else __import__('uuid').uuid4().hex,
+                       label=clean(args.label or 'pi'), state='idle', since=time.time())
+            if restoring and restored.get('note') and not row.get('note'):
+                row['note'] = restored['note']
+            if not row.get('note'):
+                row['note'] = tab_note(pid)
+            if session_file:
+                row['session_file'] = session_file
+            return row.copy(), False
+        # A pointer first available on shutdown must be persisted before returning.
+        if session_file:
+            if row.get('session_file') and row['session_file'] != session_file:
+                row['token'] = __import__('uuid').uuid4().hex
+            row['session_file'] = session_file
+        if args.state == 'shutdown':
+            row.pop('state', None)
+            row.pop('pid', None)
+            row.pop('stamp', None)
+            row.pop('owner', None)
+            return row.copy(), False
+        previous = row.get('state')
+        if args.label is not None:
+            row['label'] = clean(args.label)
+        if args.state != 'label':
+            row['state'] = args.state
+            if previous != args.state:
+                row['since'] = time.time()
+        notify = args.state in ATTENTION and previous != args.state
+        return row.copy(), notify
+    result = transact(mutate)
+    if not result:
+        return
+    row, notify = result
+    update_title(pid, row)
+    save_agent(row)
+    if os.environ.get('ZELLIJ_WS_NO_SAVE') != '1':
+        save_session()
+    if notify and os.environ.get('PI_ZELLIJ_NOTIFY', '1') != '0' and shutil.which('notify-send'):
+        # Prompt excerpts are private picker metadata, never notifications.
+        subprocess.run(['notify-send', '-a', 'pi-zellij', '-u',
+                        'critical' if args.state == 'error' else 'normal',
+                        clean(f'{SESSION} · {row.get("note") or row.get("label") or "pi"}'),
+                        {'asking': 'Needs your input', 'done': 'Ready for input',
+                         'error': 'Run ended with an error'}[args.state]],
+                       timeout=5, check=False, stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL)
+
+
+def note(text, target=None):
+    pid = pane_id(target) if target else own_pane()
+    if pid not in {'terminal_' + str(p['id']) for p in panes()}:
+        raise ValueError('Target pane is not alive in this session')
+    def mutate(data):
+        row = data.setdefault(pid, {})
+        row['note'] = clean(text)
+        return row.copy()
+    row = transact(mutate)
+    update_title(pid, row)
+    print('Note:', row['note'] or '(cleared)')
+
+
+def activity(row, state):
+    return [row.get('owner'), row.get('stamp'), state, row.get('activity_id', 0)]
+
+
+def snooze(target, expected_activity):
+    """Toggle only the attention instance the picker displayed, never newer work."""
+    target = pane_id(target)
+    if target not in {'terminal_' + str(p['id']) for p in panes()}:
+        return False
+    def mutate(data):
+        row = data.get(target, {})
+        state = row.get('state', 'idle') if agent_alive(row) else ('exited' if row.get('owner') else 'shell')
+        current = activity(row, state)
+        if state not in ATTENTION or current != expected_activity:
+            return False
+        if row.get('snoozed') == current:
+            row.pop('snoozed')
+        else:
+            row['snoozed'] = current
+        return True
+    return transact(mutate)
+
+
+def inventory(attention=False):
+    live = panes()
+    ids = {'terminal_' + str(p['id']) for p in live}
+    def mutate(data):
+        for key in list(data):
+            if key not in ids:
+                del data[key]
+        return {k: dict(v) for k, v in data.items()}
+    rows = transact(mutate)
+    result = []
+    for p in sorted(live, key=lambda p: (p.get('tab_position', 0), p['id'])):
+        pid = 'terminal_' + str(p['id'])
+        row = rows.get(pid, {})
+        state = row.get('state', 'idle') if agent_alive(row) else ('exited' if row.get('owner') else 'shell')
+        if state == 'exited':
+            update_title(pid, row)
+        current_activity = activity(row, state)
+        snoozed = bool(row.get('snoozed') and row['snoozed'] == current_activity)
+        if attention and (state not in ATTENTION or snoozed):
+            continue
+        label = row.get('note') or row.get('label') or re.sub(r'^\d+:', '', p.get('tab_name', '')) or p.get('title', '')
+        age = max(0, int(time.time() - row.get('since', time.time())))
+        result.append({'pane': pid, 'tab': p.get('tab_name', ''), 'state': state,
+                       'note': clean(label), 'age': age, 'cwd': p.get('pane_cwd') or '',
+                       'session_name': clean(row.get('label') or 'pi'),
+                       'last_prompt': clean(row.get('last_prompt', ''), 240),
+                       'updated': row.get('updated'), 'snoozed': snoozed,
+                       'activity': current_activity})
+    return result
+
+
+def focus(target):
+    target = pane_id(target)
+    selected = next((p for p in panes() if 'terminal_' + str(p['id']) == target), None)
+    if selected is None:
+        raise ValueError('Pane no longer exists')
+    last = manager.tx(lambda d: d.get('last'))
+    if last and last != SESSION:
+        manager.switch(SESSION, pane=target)
+        return
+    # Explicitly select its tab so the picker works across all project tabs.
+    call('action', 'go-to-tab', str(selected.get('tab_position', 0) + 1))
+    print(call('action', 'focus-pane-id', target) or f'Focused {target}')
+
+
+def picker(attention=True):
+    rows = [r for r in inventory(attention) if r['pane'] != own_pane()]
+    if not rows:
+        print('No agents need attention.' if attention else 'No terminal panes.')
+        return
+    text = '\n'.join(f'{r["pane"]}\t{clean(r["tab"])} · {r["state"]} · {r["note"]} ({r["age"]}s)'
+                     for r in rows) + '\n'
+    r = subprocess.run(['fzf', '--no-sort', '--delimiter=\t', '--with-nth=2..',
+                        '--header=Enter: jump · Esc: cancel', '--prompt=attention> ' if attention else 'panes> '],
+                       input=text, text=True, stdout=subprocess.PIPE)
+    if r.returncode == 0:
+        focus(r.stdout.split('\t', 1)[0])
+    elif r.returncode not in (1, 130):
+        raise ValueError('Picker failed')
+
+
+def open_command(args):
+    command = list(args.command)
+    if command and command[0] == '--':
+        command.pop(0)
+    if not command:
+        raise ValueError('Supply a command after --')
+    if manager.remote_context() and (not args.workspace or args.workspace == SESSION):
+        values = dict(vars(args), workspace=None, command=command)
+        manager.remote_task('open', values=values)
+        return
+    cwd = str(Path(args.cwd or os.getcwd()).expanduser().resolve(strict=True))
+    if not Path(cwd).is_dir():
+        raise ValueError('Working directory is not a directory')
+    if args.workspace and args.workspace != SESSION:
+        name = manager.ensure(args.workspace, cwd)
+        with manager.session(name):
+            clone = argparse.Namespace(**vars(args))
+            clone.workspace = None
+            open_command(clone)
+        if args.focus:
+            manager.switch(name)
+        return
+    if args.kind == 'tab':
+        tab_id = manager.new_tab(command, cwd, args.name or Path(command[0]).name, args.focus)
+        print(tab_id)
+        if args.note:
+            for p in panes():
+                if str(p.get('tab_id')) == tab_id:
+                    window_note(args.note, 'terminal_' + str(p['id']))
+                    break
+    else:
+        output = call('run', '--direction', args.direction, '--cwd', cwd,
+                      '--name=' + clean(args.name or command[0]),
+                      *([] if args.focus else ['--no-focus']), '--', *command)
+        print(output)
+        match = re.search(r'terminal_\d+', output)
+        if args.note and match:
+            window_note(args.note, match.group())
+
+
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from workspaces import WorkspaceManager
+manager = WorkspaceManager(globals())
+load_agent = manager.load_agent
+save_agent = manager.save_agent
+save_session = manager.save
+tab_note = manager.tab_note
+window_note = manager.window_note
+
+
+def add_workspace_commands(sub):
+    for name in ['window', 'split', 'pi']:
+        command = sub.add_parser(name)
+        command.add_argument('--in', dest='workspace')
+        command.add_argument('--dir', dest='cwd')
+        command.add_argument('--name'); command.add_argument('--note')
+        command.add_argument('--focus', action='store_true')
+        placement = command.add_mutually_exclusive_group()
+        placement.add_argument('--right', dest='direction', action='store_const', const='right')
+        placement.add_argument('--down', dest='direction', action='store_const', const='down')
+        command.set_defaults(direction='right')
+        command.add_argument('command', nargs=argparse.REMAINDER)
+    a = sub.add_parser('attach'); a.add_argument('name', nargs='?'); a.add_argument('--scratch', action='store_true')
+    w = sub.add_parser('workspace'); w.add_argument('name'); w.add_argument('--dir'); w.add_argument('--focus', action='store_true'); w.add_argument('--group')
+    sub.add_parser('workspaces')
+    sub.add_parser('remote-rpc')
+    handshake = sub.add_parser('remote-ssh')
+    handshake.add_argument('host'); handshake.add_argument('control'); handshake.add_argument('ready')
+    handshake.add_argument('ssh_args', nargs=argparse.REMAINDER)
+    directory = sub.add_parser('remote-directory')
+    directory.add_argument('token'); directory.add_argument('--start'); directory.add_argument('--label', default='Remote')
+    action = sub.add_parser('action')
+    from remote import ACTIONS
+    action.add_argument('action', choices=sorted(ACTIONS))
+    for command in ['remote-attach', 'remote-serve', 'remote-workspace']:
+        remote = sub.add_parser(command)
+        if command != 'remote-serve': remote.add_argument('host')
+        remote.add_argument('name')
+        if command == 'remote-attach':
+            remote.add_argument('--control'); remote.add_argument('--ready')
+    sub.add_parser('save')
+    sub.add_parser('last')
+    s = sub.add_parser('slot'); s.add_argument('number', type=int)
+    n = sub.add_parser('note-prompt'); n.add_argument('--clear', action='store_true')
+    d = sub.add_parser('project'); d.add_argument('--new-tab', action='store_true')
+    n = sub.add_parser('new-tab'); n.add_argument('--cwd'); n.add_argument('--name', default='shell')
+    n = sub.add_parser('rename-tab')
+    m = sub.add_parser('move'); m.add_argument('target', nargs='?')
+    n = sub.add_parser('import-tmux'); n.add_argument('path')
+    p = sub.add_parser('popup'); p.add_argument('mode', choices=['workspaces','attention','fleet','tree'])
+
+
+def workspace_command(args):
+    if args.cmd in ['window', 'split', 'pi']:
+        args.kind = 'split' if args.cmd == 'split' else 'tab'
+        if args.cmd == 'pi':
+            prompt = args.command[1:] if args.command[:1] == ['--'] else args.command
+            args.command = ['pi', *(['--', ' '.join(prompt)] if prompt else [])]
+            args.name = args.name or 'pi'
+        open_command(args)
+    elif args.cmd == 'action':
+        if not manager.remote_context(): raise ValueError('Machine action requires a remote workspace')
+        manager.remote_task('action', action=args.action)
+    elif args.cmd == 'remote-directory':
+        from directory import serve_directory
+        serve_directory(manager, args.token, args.start, args.label)
+    elif args.cmd == 'remote-rpc':
+        from remote import rpc
+        try:
+            rpc(manager)
+        except (ValueError, KeyError, OSError, subprocess.SubprocessError) as error:
+            print(json.dumps({'error': clean(error, 160)}))
+    elif args.cmd == 'remote-ssh':
+        raise SystemExit(manager.remotes.ssh_handshake(args.host, args.control, args.ready, args.ssh_args))
+    elif args.cmd == 'remote-attach': manager.remotes.attach(args.host, args.name, args.control, args.ready)
+    elif args.cmd == 'remote-workspace': manager.remotes.switch({'host': args.host, 'session': args.name})
+    elif args.cmd == 'remote-serve':
+        os.environ['PATH'] = str(Path.home() / '.local/bin') + ':' + os.environ.get('PATH', '')
+        manager.attach(args.name)
+    elif args.cmd == 'attach': manager.attach(args.name, args.scratch)
+    elif args.cmd == 'workspace':
+        name, _ = manager.register(args.name, args.dir, args.group)
+        if args.focus: manager.switch(name, args.dir)
+        else: manager.ensure(name, args.dir)
+        print('Workspace:', name)
+    elif args.cmd == 'workspaces': print(json.dumps(manager.rows(), indent=2))
+    elif args.cmd == 'save': manager.save()
+    elif args.cmd == 'last':
+        previous = manager.tx(lambda d: d.get('previous'))
+        if previous: manager.switch(previous)
+    elif args.cmd == 'slot': manager.slot(args.number)
+    elif args.cmd == 'note-prompt': manager.prompt_note(args.clear)
+    elif args.cmd == 'project': manager.project(args.new_tab)
+    elif args.cmd == 'new-tab': print(manager.new_tab(cwd=args.cwd or os.getcwd(), name=args.name))
+    elif args.cmd == 'rename-tab': manager.prompt_note()
+    elif args.cmd == 'move':
+        raise ValueError('Zellij cannot transfer a running tab/pane between sessions. Nothing was moved or restarted.')
+    elif args.cmd == 'import-tmux': manager.import_tmux(args.path)
+    elif args.cmd == 'popup': manager.popup(args.mode)
+    elif args.cmd == 'pick': manager.pick(args.mode)
+    elif args.cmd == 'fleet': manager.pick('fleet')
+    elif args.cmd == 'list': print(json.dumps(manager.inventory(args.attention), indent=2))
+    else: return False
+    return True
+
+
+def main():
+    global SESSION
+    p = argparse.ArgumentParser()
+    p.add_argument('--session')
+    sub = p.add_subparsers(dest='cmd', required=True)
+    e = sub.add_parser('event')
+    e.add_argument('state', choices=['start', 'label', 'shutdown', *MARKS])
+    e.add_argument('--pane', required=True)
+    e.add_argument('--owner', required=True)
+    e.add_argument('--pid', type=int, required=True)
+    e.add_argument('--label')
+    e.add_argument('--session-file')
+    e.add_argument('--restore-token')
+    e.add_argument('--last-prompt')
+    n = sub.add_parser('note'); n.add_argument('text', nargs='?'); n.add_argument('--pane')
+    l = sub.add_parser('list'); l.add_argument('--attention', action='store_true')
+    f = sub.add_parser('focus'); f.add_argument('pane')
+    pick = sub.add_parser('pick'); pick.add_argument('mode', nargs='?', default='attention', choices=['workspaces','attention','fleet','tree'])
+    sub.add_parser('fleet')
+    o = sub.add_parser('open')
+    o.add_argument('--kind', choices=['split', 'tab'], default='split')
+    o.add_argument('--direction', choices=['right', 'down'], default='right')
+    o.add_argument('--cwd'); o.add_argument('--name'); o.add_argument('--note')
+    o.add_argument('--in', dest='workspace')
+    o.add_argument('--focus', action='store_true')
+    o.add_argument('command', nargs=argparse.REMAINDER)
+    add_workspace_commands(sub)
+    a = p.parse_args()
+    if a.session:
+        SESSION = manager.resolve(a.session)
+    if workspace_command(a): return
+    if a.cmd == 'event': event(a)
+    elif a.cmd == 'note': window_note(a.text, a.pane)
+    elif a.cmd == 'focus': focus(a.pane)
+    elif a.cmd == 'list': print(json.dumps(inventory(a.attention), indent=2))
+    elif a.cmd == 'pick': picker()
+    elif a.cmd == 'fleet': picker(False)
+    elif a.cmd == 'open': open_command(a)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (ValueError, OSError, subprocess.SubprocessError, json.JSONDecodeError) as e:
+        print(f'zellij-ws: {e}', file=sys.stderr)
+        sys.exit(1)

@@ -1,0 +1,13 @@
+layout {
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="file:~/.local/share/zellij/plugins/workspace-bar-0.45.1.wasm" {
+                hide_swap_layout_indication true
+            }
+        }
+        children
+    }
+    tab name="1:shell" {
+        pane
+    }
+}

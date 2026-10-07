@@ -24,8 +24,12 @@ if (( $+commands[zoxide] )); then
   eval "$(zoxide init zsh)"
 fi
 
-# tmux workspace note for the current window (shown in the status line)
+# Workspace controls use Zellij.
+ws() { zellij-ws "$@"; }
 note() {
-  [ -z "$TMUX" ] && { echo "not inside tmux"; return 1; }
-  if [ $# -eq 0 ]; then tmux show -wv @note 2>/dev/null; else tmux set -w @note "$*"; fi
+  if [[ -n ${ZELLIJ:-} ]]; then
+    if (( $# )); then zellij-ws note -- "$*"; else zellij-ws note; fi
+  else
+    print -u2 'not inside a terminal workspace'; return 1
+  fi
 }

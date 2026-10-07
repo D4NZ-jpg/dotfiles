@@ -15,7 +15,7 @@ if isInstalled imv; then
     done
 fi
 
-# Opening a folder should start a standalone shell there instead of attaching tmux.
+# Opening a folder starts a standalone shell there, not a workspace attachment.
 if isInstalled kitty; then
     xdg-mime default kitty-folder.desktop inode/directory
 fi
