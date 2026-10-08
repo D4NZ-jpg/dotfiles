@@ -298,6 +298,10 @@ def _rpc(manager):
         session = manager.validate_name(request['session'])
         if op == 'ensure':
             result = manager.ensure(session, request.get('directory'))
+        elif op == 'remove-preview':
+            result = manager.remote_remove_snapshot(session)
+        elif op == 'remove':
+            result = manager.remove_remote_workspace(session, request.get('identity'))
         elif op == 'task':
             with manager.session(session):
                 command = request['command']

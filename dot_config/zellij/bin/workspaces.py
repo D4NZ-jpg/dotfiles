@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import stat
 import subprocess
 import time
 import uuid
@@ -413,6 +414,14 @@ class WorkspaceManager:
         self.remotes.close_connections()
         os.execvpe(self.c['BINARY'], [self.c['BINARY'], *self.options_for(name), 'attach', name], env)
 
+    def attach_remote_existing(self, name):
+        # A restored/stale Mosh carrier must not recreate a deleted workspace.
+        self.validate_name(name)
+        row = self.tx(lambda data: data.get('workspaces', {}).get(name))
+        if row is None or row.get('remote_bridge'):
+            raise ValueError('Remote workspace no longer exists; choose or create one explicitly.')
+        return self.attach(name)
+
     def rows(self, local_only=False):
         data, found = self.discover()
         result = []
@@ -443,15 +452,17 @@ class WorkspaceManager:
             rows.extend(self.remotes.collect('inventory', attention=attention, agents_only=agents_only))
         return rows
 
-    def remove_workspace(self, name):
+    def remove_workspace(self, name, remote_identity=None):
         name = self.resolve(name)
         if name == self.c['SESSION']:
             raise ValueError('Switch to another workspace before removing this one.')
         data, found = self.discover()
         if name not in data.get('workspaces', {}):
             raise ValueError('Workspace no longer exists.')
-        # Do not forget a workspace unless native removal succeeds. --force is
-        # only reached after picker confirmation, and never for the caller.
+        if remote_identity is not None and self.remote_remove_snapshot(name)['identity'] != remote_identity:
+            raise ValueError('Workspace changed since confirmation; refresh the picker.')
+        # Do not forget a workspace unless native removal succeeds. Interactive
+        # removal confirms first; remote removal additionally checks clients.
         if name in found:
             self.cli('delete-session', '--force', name)
         digest = hashlib.sha256(name.encode()).hexdigest()
@@ -473,10 +484,99 @@ class WorkspaceManager:
                 registry.pop('previous', None)
         self.tx(update)
 
+    def remote_remove_snapshot(self, name):
+        """Fail closed on clients, aliases, transports, or unverified session identity."""
+        self.validate_name(name)
+        if name == self.c['SESSION']:
+            raise ValueError('Switch to another workspace before removing this one.')
+        data, found = self.discover()
+        row = data.get('workspaces', {}).get(name)
+        if row is None:
+            raise ValueError('Workspace no longer exists; refresh the picker.')
+        if row.get('remote_bridge'):
+            raise ValueError('Remote transports cannot be deleted through this operation.')
+        status = found.get(name, 'saved')
+        files = []
+        runtime = Path(os.environ.get('XDG_RUNTIME_DIR', '/tmp'))
+        roots = {runtime / 'zellij', Path('/tmp') / ('zellij-' + str(os.getuid()))}
+        sockets = [p for root in roots for p in root.glob('*/' + name)]
+        if status == 'live':
+            if len(sockets) != 1:
+                raise ValueError('Cannot verify the live workspace socket; nothing was removed.')
+            info = sockets[0].lstat()
+            if not stat.S_ISSOCK(info.st_mode) or info.st_uid != os.getuid():
+                raise ValueError('Workspace socket is not owned by this account.')
+            files.append((str(sockets[0]), info.st_dev, info.st_ino, info.st_ctime_ns))
+            with self.session(name):
+                output = self.c['call']('action', 'list-clients')
+            lines = output.splitlines()
+            if not lines or lines[0].split() != ['CLIENT_ID', 'ZELLIJ_PANE_ID', 'RUNNING_COMMAND']:
+                raise ValueError('Cannot verify attached clients; nothing was removed.')
+            if any(line.strip() for line in lines[1:]):
+                raise ValueError('Workspace has attached clients. Detach every device first.')
+        else:
+            if sockets:
+                raise ValueError('Workspace state is changing; refresh the picker.')
+            digest = hashlib.sha256(name.encode()).hexdigest()
+            cache = Path(os.environ.get('XDG_CACHE_HOME', str(Path.home() / '.cache')))
+            for path in [self.path('layouts/' + digest + '.kdl'),
+                         cache / 'zellij/contract_version_1/session_info' / name / 'session-layout.kdl']:
+                if path.exists() or path.is_symlink():
+                    info = path.lstat()
+                    if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid():
+                        raise ValueError('Saved workspace layout is not an owned regular file.')
+                    files.append((str(path), info.st_dev, info.st_ino, info.st_ctime_ns))
+        identity = hashlib.sha256(json.dumps([os.getuid(), str(Path.home()), name, row,
+                                              status, files], sort_keys=True).encode()).hexdigest()
+        return {'session': name, 'name': row.get('name', name), 'status': status, 'identity': identity}
+
+    def remove_remote_workspace(self, name, identity):
+        snapshot = self.remote_remove_snapshot(name)
+        if not isinstance(identity, str) or snapshot['identity'] != identity:
+            raise ValueError('Workspace changed since confirmation; refresh the picker.')
+        original = self.tx(lambda data: dict(data['workspaces'][name]))
+        try:
+            self.remove_workspace(name, remote_identity=identity)
+        except subprocess.CalledProcessError:
+            # Zellij can stop a live session yet report failure deleting its
+            # already-absent native cache. Only clean metadata if it is gone.
+            data, found = self.discover()
+            if name in found:
+                raise
+            if data.get('workspaces', {}).get(name) != original:
+                raise ValueError('Workspace changed during removal; refresh the picker.')
+            current = self.remote_remove_snapshot(name)
+            if current['status'] != 'saved':
+                raise ValueError('Workspace changed during removal; refresh the picker.')
+            self.remove_workspace(name)
+        return True
+
+    def confirm_remove_remote(self, row):
+        from modal import pick
+        host, name = row['host'], row['session']
+        if self.remote_context() == {'host': host, 'session': name}:
+            pick([], 'Switch to another workspace before removing this one.')
+            return
+        try:
+            account = self.remotes.hosts()[host]
+            snapshot = self.remotes.request(host, 'remove-preview', session=name)
+            identity = host + ' (' + account + ') / ' + name
+            header = ('Remove remote workspace "' + identity + '"?\n'
+                      'Stops remote programs; deletes saved workspace state.\n'
+                      'All devices must be detached. Pi conversations are kept.')
+            selected, _ = pick(['cancel\tCancel', 'remove\tRemove ' + identity], header)
+            if selected is None or selected.split('\t', 1)[0] != 'remove':
+                return
+            if self.remotes.hosts().get(host) != account:
+                raise ValueError('Remote account changed; refresh the picker.')
+            self.remotes.request(host, 'remove', session=name, identity=snapshot['identity'])
+        except (ValueError, KeyError, OSError, subprocess.SubprocessError) as error:
+            pick([], 'Remote removal failed: ' + self.c['clean'](error, 200))
+
     def confirm_remove(self, row):
         from modal import pick
         if row.get('host'):
-            pick([], 'Remote workspace deletion is not enabled. Nothing was removed.')
+            self.confirm_remove_remote(row)
             return
         if row['session'] == self.c['SESSION']:
             pick([], 'Switch to another workspace before removing this one.')

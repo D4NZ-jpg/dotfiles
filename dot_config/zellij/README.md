@@ -83,7 +83,9 @@ The remote folder picker runs lf over an SSH TTY with the same dedicated config 
 
 Mosh carries the remote terminal. Its local transport is borderless, with no extra tab bar; the remote server supplies the usual tabs and panes. The outer Zellij retains the unified pickers, while ordinary editor and pane keys pass through to the remote. SSH supplies directory browsing, inventory, labels, task commands, focus, snooze, and bounded viewport previews. It uses your configured SSH agent (including Bitwarden), batch authentication, existing trusted host keys, and no agent or port forwarding. Offline hosts show a hint without hiding local entries. Previously opened legacy transports are not restarted; selecting a remote workspace uses the updated transport, leaving any old connection intact.
 
-Alt+S uses the same ownership/activity guard remotely; stale selections cannot acknowledge newer activity. Remote previews request only the current viewport, never Pi transcripts or scrollback. Remote labels/groups can be changed in s. Remote deletion is deliberately disabled; the existing local confirmation flow is unchanged.
+Alt+S uses the same ownership/activity guard remotely; stale selections cannot acknowledge newer activity. Remote previews request only the current viewport, never Pi transcripts or scrollback. Remote labels/groups can be changed in s. Alt+D also removes remote workspaces after confirmation showing the host label, SSH account, and exact session name. Cancel is selected first. Detach every device and switch away from the target before deleting it: attached clients and the current remote workspace are refused. The server rechecks clients and the workspace/socket identity after confirmation; stale selections, unreadable client state, and changed accounts are refused. Pi conversation files and backups are kept, and deleting a workspace does not delete its project directory. A stale Mosh carrier cannot silently recreate a deleted workspace; explicit workspace creation still can.
+
+These are preflight checks, not an atomic Zellij attach/delete transaction. Do not attach another device while confirming deletion. Native failures keep metadata unless the server verifies that the native session is already gone.
 
 To open or create a named remote workspace explicitly:
 
@@ -115,6 +117,7 @@ From the chezmoi source directory:
 ```
 python tests/zellij-workspaces.py
 python tests/zellij-remotes.py
+python tests/zellij-remote-delete.py
 python tests/zellij-ssh-reuse.py
 # Opt-in authenticated remote-browser and workspace tests (disposable only):
 # Set these to a host/account in your local remotes.json before running:
@@ -123,6 +126,7 @@ export ZELLIJ_TEST_REMOTE_TARGET=user@dev.example
 python tests/zellij-directory-remote.py
 python tests/zellij-machine-live.py
 python tests/zellij-ssh-reuse-live.py
+python tests/zellij-remote-delete-live.py # deletes only its own disposable fixtures
 node tests/zellij-extension.mjs
 python tests/zellij-live.py
 python tests/zellij-shell-fallback-live.py

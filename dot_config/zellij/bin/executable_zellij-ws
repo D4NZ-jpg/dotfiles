@@ -413,7 +413,7 @@ def workspace_command(args):
     elif args.cmd == 'remote-workspace': manager.remotes.switch({'host': args.host, 'session': args.name})
     elif args.cmd == 'remote-serve':
         os.environ['PATH'] = str(Path.home() / '.local/bin') + ':' + os.environ.get('PATH', '')
-        manager.attach(args.name)
+        manager.attach_remote_existing(args.name)
     elif args.cmd == 'attach': manager.attach(args.name, args.scratch)
     elif args.cmd == 'workspace':
         name, _ = manager.register(args.name, args.dir, args.group)
