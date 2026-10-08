@@ -97,7 +97,7 @@ zellij-ws remote-workspace dev client
 
 The remote account needs matching Zellij 0.45.1 helpers under `~/.config/zellij`, a Zellij binary on PATH or in `~/.local/bin`, and `mosh-server`, Python, zsh, fzf, and lf. Install the Pi extension for future remote Pi instances if needed; no existing agent needs to restart. Creating a new remote workspace does not launch Pi. Local Mosh is installed through pacman (`sudo pacman -S --needed mosh`) and is declared in `setup/pkgs/pkgs.lst`. The remote helper uses `/usr/bin/mosh`; `/usr/bin/mosh-client` is provided by the same package. The earlier private wrapper has been retired.
 
-Pane applications use `TERM=xterm-256color`, even if the outer client is Kitty or the workspace was created through non-interactive SSH. Background creation supplies that type, both Zellij configs pin it, and zsh corrects it before prompt/highlighting hooks load in older running servers. Shells outside Zellij keep their own terminal type. This prevents doubled input and leftover glyphs caused by an empty or unsupported `TERM`. An already-running affected shell can use `export TERM=xterm-256color` followed by Ctrl+L; no session or program needs to restart.
+New workspace servers and zsh pane shells use `TERM=xterm-256color`, even if the outer client is Kitty or the workspace was created through non-interactive SSH. Background creation supplies that type, both Zellij configs pin it, and zsh corrects it before prompt/highlighting hooks load in older running servers. Shells outside Zellij keep their own terminal type. This prevents doubled input and leftover glyphs caused by an empty or unsupported `TERM`. An already-running affected shell can use `export TERM=xterm-256color` followed by Ctrl+L; no session or program needs to restart. Existing non-shell programs keep their original environment; the direct Pi restore path in older servers remains a separate gap.
 
 Mosh requires reachable UDP ports (normally 60000–61000); a disposable end-to-end connection was verified. Closing a local Mosh client detaches from remote Zellij rather than stopping remote programs. A dropped connection preserves the current remote workspace. No real remote workspace is started until selected.
 
@@ -113,6 +113,17 @@ Recovery uses native Zellij layouts. Identified Pi panes resume automatically; o
 Zellij cannot move a running tab/pane between sessions. `ws move` explicitly refuses without restarting anything. tmux-only silence/bell tracking for non-Pi agents, close-other-panes, and equal-tile shortcuts have not been emulated. Tmux config, helpers, Pi links and its package entry are removed from this repo. Existing installed tmux processes are left untouched; the Pi restore guard still checks for an active copy there when tmux is available.
 
 Install the package with `sudo pacman -S zellij`. It is declared in setup/pkgs/pkgs.lst. Until then, this machine's launcher can use the previously verified local trial binary. No binary is tracked. The setup hook installs pinned, checksum-verified zellij-autolock 0.3.0 and builds workspace-bar 0.45.1 from checksum-verified upstream sources with a locked dependency graph. Its Rust/WASI toolchain is isolated from the global toolchain. The workspace bar receives only state-reading and UI-changing permissions, not command execution. Python, fzf, lf, curl and libnotify are existing declared dependencies. See `setup/zellij-workspace-bar/README.md` for the build recipe.
+
+## Remaining gaps
+
+Terminal-environment unit checks passed locally; disposable native checks passed on both the desktop and homelab. Direct remote attachment and Mosh reconnection were also verified. These checks do not establish that every picker or restoration path is working.
+
+- **Pi restoration in older running servers:** `zellij-agent` passes its inherited environment directly to Pi. A server created before the terminal fix can still supply an empty or unsupported `TERM`; the wrapper bypasses the zsh startup guard. This is a code-inspection finding, not a live Pi test.
+- **Full remote picker flow:** authenticated directory navigation passed, but the end-to-end test timed out in `wait_bridge_client()` after workspace-name entry. Direct `remote-workspace` attachment succeeded; the full picker flow still needs validation.
+- **Reported removal failure:** disposable deletion checks passed, but the original user-reported failure was not reproduced. Diagnose the next normal confirmed failure from the private error record; do not retry deletion automatically.
+- **Laptop access:** shared workspace access has not been configured or verified on the laptop.
+
+Deletion preflight is not atomic with attachment, and Zellij cannot move running panes or tabs between sessions. These remain platform/safety limitations, not completed features.
 
 ## Validation
 
