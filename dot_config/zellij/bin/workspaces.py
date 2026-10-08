@@ -217,6 +217,10 @@ class WorkspaceManager:
         env = dict(os.environ, TMPDIR='/tmp')
         env['PATH'] = str(self.c['CONFIG'] / 'bin') + ':' + str(Path.home() / '.local/bin') + ':' + env.get('PATH', '')
         if 'attach' in args:
+            if '--create-background' in args:
+                # SSH control requests have no terminal. Spawn the virtual
+                # terminal server with a usable type, not an absent/Kitty TERM.
+                env['TERM'] = 'xterm-256color'
             # Otherwise --layout can be interpreted as adding tabs to the caller.
             for key in ['ZELLIJ', 'ZELLIJ_SESSION_NAME', 'ZELLIJ_PANE_ID', 'TMUX', 'TMUX_PANE']:
                 env.pop(key, None)

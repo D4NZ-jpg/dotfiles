@@ -1,3 +1,9 @@
+# New shells in older Zellij servers can inherit an empty/Kitty TERM.
+# Their terminal is Zellij, not the outer client; fix it before prompt hooks load.
+if [[ -n ${ZELLIJ:-} ]]; then
+  export TERM=xterm-256color
+fi
+
 # Exports
 export EDITOR='nvim'
 export WLR_NO_HARDWARE_CURSORS=1

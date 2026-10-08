@@ -1,4 +1,8 @@
 default_shell "/usr/bin/zsh"
+// Pane applications talk to Zellij's virtual terminal, not the outer Kitty/SSH client.
+env {
+    TERM "xterm-256color"
+}
 default_layout "default"
 default_mode "normal"
 mouse_mode true

@@ -97,6 +97,8 @@ zellij-ws remote-workspace dev client
 
 The remote account needs matching Zellij 0.45.1 helpers under `~/.config/zellij`, a Zellij binary on PATH or in `~/.local/bin`, and `mosh-server`, Python, zsh, fzf, and lf. Install the Pi extension for future remote Pi instances if needed; no existing agent needs to restart. Creating a new remote workspace does not launch Pi. Local Mosh is installed through pacman (`sudo pacman -S --needed mosh`) and is declared in `setup/pkgs/pkgs.lst`. The remote helper uses `/usr/bin/mosh`; `/usr/bin/mosh-client` is provided by the same package. The earlier private wrapper has been retired.
 
+Pane applications use `TERM=xterm-256color`, even if the outer client is Kitty or the workspace was created through non-interactive SSH. Background creation supplies that type, both Zellij configs pin it, and zsh corrects it before prompt/highlighting hooks load in older running servers. Shells outside Zellij keep their own terminal type. This prevents doubled input and leftover glyphs caused by an empty or unsupported `TERM`. An already-running affected shell can use `export TERM=xterm-256color` followed by Ctrl+L; no session or program needs to restart.
+
 Mosh requires reachable UDP ports (normally 60000–61000); a disposable end-to-end connection was verified. Closing a local Mosh client detaches from remote Zellij rather than stopping remote programs. A dropped connection preserves the current remote workspace. No real remote workspace is started until selected.
 
 Managed remote carriers restore automatically through `remote-attach` for their exact allowlisted host and saved workspace. Restoration creates a fresh SSH/Mosh handshake rather than replaying native `mosh-client` process arguments or old UDP state. The carrier stays borderless, without an extra local tab bar. Temporary SSH control/readiness paths are used only for the current handshake, not durable recovery. Attaching to a carrier with one stopped/held transport pane repairs that pane; running transports and multi-terminal carriers are not replaced.
@@ -121,6 +123,8 @@ python tests/zellij-workspaces.py
 python tests/zellij-remotes.py
 python tests/zellij-remote-delete.py
 python tests/zellij-removal-diagnostics.py
+python tests/zellij-terminal-env.py
+python tests/zellij-terminal-env-live.py # disposable local shells, no Pi
 python tests/zellij-ssh-reuse.py
 # Opt-in authenticated remote-browser and workspace tests (disposable only):
 # Set these to a host/account in your local remotes.json before running:

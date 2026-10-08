@@ -1,5 +1,9 @@
 // Transport-only configuration. The remote server supplies tabs and pane UI.
 default_shell "/usr/bin/zsh"
+// Mosh runs in a Zellij pane; keep its virtual terminal type valid too.
+env {
+    TERM "xterm-256color"
+}
 default_layout "default"
 default_mode "locked"
 mouse_mode true
