@@ -87,6 +87,8 @@ Alt+S uses the same ownership/activity guard remotely; stale selections cannot a
 
 These are preflight checks, not an atomic Zellij attach/delete transaction. Do not attach another device while confirming deletion. Native failures keep metadata unless the server verifies that the native session is already gone.
 
+Remote removal failures show wrapped details and save the latest bounded error to `~/.local/state/zellij-workspaces/last-remote-removal-error.json` (or the configured workspace-state directory). The file is owner-only and contains the UTC timestamp, host, exact session, operation phase, and error text—not conversation files, registry dumps, or command/environment payloads. Native errors include the exit code and useful stderr rather than the command line. Capture refuses unsafe paths; the popup still shows the original failure if writing fails. Cancellation does not create a record; successful removal clears the previous one. Errors never trigger an automatic deletion retry.
+
 To open or create a named remote workspace explicitly:
 
 ```
@@ -118,6 +120,7 @@ From the chezmoi source directory:
 python tests/zellij-workspaces.py
 python tests/zellij-remotes.py
 python tests/zellij-remote-delete.py
+python tests/zellij-removal-diagnostics.py
 python tests/zellij-ssh-reuse.py
 # Opt-in authenticated remote-browser and workspace tests (disposable only):
 # Set these to a host/account in your local remotes.json before running:

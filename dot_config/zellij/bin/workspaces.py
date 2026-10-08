@@ -8,6 +8,7 @@ import re
 import shutil
 import stat
 import subprocess
+import textwrap
 import time
 import uuid
 
@@ -551,15 +552,85 @@ class WorkspaceManager:
             self.remove_workspace(name)
         return True
 
+    @contextlib.contextmanager
+    def removal_diagnostic_directory(self):
+        root = self.root.absolute()
+        if any(path.is_symlink() for path in (root, *root.parents)):
+            raise ValueError('Unsafe diagnostic directory symlink')
+        root.mkdir(mode=0o700, parents=True, exist_ok=True)
+        directory = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        try:
+            info = os.fstat(directory)
+            if info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) & 0o077:
+                raise ValueError('Diagnostic directory must be owned and private')
+            try:
+                saved = os.stat('last-remote-removal-error.json', dir_fd=directory, follow_symlinks=False)
+            except FileNotFoundError:
+                pass
+            else:
+                if (not stat.S_ISREG(saved.st_mode) or saved.st_uid != os.getuid() or
+                        stat.S_IMODE(saved.st_mode) != 0o600):
+                    raise ValueError('Unsafe diagnostic file')
+            yield directory
+        finally:
+            os.close(directory)
+
+    def record_removal_error(self, host, name, stage, error):
+        from remote import removal_error_text
+        record = {'timestamp_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+                  'host': removal_error_text(host)[:256], 'session': removal_error_text(name)[:256],
+                  'stage': stage, 'error': removal_error_text(error)}
+        with self.removal_diagnostic_directory() as directory:
+            temporary = '.remote-removal-error-' + uuid.uuid4().hex
+            try:
+                fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                             0o600, dir_fd=directory)
+                with os.fdopen(fd, 'w') as output:
+                    json.dump(record, output, ensure_ascii=False)
+                    output.flush()
+                    os.fsync(output.fileno())
+                os.replace(temporary, 'last-remote-removal-error.json',
+                           src_dir_fd=directory, dst_dir_fd=directory)
+            finally:
+                try:
+                    os.unlink(temporary, dir_fd=directory)
+                except FileNotFoundError:
+                    pass
+        return self.root / 'last-remote-removal-error.json'
+
+    def clear_removal_error(self):
+        with self.removal_diagnostic_directory() as directory:
+            try:
+                os.unlink('last-remote-removal-error.json', dir_fd=directory)
+            except FileNotFoundError:
+                pass
+
+    def show_remote_removal_error(self, host, name, stage, error):
+        from modal import pick
+        from remote import removal_error_text
+        message = removal_error_text(error)
+        width = max(24, min(72, shutil.get_terminal_size((80, 24)).columns - 8))
+        try:
+            path = self.record_removal_error(host, name, stage, error)
+            capture = 'Details saved privately:\n' + textwrap.fill(str(path), width=width)
+        except (OSError, ValueError):
+            capture = 'Could not save diagnostics; the private path is unavailable.'
+        header = ('Remote removal failed (' + stage + ')\n' +
+                  textwrap.fill(host + ' / ' + name, width=width) + '\n\n' +
+                  textwrap.fill(message, width=width, max_lines=6, placeholder=' …') +
+                  '\n\n' + capture + '\nNo automatic retry was made.')
+        pick([], header)
+
     def confirm_remove_remote(self, row):
         from modal import pick
         host, name = row['host'], row['session']
-        if self.remote_context() == {'host': host, 'session': name}:
-            pick([], 'Switch to another workspace before removing this one.')
-            return
+        stage = 'preflight'
         try:
+            if self.remote_context() == {'host': host, 'session': name}:
+                raise ValueError('Switch to another workspace before removing this one.')
             account = self.remotes.hosts()[host]
             snapshot = self.remotes.request(host, 'remove-preview', session=name)
+            stage = 'confirmation'
             identity = host + ' (' + account + ') / ' + name
             header = ('Remove remote workspace "' + identity + '"?\n'
                       'Stops remote programs; deletes saved workspace state.\n'
@@ -569,9 +640,14 @@ class WorkspaceManager:
                 return
             if self.remotes.hosts().get(host) != account:
                 raise ValueError('Remote account changed; refresh the picker.')
+            stage = 'delete'
             self.remotes.request(host, 'remove', session=name, identity=snapshot['identity'])
+            try:
+                self.clear_removal_error()
+            except (OSError, ValueError):
+                pass
         except (ValueError, KeyError, OSError, subprocess.SubprocessError) as error:
-            pick([], 'Remote removal failed: ' + self.c['clean'](error, 200))
+            self.show_remote_removal_error(host, name, stage, error)
 
     def confirm_remove(self, row):
         from modal import pick

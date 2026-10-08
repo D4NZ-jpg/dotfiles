@@ -56,6 +56,28 @@ def reuse_options(socket, master='auto'):
 REMOTE_HELPER = '$HOME/.config/zellij/bin/zellij-ws'
 
 
+class RemovalFailure(ValueError):
+    """Bounded native reason, without command arguments or environment."""
+
+
+def removal_error_text(error):
+    if isinstance(error, subprocess.CalledProcessError):
+        reason = error.stderr or error.stdout or 'No native error details were returned.'
+        if isinstance(reason, bytes):
+            reason = reason.decode('utf-8', errors='replace')
+        text = 'Native Zellij command failed during removal (exit ' + str(error.returncode) + '): ' + reason[:4096]
+    elif isinstance(error, subprocess.TimeoutExpired):
+        text = ('Removal request timed out after ' + str(error.timeout) +
+                ' seconds. Its outcome is unknown; refresh the picker before retrying.')
+    else:
+        text = str(error)[:4096]
+    text = re.sub(r'\x1b(?:\[[0-?]*[ -/]*[@-~]|\][^\x07]*?(?:\x07|\x1b\\))', '', text)
+    text = re.sub(r'[\x00-\x08\x0b-\x1f\x7f-\x9f]', '', text)
+    text = re.sub(r'(?i)\b(password|token|api[_-]?key|mosh_key)\s*[=:]\s*\S+', r'\1=[redacted]', text)
+    text = re.sub(r'\b(?:sk-[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{20,})\b', '[redacted]', text)
+    return re.sub(r'\s+', ' ', text).strip()[:1024]
+
+
 class Remotes:
     def __init__(self, manager):
         self.m = manager
@@ -121,11 +143,16 @@ class Remotes:
                                 input=json.dumps({'operation': operation, **values}),
                                 text=True, capture_output=True, timeout=12)
         if result.returncode:
+            if operation in ('remove', 'remove-preview'):
+                reason = removal_error_text(result.stderr or 'No SSH error details were returned.')
+                raise RemovalFailure('Remote ' + host + ' SSH/helper failure (exit ' + str(result.returncode) + '): ' + reason)
             raise ValueError('Remote ' + host + ' unavailable (SSH/helper failure)')
         if len(result.stdout) > 2_000_000:
             raise ValueError('Remote response exceeds limit')
         reply = json.loads(result.stdout)
         if 'error' in reply:
+            if operation in ('remove', 'remove-preview'):
+                raise RemovalFailure('Remote ' + host + ': ' + removal_error_text(reply['error']))
             raise ValueError('Remote ' + host + ': ' + self.m.c['clean'](reply['error'], 160))
         return reply['result']
 
@@ -271,9 +298,13 @@ ACTIONS = {
 def rpc(manager):
     import contextlib
     import io
-    with contextlib.redirect_stdout(io.StringIO()):
-        result = _rpc(manager)
-    print(json.dumps({'result': result}))
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            result = _rpc(manager)
+    except RemovalFailure as error:
+        print(json.dumps({'error': removal_error_text(error)}))
+    else:
+        print(json.dumps({'result': result}))
 
 
 def _rpc(manager):
@@ -298,10 +329,12 @@ def _rpc(manager):
         session = manager.validate_name(request['session'])
         if op == 'ensure':
             result = manager.ensure(session, request.get('directory'))
-        elif op == 'remove-preview':
-            result = manager.remote_remove_snapshot(session)
-        elif op == 'remove':
-            result = manager.remove_remote_workspace(session, request.get('identity'))
+        elif op in ('remove-preview', 'remove'):
+            try:
+                result = (manager.remote_remove_snapshot(session) if op == 'remove-preview' else
+                          manager.remove_remote_workspace(session, request.get('identity')))
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+                raise RemovalFailure(removal_error_text(error)) from None
         elif op == 'task':
             with manager.session(session):
                 command = request['command']
