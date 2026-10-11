@@ -19,7 +19,12 @@ cases = [('Enter selected', [b'\r'], 'a project'),
          ('Current directory', [b'.'], '.'),
          ('Empty directory', [b'l', b'l', b'\r'], 'a project/child'),
          ('q cancel', [b'q'], None),
-         ('Esc cancel', [b'\x1b'], None)]
+         ('Esc cancel', [b'\x1b'], None),
+         ('New folder', [b'n', b'fresh idea\r'], 'fresh idea'),
+         ('New folder in browsed directory', [b'l', b'n', b'nested\r'], 'a project/nested'),
+         ('New folder back to browsing', [b'n', (b'\r', 1.5), b'j', b'\r'], 'b-project'),
+         ('New folder existing name', [b'n', b'b-project\r', b'other\r'], 'other'),
+         ('New folder rejects paths', [b'n', b'x/y\r', b'..\r', b'ok\r'], 'ok')]
 for label, inputs, expected in cases:
     with tempfile.TemporaryDirectory(prefix='zellij-lf-test-', dir='/tmp') as directory:
         tmp = Path(directory)
@@ -54,8 +59,10 @@ for label, inputs, expected in cases:
             drain(1.5)
             assert proc.poll() is None, 'lf exited before input'
             for keys in inputs:
+                # (keys, seconds) waits longer, e.g. while lf reopens after the name prompt.
+                keys, wait = keys if isinstance(keys, tuple) else (keys, 0.6 if label.startswith('New folder') else 0.2)
                 os.write(master, keys)
-                drain(0.2)
+                drain(wait)
             deadline = time.monotonic() + 5
             while time.monotonic() < deadline and not result.exists():
                 drain(0.1)
@@ -65,6 +72,10 @@ for label, inputs, expected in cases:
             log = (tmp / 'lf.log').read_text()
             assert 'error:' not in log, log[-3000:]
             assert actual == wanted, (label, actual, wanted, log[-3000:])
+            folders = sorted(p.relative_to(start).as_posix() for p in start.rglob('*') if p.is_dir())
+            created = {'New folder': ['fresh idea'], 'New folder in browsed directory': ['a project/nested'],
+                       'New folder existing name': ['other'], 'New folder rejects paths': ['ok']}.get(label, [])
+            assert folders == sorted(['a project', 'a project/child', 'b-project', *created]), (label, folders)
             print(label + ': correct lf directory result')
         finally:
             if proc.poll() is None:

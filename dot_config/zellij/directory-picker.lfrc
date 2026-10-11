@@ -6,7 +6,7 @@ set sortby natural
 set reverse false
 set ratios 1:2:3
 set info ""
-set promptfmt "Local: %d | Enter select, . current, Alt+M machine, q/Esc cancel"
+set promptfmt "Local: %d | Enter select, . current, n new folder, Alt+M machine, q/Esc cancel"
 
 cmd choose-directory ${{
     selected=${f:-$PWD}
@@ -18,11 +18,18 @@ cmd choose-current ${{
     umask 077
     printf '%s\n' "$PWD" > "$ZELLIJ_WS_DIRECTORY_RESULT"
 }}
+# The picker process asks for the name and creates the folder; lf only
+# reports where. Typing stays out of lf, whose prompt keys are disabled here.
+cmd new-folder ${{
+    umask 077
+    printf '@new\n%s\n' "$PWD" > "$ZELLIJ_WS_DIRECTORY_RESULT"
+}}
 cmd choose-machine ${{
     umask 077
     printf '@machine\n' > "$ZELLIJ_WS_DIRECTORY_RESULT"
 }}
 map <a-m> :choose-machine; quit
+map n :new-folder; quit
 map <enter> :choose-directory; quit
 map . :choose-current; quit
 map <esc> quit

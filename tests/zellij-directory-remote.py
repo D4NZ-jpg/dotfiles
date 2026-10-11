@@ -34,7 +34,9 @@ cases = [('Enter selected', [b'\r'], 'a project'),
          ('Current directory', [b'.'], '.'),
          ('Empty directory', [b'l', b'l', b'\r'], 'a project/child'),
          ('q cancel', [b'q'], None), ('Esc cancel', [b'\x1b'], None),
-         ('Alt+M machine switch', [b'\x1bm'], '@machine')]
+         ('Alt+M machine switch', [b'\x1bm'], '@machine'),
+         ('New folder', [b'n', b'fresh idea\r'], 'fresh idea'),
+         ('New folder back to browsing', [b'n', (b'\r', 2.5), b'j', b'\r'], 'b-project')]
 try:
     for label, inputs, expected in cases:
         with tempfile.TemporaryDirectory(prefix='remote-lf-pty-', dir='/tmp') as tmp:
@@ -71,8 +73,10 @@ try:
                 assert HOST.encode() + b':' in captured, 'Shared remote lf header did not render'
                 drain(.4)
                 for keys in inputs:
+                    # (keys, seconds) waits longer, e.g. while remote lf reopens.
+                    keys, wait = keys if isinstance(keys, tuple) else (keys, .6 if label.startswith('New folder') else .25)
                     os.write(master, keys)
-                    drain(.25)
+                    drain(wait)
                 deadline = time.monotonic() + 10
                 while time.monotonic() < deadline and not result.exists(): drain(.1)
                 proc.wait(timeout=3)

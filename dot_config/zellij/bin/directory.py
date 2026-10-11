@@ -11,10 +11,59 @@ import subprocess
 import tempfile
 
 
+def create_folder(parent, ask=input, say=print):
+    """Ask for one new folder name inside parent. Returns the new path, or None to go back."""
+    say('\nNew folder in ' + str(parent))
+    while True:
+        try:
+            name = ask('Name (empty to go back): ').strip()
+        except (EOFError, KeyboardInterrupt):
+            say('')
+            return None
+        if not name:
+            return None
+        if name in ('.', '..') or '/' in name or '\0' in name or len(name.encode()) > 255:
+            say('Use a single folder name without "/".')
+            continue
+        target = Path(parent) / name
+        try:
+            target.mkdir()
+        except FileExistsError:
+            say(name + ' already exists.')
+            continue
+        except OSError as error:
+            say('Could not create folder: ' + (error.strerror or str(error)))
+            continue
+        return target
+
+
 def pick_directory(config, start, allow_machine=False, machine_label='Local'):
     binary = shutil.which('lf')
     if not binary:
         raise ValueError('Directory browsing requires lf')
+    start = Path(start)
+    while True:
+        selected = _browse(binary, config, start, machine_label)
+        if selected is None:
+            return None
+        if selected.startswith('@new\n'):
+            parent = Path(selected.split('\n', 1)[1]).resolve()
+            if not parent.is_dir():
+                raise ValueError('Directory no longer exists')
+            created = create_folder(parent)
+            if created is None:
+                start = parent  # Back to browsing where the user was.
+                continue
+            return created.resolve()
+        if selected == '@machine':
+            return '@machine' if allow_machine else None
+        target = Path(selected).resolve()
+        if not target.is_dir():
+            raise ValueError('Selected directory no longer exists')
+        return target
+
+
+def _browse(binary, config, start, machine_label):
     with tempfile.TemporaryDirectory(prefix='zellij-directory-picker-', dir='/tmp') as directory:
         result = Path(directory) / 'selected-directory'
         env = dict(os.environ, TMPDIR='/tmp', ZELLIJ_WS_DIRECTORY_RESULT=str(result),
@@ -31,14 +80,7 @@ def pick_directory(config, start, allow_machine=False, machine_label='Local'):
         if not result.exists():
             return None
         selected = result.read_text().removesuffix('\n')
-        if not selected:
-            return None
-        if selected == '@machine':
-            return '@machine' if allow_machine else None
-        target = Path(selected).resolve()
-        if not target.is_dir():
-            raise ValueError('Selected directory no longer exists')
-        return target
+        return selected or None
 
 
 def result_path(manager, token):
