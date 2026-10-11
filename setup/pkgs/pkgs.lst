@@ -21,6 +21,9 @@ swaybg
 quickshell
 networkmanager
 wl-clipboard
+grim
+slurp
+xdg-user-dirs
 swaylock-effects-git
 pavucontrol
 htop

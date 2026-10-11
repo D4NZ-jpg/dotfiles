@@ -33,6 +33,15 @@ hl.config({
     -- attach instead of leaving it unrecoverable.
     misc = { disable_hyprland_logo = true, allow_session_lock_restore = true },
 })
+-- Screenshot toolbar: blurred translucent material, shown instantly. ignore_alpha
+-- keeps the soft shadow and transparent margin out of the blur.
+hl.layer_rule({
+    name = "screenshot-toolbar",
+    match = { namespace = "^dan-screenshot$" },
+    blur = true,
+    ignore_alpha = 0.5,
+    no_anim = true,
+})
 hl.curve("myBezier", { type = "bezier", points = { { 0.05, 0.9 }, { 0.1, 1.05 } } })
 for _, anim in ipairs({
     { "windows", 5, "myBezier" }, { "windowsOut", 5, "default", "popin 80%" },
@@ -121,6 +130,7 @@ bind("SHIFT + K", function() rows.step(-1, true) end)
 bind("mouse_down", function() rows.step(1, false) end)
 bind("mouse_up", function() rows.step(-1, false) end)
 bind("ALT + P", exec('"$HOME/.config/scripts/rofi-screenshot-wayland.sh"'))
+hl.bind("PRINT", exec('"$HOME/.config/scripts/rofi-screenshot-wayland.sh"'))
 bind("mouse:272", hl.dsp.window.drag(), { mouse = true })
 bind("mouse:273", hl.dsp.window.resize(), { mouse = true })
 bind("A", function() pads.toggle("term") end)

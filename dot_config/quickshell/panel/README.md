@@ -43,8 +43,60 @@ PipeWire volume and Bluetooth power state. No workspace indicator.
   setting is changed merely by revealing the bar. No scratchpads remain in use
   by the bar; the terminal scratchpad (Super+A) is unrelated.
 
-Only one popup is open at a time; opening another replaces it. Both share
-`PanelPopup.qml` for placement, focus and dismissal.
+Only one popup is open at a time; opening another replaces it. The service popups share
+`PanelPopup.qml` for placement, focus and dismissal; screenshots use a separate
+bottom-center toolbar.
+
+## Screenshot toolbar
+
+`Print` or `Super+Alt+P` toggles the toolbar on the focused screen. IPC:
+`quickshell ipc -c panel call panel screenshot focused`.
+The legacy `rofi-screenshot-wayland.sh` launcher now opens this toolbar, not Rofi.
+Requires `grim`, `slurp`, `wl-clipboard`, `xdg-user-dirs`, Python and Hyprland.
+
+A single translucent row, modeled on the macOS screenshot toolbar:
+close, Screen / Window / Region icons, **Options**, **Capture**.
+Hyprland blurs what is behind it (layer rule `screenshot-toolbar` in
+`hyprland.lua`; the legacy `hyprland.conf` shows it unblurred).
+
+- **Screen** captures the screen where the toolbar opened.
+- **Window** lets you click a window rectangle on a visible workspace. It captures
+  the visible screen pixels in that rectangle, not an isolated window surface;
+  overlapping windows remain in the image. Offscreen edges are clipped.
+- **Region** lets you drag a rectangle. Escape cancels either selection without
+  capturing, writing a file, or changing the clipboard.
+- **Options** opens a *Save to* menu: Clipboard, Screenshots folder, or
+  Clipboard and folder. Folder means
+  `$(xdg-user-dir PICTURES)/Screenshots`, with timestamped PNG filenames.
+  The initial selection is Region / Clipboard; successful submission remembers
+  the choices until the panel reloads.
+
+Keys: `1`/`2`/`3` or `Left`/`Right` select Screen/Window/Region; `C`/`F`/`B`
+select the destination; `O` opens Options (`Up`/`Down`, `Enter` to choose);
+`Enter` captures; `Esc` closes the menu, then the toolbar; `Tab` traverses controls. Clicking outside
+closes the toolbar. It appears and disappears without animation; the top bar
+is hidden immediately during the screenshot workflow.
+
+The backend waits for the toolbar to unmap before capture. It uses a private
+PNG temporary directory, cleans up on cancellation/error, publishes saved files
+atomically without replacing existing files, and copies with the `image/png`
+MIME type. Failures notify without claiming success. If **Both** saves the file
+but clipboard copy fails, the notification identifies that partial result.
+Only one selection may run at a time. No screenshot image bytes or window titles
+are logged. Direct backend use:
+`~/.config/scripts/screenshot-capture.py region folder`.
+
+Synthetic checks (fake compositor, capture, selector and clipboard):
+`python3 tests/screenshot-capture.py`.
+Toolbar controls and the existing service popups:
+`python3 tests/quickshell-panel.py`.
+These tests do not capture the desktop or read/write the actual clipboard.
+The backend has 24 synthetic checks; the toolbar has 23 control checks plus
+six Qt 6 keyboard/pointer tests, including Enter/Escape after Tab traversal and
+the Options menu. Its look was reviewed from an offscreen render, not a desktop
+capture. Live validation checked bottom-center placement on both monitors,
+IPC switching/dismissal, and the Hyprland layer rule. Real screen/window/region capture and clipboard paste still need a
+user check. The Qt input tests require Qt 6's `qmltestrunner` (`qt6-declarative`).
 
 ## Volume popup
 

@@ -15,7 +15,30 @@ ShellRoot {
     // At most one popup is open: `popup` names it, `popupMonitor` places it.
     property string popup: ""
     property string popupMonitor: ""
-    readonly property bool forced: overview || launcher || manual || popup !== ""
+    readonly property bool forced: overview || launcher || manual || (popup !== "" && popup !== "screenshot")
+    property string screenshotMode: "region"
+    property string screenshotDestination: "clipboard"
+    function captureScreenshot(mode, destination) {
+        if (screenshotCapture.running) return;
+        const monitor = popupMonitor;
+        screenshotMode = mode;
+        screenshotDestination = destination;
+        closePopup();
+        screenshotCapture.command = [Quickshell.env("HOME") + "/.config/scripts/screenshot-capture.py", mode, destination, "--monitor", monitor];
+        screenshotCapture.running = true;
+    }
+    // slurp grabs the keyboard during a real selection, so the shortcut can only
+    // arrive while a capture is running if that capture is stuck: stop it
+    // (the backend treats SIGTERM as cancel) and open the toolbar afterwards.
+    property string screenshotReopen: ""
+    Process {
+        id: screenshotCapture
+        onExited: {
+            const monitor = root.screenshotReopen;
+            root.screenshotReopen = "";
+            if (monitor !== "") root.ipcPopup("screenshot", monitor);
+        }
+    }
     readonly property color ink: "#d5c8ac"
     readonly property color muted: "#afa286"
     readonly property string networkStatus: {
@@ -37,6 +60,13 @@ ShellRoot {
     // or "" to close.
     function ipcPopup(name, monitor) {
         if (monitor === "focused") monitor = Hyprland.focusedMonitor?.name ?? "";
+        if (name === "screenshot" && screenshotCapture.running) {
+            if (monitor !== "" && screenshotReopen === "") {
+                screenshotReopen = monitor;
+                screenshotCapture.signal(15);
+            }
+            return;
+        }
         if (monitor === "") closePopup();
         else if (Quickshell.screens.some(s => s.name === monitor)) togglePopup(name, monitor);
     }
@@ -114,8 +144,9 @@ ShellRoot {
         function volume(monitor: string): void { root.ipcPopup("volume", monitor); }
         function bluetooth(monitor: string): void { root.ipcPopup("bluetooth", monitor); }
         function sync(monitor: string): void { root.ipcPopup("sync", monitor); }
+        function screenshot(monitor: string): void { root.ipcPopup("screenshot", monitor); }
         function status(): string {
-            return JSON.stringify({overview: root.overview, launcher: root.launcher, manual: root.manual, network: root.networkStatus, popup: root.popup, popupMonitor: root.popupMonitor, networkScanning: Networking.devices.values.some(d => d.type === DeviceType.Wifi && d.scannerEnabled)});
+            return JSON.stringify({overview: root.overview, launcher: root.launcher, manual: root.manual, network: root.networkStatus, popup: root.popup, popupMonitor: root.popupMonitor, screenshotBusy: screenshotCapture.running, networkScanning: Networking.devices.values.some(d => d.type === DeviceType.Wifi && d.scannerEnabled)});
         }
     }
     // Query actual layer state rather than keeping an open/close counter.
@@ -186,8 +217,18 @@ ShellRoot {
                 active: root.popup === "bluetooth" && root.popupMonitor === panel.screen.name
                 BluetoothPopup { barWindow: panel; onDismissed: root.closePopup() }
             }
+            LazyLoader {
+                active: root.popup === "screenshot" && root.popupMonitor === panel.screen.name
+                ScreenshotToolbar {
+                    barWindow: panel
+                    mode: root.screenshotMode
+                    destination: root.screenshotDestination
+                    onDismissed: root.closePopup()
+                    onCaptured: (mode, destination) => root.captureScreenshot(mode, destination)
+                }
+            }
             property bool hovered: false
-            readonly property bool revealed: root.forced || hovered
+            readonly property bool revealed: (root.forced || hovered) && root.popup !== "screenshot" && !screenshotCapture.running
             // Hidden panel only owns a two-pixel hover strip; everything else passes through.
             mask: Region { width: panel.width; height: Math.max(2, Math.ceil(bar.y + bar.height)) }
             Timer { id: showDelay; interval: 120; onTriggered: panel.hovered = true }
@@ -205,6 +246,7 @@ ShellRoot {
                 y: panel.revealed ? 0 : -height
                 color: "#262626"
                 Behavior on y {
+                    enabled: root.popup !== "screenshot" && !screenshotCapture.running
                     NumberAnimation {
                         duration: 180
                         easing.type: Easing.BezierSpline

@@ -9,7 +9,7 @@ import unittest
 
 REPO = Path(__file__).resolve().parent.parent
 PANEL = REPO / "dot_config/quickshell/panel"
-COMPONENTS = ("NetworkContent.qml", "VolumeContent.qml", "BluetoothContent.qml", "SyncContent.qml", "PanelAction.qml")
+COMPONENTS = ("NetworkContent.qml", "VolumeContent.qml", "BluetoothContent.qml", "SyncContent.qml", "PanelAction.qml", "ScreenshotContent.qml", "ScreenshotButton.qml")
 
 
 def run_fixture(fixture: str, marker: str) -> str:
@@ -37,6 +37,24 @@ def run_fixture(fixture: str, marker: str) -> str:
 
 
 class PanelPopupTests(unittest.TestCase):
+    def test_screenshot_controls(self):
+        print(run_fixture("quickshell-screenshot.qml", "SCREENSHOT_TESTS"))
+
+    def test_screenshot_keyboard_and_pointer(self):
+        env = {**os.environ, "QT_QPA_PLATFORM": "offscreen"}
+        env.pop("WAYLAND_DISPLAY", None)
+        # Arch's unversioned wrapper may target Qt 5; use the Qt 6 runner.
+        qt6_runner = Path("/usr/lib/qt6/bin/qmltestrunner")
+        runner = str(qt6_runner) if qt6_runner.exists() else "qmltestrunner6"
+        result = subprocess.run(
+            [runner, "-input", str(REPO / "tests/tst_screenshot.qml")],
+            capture_output=True, text=True, env=env, timeout=15,
+        )
+        output = result.stdout + result.stderr
+        self.assertEqual(result.returncode, 0, output)
+        self.assertNotIn("QWARN", output, output)
+        print(next(line for line in output.splitlines() if line.startswith("Totals:")))
+
     def test_network_flows(self):
         print(run_fixture("quickshell-network.qml", "NETWORK_TESTS"))
 
