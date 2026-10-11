@@ -82,7 +82,11 @@ PNG temporary directory, cleans up on cancellation/error, publishes saved files
 atomically without replacing existing files, and copies with the `image/png`
 MIME type. Failures notify without claiming success. If **Both** saves the file
 but clipboard copy fails, the notification identifies that partial result.
-Only one selection may run at a time. No screenshot image bytes or window titles
+Only one selection may run at a time. Child tools get `/dev/null` as stdin
+(slurp otherwise reads boxes from Quickshell's open stdin pipe and hangs). If
+the shortcut arrives while a capture is still running, that capture is stuck
+(slurp holds the keyboard during a real selection), so the panel cancels it
+and reopens the toolbar. No screenshot image bytes or window titles
 are logged. Direct backend use:
 `~/.config/scripts/screenshot-capture.py region folder`.
 
@@ -91,7 +95,7 @@ Synthetic checks (fake compositor, capture, selector and clipboard):
 Toolbar controls and the existing service popups:
 `python3 tests/quickshell-panel.py`.
 These tests do not capture the desktop or read/write the actual clipboard.
-The backend has 24 synthetic checks; the toolbar has 23 control checks plus
+The backend has 25 synthetic checks, run with an open stdin pipe as Quickshell does; the toolbar has 23 control checks plus
 six Qt 6 keyboard/pointer tests, including Enter/Escape after Tab traversal and
 the Options menu. Its look was reviewed from an offscreen render, not a desktop
 capture. Live validation checked bottom-center placement on both monitors,
