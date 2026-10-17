@@ -24,12 +24,3 @@ if (( $+commands[zoxide] )); then
   eval "$(zoxide init zsh)"
 fi
 
-# Workspace controls use Zellij.
-ws() { zellij-ws "$@"; }
-note() {
-  if [[ -n ${ZELLIJ:-} ]]; then
-    if (( $# )); then zellij-ws note -- "$*"; else zellij-ws note; fi
-  else
-    print -u2 'not inside a terminal workspace'; return 1
-  fi
-}

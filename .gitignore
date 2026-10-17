@@ -1,2 +1,0 @@
-# Machine-specific SSH account allowlist; create locally when needed.
-/dot_config/zellij/remotes.json

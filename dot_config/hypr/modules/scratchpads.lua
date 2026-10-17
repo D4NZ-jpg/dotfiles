@@ -1,7 +1,7 @@
 -- Native special-workspace scratchpads; no Pyprland or legacy IPC commands.
 local M = {}
 local specs = {
-    term = { class = "kitty-dropterm", command = "kitty --class kitty-dropterm --override shell=zellij-scratch", width = 0.75, height = 0.75, edge = "center" },
+    term = { class = "kitty-dropterm", command = "kitty --class kitty-dropterm", width = 0.75, height = 0.75, edge = "center" },
 }
 local function run(api, dispatcher)
     local result = api.dispatch(dispatcher)

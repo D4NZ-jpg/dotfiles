@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-unset TMUX TMUX_PANE ZELLIJ ZELLIJ_SESSION_NAME ZELLIJ_PANE_ID
-if "$HOME/.config/zellij/bin/zellij-ws" attach --scratch; then
-    exit 0
-fi
-printf '\nZellij scratch workspace could not start. Leaving a shell.\n' >&2
-exec "${SHELL:-/usr/bin/zsh}" -l

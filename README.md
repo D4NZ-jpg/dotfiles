@@ -26,32 +26,17 @@ Arch Linux, Hyprland, one palette everywhere: charcoal `#262626`, cream
 
 **Terminal**
 
-- **kitty** with the `charcoal.conf` theme; new windows attach to the last
-  normal Zellij workspace.
-- **Zellij** as a keyboard-first workspace manager: named project sessions,
-  stable numbered task tabs, shared task notes, directory browsing with lf,
-  fzf workspace/agent pickers, and exact Pi conversation restoration.
-  Ctrl+Space is the prefix; g lists agents needing attention, G the fleet.
-  The top bar shows the workspace name. Optional remote workspaces use SSH
-  and Mosh. Details in [`dot_config/zellij/README.md`](dot_config/zellij/README.md).
+- **kitty** with the `charcoal.conf` theme, using its own tabs and splits.
+  Super+A toggles a floating scratch terminal.
 - **zsh** with starship, lazy nvm, cached completions; **bat**, **lazygit**,
   **fastfetch**, **cava** on the same palette.
-- **Neovim** (lazy.nvim, LSP, DAP, treesitter). A small plugin makes
-  `Ctrl+w h/j/k/l` hop to the neighbouring Zellij pane at a window edge.
+- **Neovim** (lazy.nvim, LSP, DAP, treesitter).
 
 **Browser**
 
 - **Zen** styling, privacy prefs and add-on policies applied by
   `zen-style/apply.py` into whichever profile exists. No profile data is
   tracked (`zen-style/README.md`).
-
-**Pi**
-
-- A Zellij extension (`dot_config/zellij/pi/zellij.ts`) and the
-  `terminal-workspaces` skill report Pi state, preserve exact conversation
-  references across reboots, and open task tabs, splits or parallel sessions
-  when asked. Notifications contain task labels, not conversation text.
-  Panes without a saved conversation reference restore as ordinary shells.
 
 ## Install
 
@@ -64,12 +49,9 @@ chezmoi init --apply D4NZ-jpg
 detected GPU (`nvidia.sh`), services from `system_ctl.lst`, then
 `post-install.sh` (default shell, Zen, icons, Hyprland plugins). Arch only.
 
-`run_after_zellij-plugins.sh` installs checksum-pinned autolock and builds
-our workspace-labelled tab bar from pinned sources with an isolated Rust/WASI
-toolchain. No compiled plugin or private workspace state is tracked.
-
-Tmux config, helpers and its package entry have been removed. Applying these
-files does not stop or uninstall an already running tmux installation.
+Zellij (and tmux before it) has been removed; remote agent work moved to
+t3code. Applying these files does not stop running sessions or uninstall
+packages.
 
 New tools go in `setup/pkgs/pkgs.lst`; per-machine paths use chezmoi
 templates (`qt6ct.conf.tmpl`), never absolute home paths.
@@ -77,18 +59,11 @@ templates (`qt6ct.conf.tmpl`), never absolute home paths.
 ## Tests
 
 `tests/` holds Python and QML checks for the installer helpers, the Zen
-scripts, the Quickshell popups and the Neovim DAP config. They run without
-touching the live system:
+scripts, the Quickshell popups, the screenshot backend and the Neovim DAP
+config. They run without touching the live system:
 
 ```bash
 python tests/installer-utils.py
 python tests/quickshell-panel.py
-python tests/zellij-workspaces.py
-python tests/zellij-remotes.py
-python tests/zellij-ssh-reuse.py
-node tests/zellij-extension.mjs
-lua tests/nvim-navigation.lua
+python tests/screenshot-capture.py
 ```
-
-Zellij's native tests use disposable sessions and fake Pi/transport commands.
-Authenticated remote tests are opt-in; see the Zellij README for requirements.
